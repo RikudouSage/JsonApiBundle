@@ -30,6 +30,6 @@ final class FindFilteredQueryBuilder implements CompilerPassInterface
             $resultingBuilder = 'rikudou_api.query_builder.default';
         }
 
-        $container->setAlias(FilteredQueryBuilderInterface::class, $resultingBuilder);
+        $container->setAlias(FilteredQueryBuilderInterface::class, (string) $resultingBuilder);
     }
 }

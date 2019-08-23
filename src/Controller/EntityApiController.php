@@ -195,7 +195,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 ->getResult();
 
             foreach ($query as $item) {
-                $response->addObject(new JsonApiObject($this->objectParser->getArray($item)));
+                $response->addObject(new JsonApiObject($this->objectParser->getJsonApiArray($item)));
             }
         }
 
@@ -243,7 +243,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             throw new JsonApiErrorException('The resource does not exist', Response::HTTP_NOT_FOUND);
         }
 
-        $response = new JsonApiObject($this->objectParser->getArray($item));
+        $response = new JsonApiObject($this->objectParser->getJsonApiArray($item));
 
         $event = new ApiResponseCreatedEvent(
             $response,

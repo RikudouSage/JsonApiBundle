@@ -175,6 +175,7 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
     {
         $class = $property->getDeclaringClass();
 
+        /** @var string|null $getter */
         $getter = $annotation->getter;
         $setter = $annotation->setter;
         $adder = $annotation->adder;
@@ -184,7 +185,7 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
         if ($getter === null && $property->isPublic()) {
             return new ApiObjectAccessor(
                 ApiObjectAccessor::TYPE_PROPERTY,
-                null,
+                $property->getName(),
                 null,
                 null,
                 null,

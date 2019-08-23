@@ -8,10 +8,10 @@ use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use function is_countable;
 use function is_iterable;
+use function method_exists;
 use ReflectionClass;
 use ReflectionException;
 use Rikudou\JsonApiBundle\Annotation\ApiResource;
-use Rikudou\JsonApiBundle\Interfaces\ApiResourceInterface;
 use Rikudou\JsonApiBundle\NameResolution\ApiNameResolutionInterface;
 use Rikudou\JsonApiBundle\Service\ApiNormalizerLocator;
 
@@ -65,14 +65,12 @@ final class ApiObjectParser
      *
      * @return array
      */
-    public function getArray($object, bool $metadataOnly = false)
+    public function getJsonApiArray($object, bool $metadataOnly = false)
     {
         $this->objectValidator->throwOnInvalidObject($object);
 
-        // the object doesn't have to be the interface, but must have method getId(), so just typehint it
-        // for the IDE
+        assert(method_exists($object, 'getId'));
 
-        /** @var ApiResourceInterface $object */
         $result = [
             'id' => $object->getId(),
             'type' => $this->getResourceName($object),
@@ -93,11 +91,11 @@ final class ApiObjectParser
                     if (is_iterable($value)) {
                         $result['relationships'][$property]['data'] = [];
                         foreach ($value as $item) {
-                            $relationData = $this->getArray($item, true);
+                            $relationData = $this->getJsonApiArray($item, true);
                             $result['relationships'][$property]['data'][] = $relationData;
                         }
                     } elseif ($value !== null) {
-                        $relationData = $this->getArray($value, true);
+                        $relationData = $this->getJsonApiArray($value, true);
                         $result['relationships'][$property]['data'] = $relationData;
                     } else {
                         $result['relationships'][$property]['data'] = null;

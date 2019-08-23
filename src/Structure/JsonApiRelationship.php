@@ -38,11 +38,13 @@ final class JsonApiRelationship implements JsonSerializable
     {
         if ($this->data instanceof JsonApiRelationshipData) {
             $data = $this->data->jsonSerialize();
-        } else {
+        } elseif ($this->data !== null) {
             $data = [];
             foreach ($this->data as $datum) {
                 $data[] = $datum->jsonSerialize();
             }
+        } else {
+            $data = [];
         }
 
         return [

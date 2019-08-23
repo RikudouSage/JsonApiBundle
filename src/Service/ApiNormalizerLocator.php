@@ -25,7 +25,7 @@ final class ApiNormalizerLocator
     }
 
     /**
-     * @param $classOrObject
+     * @param string|object $classOrObject
      *
      * @return ApiObjectNormalizerInterface|null
      */

@@ -15,7 +15,7 @@ final class CreateNameResolutionService implements CompilerPassInterface
     {
         $serviceId = $container->getParameter('rikudou_api.name_resolution_service');
         $service = $container->getDefinition($serviceId);
-        if (!is_a($service->getClass(), ApiNameResolutionInterface::class, true)) {
+        if (!is_a($service->getClass() ?? '', ApiNameResolutionInterface::class, true)) {
             throw new LogicException(
                 sprintf(
                     'The name resolution service must implement the %s interface',

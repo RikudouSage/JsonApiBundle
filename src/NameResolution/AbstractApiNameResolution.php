@@ -2,6 +2,7 @@
 
 namespace Rikudou\JsonApiBundle\NameResolution;
 
+use function is_array;
 use function lcfirst;
 use function preg_replace_callback;
 use RuntimeException;
@@ -17,7 +18,7 @@ abstract class AbstractApiNameResolution implements ApiNameResolutionInterface
 {
     public function getResourceNamePlural(string $className): string
     {
-        return Inflector::pluralize($this->getResourceName($className));
+        return $this->getSingleInflectorResult(Inflector::pluralize($this->getResourceName($className)));
     }
 
     public function getGetter(string $propertyName): string
@@ -32,12 +33,16 @@ abstract class AbstractApiNameResolution implements ApiNameResolutionInterface
 
     public function getAdder(string $propertyName): string
     {
-        return 'add' . Inflector::singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)));
+        return 'add' . $this->getSingleInflectorResult(
+            Inflector::singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)))
+        );
     }
 
     public function getRemover(string $propertyName): string
     {
-        return 'remove' . Inflector::singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)));
+        return 'remove' . $this->getSingleInflectorResult(
+            Inflector::singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)))
+        );
     }
 
     public function getIsser(string $propertyName): string
@@ -69,8 +74,22 @@ abstract class AbstractApiNameResolution implements ApiNameResolutionInterface
 
     protected function snakeCaseToCamelCase(string $propertyName): string
     {
-        return preg_replace_callback('@_([a-z])@', function ($matches) {
+        return (string) preg_replace_callback('@_([a-z])@', function ($matches) {
             return strtoupper($matches[1]);
         }, $propertyName);
+    }
+
+    /**
+     * @param array|string $result
+     *
+     * @return string
+     */
+    private function getSingleInflectorResult($result): string
+    {
+        if (is_array($result)) {
+            return $result[0];
+        }
+
+        return $result;
     }
 }

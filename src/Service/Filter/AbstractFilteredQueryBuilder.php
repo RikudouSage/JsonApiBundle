@@ -64,8 +64,9 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                 throw new InvalidArgumentException('Invalid filter format');
             }
 
+            $allowedProperties = array_keys($this->propertyParser->getApiProperties(new $class));
+
             if ($useFilter) {
-                $allowedProperties = array_keys($this->propertyParser->getApiProperties(new $class));
                 $i = 0;
                 foreach ($filter as $key => $values) {
                     if (!in_array($key, $allowedProperties, true)) {

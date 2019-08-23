@@ -52,7 +52,7 @@ final class KebabCaseApiNameResolution extends AbstractApiNameResolution
     {
         $normalized = $this->snakeCaseToCamelCase($propertyName);
 
-        return preg_replace_callback('@([A-Z])@', function ($matches) {
+        return (string) preg_replace_callback('@([A-Z])@', function ($matches) {
             return '-' . strtolower($matches[1]);
         }, $normalized);
     }
