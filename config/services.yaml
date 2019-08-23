@@ -1,0 +1,82 @@
+services:
+  rikudou_api.name_resolution.camel_case:
+    class: Rikudou\JsonApiBundle\NameResolution\CamelCaseApiNameResolution
+
+  rikudou_api.name_resolution.kebab_case:
+    class: Rikudou\JsonApiBundle\NameResolution\KebabCaseApiNameResolution
+    arguments:
+      - '@rikudou_api.name_resolution.camel_case'
+
+  rikudou_api.query_builder.default:
+    class: Rikudou\JsonApiBundle\Service\Filter\DefaultFilteredQueryBuilder
+    arguments:
+      - '@doctrine.orm.entity_manager.abstract'
+      - '@rikudou_api.object_parser.property_parser'
+
+  rikudou_api.controller.api_router:
+    class: Rikudou\JsonApiBundle\Controller\ApiRouter
+    tags:
+      - controller.service_arguments
+
+  rikudou_api.controller.entity_base:
+    class: Rikudou\JsonApiBundle\Controller\EntityApiController
+    abstract: true
+    arguments:
+      - '@rikudou_api.query_builder.default'
+      - '@request_stack'
+      - '%rikudou_api.pagination%'
+      - '%rikudou_api.per_page_limit%'
+
+  rikudou_api.listener.json_api_response:
+    class: Rikudou\JsonApiBundle\Listener\JsonApiStructureResponseListener
+    tags:
+      - kernel.event_subscriber
+
+  rikudou_api.object_parser.parser:
+    class: Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectParser
+    arguments:
+      - '@rikudou_api.object_parser.property_parser'
+      - '@rikudou_api.object_parser.validator'
+      - '@rikudou_api.object_parser.cache'
+      - '@rikudou_api.name_resolution.camel_case'
+      - '@rikudou_api.api_normalizer_locator'
+
+  rikudou_api.object_parser.property_parser:
+    class: Rikudou\JsonApiBundle\Service\ObjectParser\ApiPropertyParser
+    arguments:
+      - '@rikudou_api.object_parser.validator'
+      - '@service_container'
+      - '@rikudou_api.object_parser.cache'
+      - '@Rikudou\JsonApiBundle\NameResolution\ApiNameResolutionInterface'
+    tags:
+      - container.service_subscriber
+
+  rikudou_api.object_parser.cache:
+    class: Rikudou\JsonApiBundle\Service\ObjectParser\ApiParserCache
+    arguments:
+      - '@cache.api_annotation'
+      - '@rikudou_api.object_parser.validator'
+      - '%rikudou_api.property_cache_enabled%'
+
+  rikudou_api.object_parser.validator:
+    class: Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectValidator
+    arguments:
+      - '@service_container'
+    tags:
+      - container.service_subscriber
+
+  rikudou_api.api_resource_locator:
+    class: Rikudou\JsonApiBundle\Service\ApiResourceLocator
+    arguments:
+      - '@rikudou_api.object_parser.parser'
+
+  rikudou_api.api_normalizer_locator:
+    class: Rikudou\JsonApiBundle\Service\ApiNormalizerLocator
+
+  rikudou_api.api_normalizer.datetime:
+    class: Rikudou\JsonApiBundle\Service\ObjectParser\Normalizer\DateTimeNormalizer
+    arguments:
+      - '%rikudou_api.transform_datetime_objects%'
+      - '%rikudou_api.datetime_format%'
+    tags:
+      - rikudou_api.api_normalizer

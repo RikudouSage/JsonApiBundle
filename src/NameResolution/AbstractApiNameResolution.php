@@ -1,0 +1,76 @@
+<?php
+
+namespace Rikudou\JsonApiBundle\NameResolution;
+
+use function lcfirst;
+use function preg_replace_callback;
+use RuntimeException;
+use function sprintf;
+use function strlen;
+use function strpos;
+use function strtoupper;
+use function substr;
+use Symfony\Component\Inflector\Inflector;
+use function ucfirst;
+
+abstract class AbstractApiNameResolution implements ApiNameResolutionInterface
+{
+    public function getResourceNamePlural(string $className): string
+    {
+        return Inflector::pluralize($this->getResourceName($className));
+    }
+
+    public function getGetter(string $propertyName): string
+    {
+        return 'get' . ucfirst($this->snakeCaseToCamelCase($propertyName));
+    }
+
+    public function getSetter(string $propertyName): string
+    {
+        return 'set' . ucfirst($this->snakeCaseToCamelCase($propertyName));
+    }
+
+    public function getAdder(string $propertyName): string
+    {
+        return 'add' . Inflector::singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)));
+    }
+
+    public function getRemover(string $propertyName): string
+    {
+        return 'remove' . Inflector::singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)));
+    }
+
+    public function getIsser(string $propertyName): string
+    {
+        return 'is' . ucfirst($this->snakeCaseToCamelCase($propertyName));
+    }
+
+    public function getHasser(string $propertyName): string
+    {
+        return 'has' . ucfirst($this->snakeCaseToCamelCase($propertyName));
+    }
+
+    public function getAttributeNameFromMethod(string $methodName): string
+    {
+        $prefixes = [
+            'get',
+            'has',
+            'is',
+        ];
+
+        foreach ($prefixes as $prefix) {
+            if (strpos($methodName, $prefix) === 0) {
+                return $this->getAttributeNameFromProperty(lcfirst(substr($methodName, strlen($prefix))));
+            }
+        }
+
+        throw new RuntimeException(sprintf("Cannot transform method '%s' to attribute name", $methodName));
+    }
+
+    protected function snakeCaseToCamelCase(string $propertyName): string
+    {
+        return preg_replace_callback('@_([a-z])@', function ($matches) {
+            return strtoupper($matches[1]);
+        }, $propertyName);
+    }
+}

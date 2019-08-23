@@ -1,0 +1,6 @@
+framework:
+  cache:
+    pools:
+      cache.api_annotation:
+        name: cache.api_annotations
+        adapter: cache.app
