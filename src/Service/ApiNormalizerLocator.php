@@ -44,7 +44,7 @@ final class ApiNormalizerLocator
         if (isset($this->normalizers[$className])) {
             $normalizer = $this->normalizers[$className];
         } else {
-            foreach ($this->normalizers as $class => $normalizer) {
+            foreach ($this->normalizers as $class => $classNormalizer) {
                 if (is_a($className, $class, true)) {
                     $normalizer = $this->normalizers[$class];
                     break;

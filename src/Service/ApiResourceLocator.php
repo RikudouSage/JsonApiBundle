@@ -29,11 +29,13 @@ final class ApiResourceLocator
 
     /**
      * @param ApiControllerInterface $controller
+     * @param string                 $serviceName
      *
      * @internal
      */
-    public function addController(ApiControllerInterface $controller): void
+    public function addController(ApiControllerInterface $controller, string $serviceName): void
     {
+        $controller->setServiceName($serviceName);
         $this->controllers[] = $controller;
     }
 

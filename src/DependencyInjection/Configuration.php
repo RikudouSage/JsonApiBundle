@@ -40,7 +40,7 @@ final class Configuration implements ConfigurationInterface
                 ->end()
                 ->booleanNode('property_cache_enabled')
                     ->info('Whether to cache api properties settings, recommended in production environment')
-                    ->defaultValue($this->isDebug)
+                    ->defaultValue(!$this->isDebug)
                 ->end()
                 ->booleanNode('auto_discover_resources')
                     ->info('Whether the bundle should look for all classes marked with ApiResource annotation and enable them automatically')

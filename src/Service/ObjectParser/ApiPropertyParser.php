@@ -73,10 +73,8 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
 
         $reflection = new ReflectionClass($this->objectValidator->getRealClass($object));
 
-        /** @var ApiProperty[] $enabled */
-        /** @var string[] $disabled */
-        [$enabled, $disabled] = $this->getResourcePropertyConfig($reflection);
-        $properties = $this->parsedProperties($reflection->getProperties(), $enabled, $disabled);
+        $resourceConfig = $this->getResourcePropertyConfig($reflection);
+        $properties = $this->parsedProperties($reflection->getProperties(), $resourceConfig['enabled'], $resourceConfig['disabled']);
         $methods = $this->parsedMethods($reflection->getMethods(ReflectionMethod::IS_PUBLIC));
 
         $result = array_merge($properties, $methods);
@@ -89,7 +87,7 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
     public static function getSubscribedServices()
     {
         return [
-            'rikudou_api.object_parser.parser',
+            'rikudou_api.object_parser.parser' => ApiObjectParser::class,
         ];
     }
 
@@ -107,18 +105,18 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
      */
     private function getResourcePropertyConfig(ReflectionClass $class)
     {
+        $result = [
+            'enabled' => [],
+            'disabled' => [],
+        ];
         $annotationReader = new AnnotationReader();
         $annotation = $annotationReader->getClassAnnotation($class, ApiResource::class);
-        if ($annotation === null) {
-            return [];
+        if ($annotation instanceof ApiResource) {
+            $result['enabled'] = $annotation->enabledProperties;
+            $result['disabled'] = $annotation->disabledProperties;
         }
 
-        assert($annotation instanceof ApiResource);
-
-        return [
-            'enabled' => $annotation->enabledProperties,
-            'disabled' => $annotation->disabledProperties,
-        ];
+        return $result;
     }
 
     /**

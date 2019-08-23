@@ -10,7 +10,7 @@ services:
   rikudou_api.query_builder.default:
     class: Rikudou\JsonApiBundle\Service\Filter\DefaultFilteredQueryBuilder
     arguments:
-      - '@doctrine.orm.entity_manager.abstract'
+      - '@doctrine.orm.entity_manager'
       - '@rikudou_api.object_parser.property_parser'
 
   rikudou_api.controller.api_router:
@@ -26,11 +26,21 @@ services:
       - '@request_stack'
       - '%rikudou_api.pagination%'
       - '%rikudou_api.per_page_limit%'
+      - '@rikudou_api.object_parser.parser'
+      - '@event_dispatcher'
+      - '@doctrine.orm.entity_manager'
+      - '@router.default'
 
   rikudou_api.listener.json_api_response:
     class: Rikudou\JsonApiBundle\Listener\JsonApiStructureResponseListener
     tags:
       - kernel.event_subscriber
+
+  rikudou_api.listener.cache_clear_listener:
+    class: Rikudou\JsonApiBundle\Listener\CacheClearHookListener
+    arguments:
+      - '%rikudou_api.clear_cache_hook%'
+      - '@cache.api_annotations'
 
   rikudou_api.object_parser.parser:
     class: Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectParser
@@ -54,7 +64,7 @@ services:
   rikudou_api.object_parser.cache:
     class: Rikudou\JsonApiBundle\Service\ObjectParser\ApiParserCache
     arguments:
-      - '@cache.api_annotation'
+      - '@cache.api_annotations'
       - '@rikudou_api.object_parser.validator'
       - '%rikudou_api.property_cache_enabled%'
 

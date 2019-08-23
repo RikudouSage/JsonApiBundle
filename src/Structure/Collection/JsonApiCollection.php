@@ -61,7 +61,7 @@ final class JsonApiCollection implements JsonSerializable
         return $this;
     }
 
-    public function addLink(string $name, string $link)
+    public function addLink(string $name, ?string $link)
     {
         $this->links[] = new JsonApiLink($name, $link);
 
@@ -83,14 +83,14 @@ final class JsonApiCollection implements JsonSerializable
 
     public function jsonSerialize()
     {
-        $result = [
-            'meta' => $this->meta->jsonSerialize(),
-            'links' => $this->links->jsonSerialize(),
-            'data' => [],
-        ];
+        $result = array_merge(
+            $this->meta->jsonSerialize() ?: [],
+            $this->links->jsonSerialize() ?: [],
+            ['data' => []]
+        );
 
         foreach ($this->data as $apiObject) {
-            $result['data'] = array_merge($result['data'], $apiObject->jsonSerialize());
+            $result['data'][] = $apiObject->jsonSerialize();
         }
 
         return $result;

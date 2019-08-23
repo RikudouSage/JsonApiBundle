@@ -5,6 +5,7 @@ namespace Rikudou\JsonApiBundle\Structure\Collection;
 use function array_merge;
 use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\JsonApiRelationship;
+use stdClass;
 
 /**
  * @method JsonApiRelationship current()
@@ -19,9 +20,13 @@ final class JsonApiRelationshipCollection extends AbstractCollection implements 
         $result = [
             'relationships' => [],
         ];
-        /** @var JsonApiRelationship $relationship */
-        foreach ($this->data as $relationship) {
-            $result['relationships'] = array_merge($result['relationships'], $relationship->jsonSerialize());
+        if (!$this->count()) {
+            $result['relationships'] = new stdClass();
+        } else {
+            /** @var JsonApiRelationship $relationship */
+            foreach ($this->data as $relationship) {
+                $result['relationships'] = array_merge($result['relationships'], $relationship->jsonSerialize());
+            }
         }
 
         return $result;

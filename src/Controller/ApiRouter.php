@@ -2,7 +2,6 @@
 
 namespace Rikudou\JsonApiBundle\Controller;
 
-use function get_class;
 use Rikudou\JsonApiBundle\ApiEvents;
 use Rikudou\JsonApiBundle\Events\RouterPreroutingEvent;
 use Rikudou\JsonApiBundle\Exception\JsonApiErrorException;
@@ -99,9 +98,7 @@ final class ApiRouter extends AbstractController
                 );
         }
 
-        $controllerClass = get_class($controller);
-
-        return $this->forward("{$controllerClass}::{$method}", [
+        return $this->forward("{$controller->getServiceName()}::{$method}", [
             'id' => $id,
         ], $request->query->all());
     }

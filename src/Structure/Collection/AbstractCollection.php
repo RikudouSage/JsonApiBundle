@@ -168,6 +168,8 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
             if (!class_exists($class)) {
                 throw new LogicException("{$class} is not a valid class");
             }
+
+            return true;
         });
 
         if ($value === null) {

@@ -5,6 +5,7 @@ namespace Rikudou\JsonApiBundle\Structure\Collection;
 use function array_merge;
 use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\JsonApiAttribute;
+use stdClass;
 
 /**
  * @method JsonApiAttribute current()
@@ -19,9 +20,13 @@ final class JsonApiAttributesCollection extends AbstractCollection implements Js
         $result = [
             'attributes' => [],
         ];
-        /** @var JsonApiAttribute $attribute */
-        foreach ($this->data as $attribute) {
-            $result['attributes'] = array_merge($result['attributes'], $attribute->jsonSerialize());
+        if (!$this->count()) {
+            $result['attributes'] = new stdClass();
+        } else {
+            /** @var JsonApiAttribute $attribute */
+            foreach ($this->data as $attribute) {
+                $result['attributes'] = array_merge($result['attributes'], $attribute->jsonSerialize());
+            }
         }
 
         return $result;

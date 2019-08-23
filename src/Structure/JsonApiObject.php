@@ -2,6 +2,7 @@
 
 namespace Rikudou\JsonApiBundle\Structure;
 
+use function array_merge;
 use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\Collection\JsonApiAttributesCollection;
 use Rikudou\JsonApiBundle\Structure\Collection\JsonApiLinksCollection;
@@ -167,14 +168,16 @@ final class JsonApiObject implements JsonSerializable
 
     public function jsonSerialize()
     {
-        return [
-            'id' => $this->id,
-            'type' => $this->type,
-            'attributes' => $this->attributes->jsonSerialize(),
-            'relationships' => $this->relationships->jsonSerialize(),
-            'links' => $this->links->jsonSerialize(),
-            'meta' => $this->meta->jsonSerialize(),
-        ];
+        return array_merge(
+            [
+                'id' => $this->id,
+                'type' => $this->type,
+            ],
+            $this->attributes->jsonSerialize(),
+            $this->relationships->jsonSerialize(),
+            $this->meta->jsonSerialize(),
+            $this->links->jsonSerialize()
+        );
     }
 
     private function parse(array $json)

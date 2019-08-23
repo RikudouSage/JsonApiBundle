@@ -18,7 +18,7 @@ final class PopulateResourceLocator implements CompilerPassInterface
             if ($definition->isAbstract()) {
                 continue;
             }
-            $locator->addMethodCall('addController', [new Reference($service)]);
+            $locator->addMethodCall('addController', [new Reference($service), $service]);
         }
     }
 }

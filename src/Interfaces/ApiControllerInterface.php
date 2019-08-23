@@ -63,4 +63,16 @@ interface ApiControllerInterface
      * @param string $resourceName
      */
     public function setResourceName(string $resourceName): void;
+
+    /**
+     * Called by the bundle, sets the controller's service name
+     *
+     * @param string $serviceName
+     */
+    public function setServiceName(string $serviceName): void;
+
+    /**
+     * @return string
+     */
+    public function getServiceName(): string;
 }

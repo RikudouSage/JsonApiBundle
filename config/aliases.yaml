@@ -1,2 +1,3 @@
 services:
   Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectParser: '@rikudou_api.object_parser.parser'
+  Rikudou\JsonApiBundle\Service\ApiResourceLocator: '@rikudou_api.api_resource_locator'

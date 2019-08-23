@@ -42,6 +42,11 @@ abstract class EntityApiController extends AbstractController implements ApiCont
     protected $resourceName;
 
     /**
+     * @var string
+     */
+    protected $serviceName;
+
+    /**
      * @var RequestStack
      */
     private $requestStack;
@@ -71,6 +76,11 @@ abstract class EntityApiController extends AbstractController implements ApiCont
      */
     private $entityManager;
 
+    /**
+     * @var UrlGeneratorInterface
+     */
+    private $urlGenerator;
+
     public function __construct(
         FilteredQueryBuilderInterface $filteredQueryBuilder,
         RequestStack $requestStack,
@@ -78,7 +88,8 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         int $defaultPerPageLimit,
         ApiObjectParser $objectParser,
         EventDispatcherInterface $eventDispatcher,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        UrlGeneratorInterface $urlGenerator
     ) {
         $this->filteredQueryBuilder = $filteredQueryBuilder;
         $this->requestStack = $requestStack;
@@ -87,6 +98,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         $this->objectParser = $objectParser;
         $this->eventDispatcher = $eventDispatcher;
         $this->entityManager = $entityManager;
+        $this->urlGenerator = $urlGenerator;
     }
 
     public function setResourceName(string $resourceName): void
@@ -95,18 +107,31 @@ abstract class EntityApiController extends AbstractController implements ApiCont
     }
 
     /**
-     * @param UrlGeneratorInterface|null $urlGenerator
-     *
+     * @param string $serviceName
+     */
+    public function setServiceName(string $serviceName): void
+    {
+        $this->serviceName = $serviceName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getServiceName(): string
+    {
+        return $this->serviceName;
+    }
+
+    /**
      * @throws AnnotationException
      * @throws ReflectionException
      *
      * @return JsonApiCollection
      */
-    public function getCollection(UrlGeneratorInterface $urlGenerator = null)
+    public function getCollection()
     {
         $request = $this->requestStack->getCurrentRequest();
         assert($request !== null);
-        assert($urlGenerator !== null);
 
         $queryParams = $request->query;
         $currentPage = $queryParams->getInt('page', 1);
@@ -124,17 +149,14 @@ abstract class EntityApiController extends AbstractController implements ApiCont
 
         $response = new JsonApiCollection();
         $response->addLink('self', $this->route(
-            $urlGenerator,
             'rikudou_json_api.router',
             $queryParams->all()
         ));
         $response->addLink('first', $this->route(
-            $urlGenerator,
             'rikudou_json_api.router',
             array_merge_recursive($queryParams->all(), ['page' => 1])
         ));
         $response->addLink('last', $this->route(
-            $urlGenerator,
             'rikudou_json_api.router',
             array_merge_recursive($queryParams->all(), ['page' => $lastPage])
         ));
@@ -142,7 +164,6 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             'prev',
             $currentPage > 1
             ? $this->route(
-                $urlGenerator,
                 'rikudou_json_api.router',
                 array_merge_recursive($queryParams->all(), ['page' => min($currentPage - 1, $lastPage)])
             )
@@ -152,7 +173,6 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             'next',
             $currentPage + 1 < $lastPage
             ? $this->route(
-                $urlGenerator,
                 'rikudou_json_api.router',
                 array_merge_recursive($queryParams->all(), ['page' => $currentPage + 1])
             )
@@ -298,12 +318,12 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         );
     }
 
-    protected function route(UrlGeneratorInterface $urlGenerator, string $route, array $parameters = [])
+    protected function route(string $route, array $parameters = [])
     {
         if (!isset($parameters['resourceName'])) {
             $parameters['resourceName'] = $this->resourceName;
         }
 
-        return $urlGenerator->generate($route, $parameters);
+        return $this->urlGenerator->generate($route, $parameters);
     }
 }

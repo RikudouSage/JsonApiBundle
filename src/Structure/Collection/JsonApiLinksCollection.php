@@ -5,6 +5,7 @@ namespace Rikudou\JsonApiBundle\Structure\Collection;
 use function array_merge;
 use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\JsonApiLink;
+use stdClass;
 
 /**
  * @method JsonApiLink current()
@@ -19,9 +20,13 @@ final class JsonApiLinksCollection extends AbstractCollection implements JsonSer
         $result = [
             'links' => [],
         ];
-        /** @var JsonApiLink $link */
-        foreach ($this->data as $link) {
-            $result['links'] = array_merge($result['links'], $link->jsonSerialize());
+        if (!$this->count()) {
+            $result['links'] = new stdClass();
+        } else {
+            /** @var JsonApiLink $link */
+            foreach ($this->data as $link) {
+                $result['links'] = array_merge($result['links'], $link->jsonSerialize());
+            }
         }
 
         return $result;

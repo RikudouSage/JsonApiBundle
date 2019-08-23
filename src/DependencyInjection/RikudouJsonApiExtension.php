@@ -12,6 +12,13 @@ use Symfony\Component\Yaml\Yaml;
 
 final class RikudouJsonApiExtension extends Extension implements PrependExtensionInterface
 {
+    public function getConfiguration(array $config, ContainerBuilder $container)
+    {
+        $isDebug = $container->getParameter('kernel.debug');
+
+        return new Configuration($isDebug);
+    }
+
     /**
      * Loads a specific configuration.
      *
@@ -33,7 +40,6 @@ final class RikudouJsonApiExtension extends Extension implements PrependExtensio
         $container->setParameter('rikudou_api.clear_cache_hook', $configs['clear_cache_hook']);
         $container->setParameter('rikudou_api.property_cache_enabled', $configs['property_cache_enabled']);
         $container->setParameter('rikudou_api.auto_discover_resources', $configs['auto_discover_resources']);
-        $container->setParameter('rikudou_api.auto_discover_cache_enabled', $configs['auto_discover_cache_enabled']);
         $container->setParameter('rikudou_api.name_resolution_service', $configs['name_resolution_service']);
         $container->setParameter('rikudou_api.pagination', $configs['pagination']);
         $container->setParameter('rikudou_api.per_page_limit', $configs['per_page_limit']);

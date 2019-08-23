@@ -10,9 +10,9 @@ use Rikudou\JsonApiBundle\Controller\DefaultEntityApiController;
 use Rikudou\JsonApiBundle\Interfaces\ApiResourceInterface;
 use Rikudou\ReflectionFile;
 use SplFileInfo;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
 
 final class CreateResourceServices implements CompilerPassInterface
 {
@@ -22,7 +22,7 @@ final class CreateResourceServices implements CompilerPassInterface
             return;
         }
         /** @var string $directory */
-        $directory = $container->getParameter('kernel.project_dir');
+        $directory = $container->getParameter('kernel.root_dir');
 
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($directory)
@@ -47,15 +47,23 @@ final class CreateResourceServices implements CompilerPassInterface
                 continue;
             }
 
-            $class = $reflection->getClass();
+            try {
+                $class = $reflection->getClass();
+            } catch (\ReflectionException $e) {
+                continue;
+            }
 
             if (
                 $class->implementsInterface(ApiResourceInterface::class)
                 || $annotationReader->getClassAnnotation($class, ApiResource::class)
             ) {
-                $definition = new Definition(DefaultEntityApiController::class);
+                $definition = new ChildDefinition('rikudou_api.controller.entity_base');
+                $definition->setClass(DefaultEntityApiController::class);
                 $definition->addMethodCall('setClassName', [$class->getName()]);
                 $definition->addTag('rikudou_api.api_controller');
+                $definition->addTag('controller.service_arguments');
+                $definition->setPublic(true);
+
                 $container->setDefinition("rikudou.api_controller.default.{$class->getName()}", $definition);
             }
         }

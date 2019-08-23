@@ -12,11 +12,11 @@ final class JsonApiLink implements JsonSerializable
     private $name;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $link;
 
-    public function __construct(string $name, string $link)
+    public function __construct(string $name, ?string $link)
     {
         $this->name = $name;
         $this->link = $link;
@@ -25,7 +25,7 @@ final class JsonApiLink implements JsonSerializable
     /**
      * @return string
      */
-    public function getLink(): string
+    public function getLink(): ?string
     {
         return $this->link;
     }

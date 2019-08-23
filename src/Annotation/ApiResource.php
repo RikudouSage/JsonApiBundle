@@ -2,8 +2,11 @@
 
 namespace Rikudou\JsonApiBundle\Annotation;
 
+use Doctrine\Common\Annotations\Annotation\Target;
+
 /**
  * @Annotation
+ * @Target("CLASS")
  */
 final class ApiResource
 {
