@@ -12,15 +12,15 @@ final class JsonApiRelationshipData implements JsonSerializable
     private $type;
 
     /**
-     * @var int|string
+     * @var int|string|null
      */
     private $id;
 
     /**
      * JsonApiRelationshipData constructor.
      *
-     * @param string     $type
-     * @param int|string $id
+     * @param string          $type
+     * @param int|string|null $id
      */
     public function __construct(string $type, $id)
     {
@@ -37,7 +37,7 @@ final class JsonApiRelationshipData implements JsonSerializable
     }
 
     /**
-     * @return int|string
+     * @return int|string|null
      */
     public function getId()
     {

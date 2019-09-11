@@ -66,6 +66,10 @@ final class Configuration implements ConfigurationInterface
                     ->info('The date time format used if transform_datetime_objects is enabled')
                     ->defaultValue('c')
                 ->end()
+                ->booleanNode('handle_special_exceptions')
+                    ->info('Whether exceptions with special semantic meaning (like JsonApiErrorException) should by handled by the bundle. Should be enabled on production.')
+                    ->defaultValue(!$this->isDebug)
+                ->end()
             ->end();
 
         return $treeBuilder;

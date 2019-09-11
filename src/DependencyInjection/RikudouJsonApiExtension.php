@@ -45,6 +45,7 @@ final class RikudouJsonApiExtension extends Extension implements PrependExtensio
         $container->setParameter('rikudou_api.per_page_limit', $configs['per_page_limit']);
         $container->setParameter('rikudou_api.transform_datetime_objects', $configs['transform_datetime_objects']);
         $container->setParameter('rikudou_api.datetime_format', $configs['datetime_format']);
+        $container->setParameter('rikudou_api.handle_special_exceptions', $configs['handle_special_exceptions']);
     }
 
     /**

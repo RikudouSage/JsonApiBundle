@@ -12,12 +12,12 @@ use Rikudou\JsonApiBundle\Structure\Collection\JsonApiRelationshipCollection;
 final class JsonApiObject implements JsonSerializable
 {
     /**
-     * @var string
+     * @var string|null
      */
     private $type;
 
     /**
-     * @var string|int
+     * @var string|int|null
      */
     private $id;
 
@@ -49,7 +49,7 @@ final class JsonApiObject implements JsonSerializable
     /**
      * @return string
      */
-    public function getType(): string
+    public function getType(): ?string
     {
         return $this->type;
     }
@@ -67,7 +67,7 @@ final class JsonApiObject implements JsonSerializable
     }
 
     /**
-     * @return int|string
+     * @return int|string|null
      */
     public function getId()
     {
@@ -187,12 +187,8 @@ final class JsonApiObject implements JsonSerializable
         $this->meta = new JsonApiMetaCollection();
         $this->relationships = new JsonApiRelationshipCollection();
 
-        if (!isset($json['type']) || !isset($json['id'])) {
-            return;
-        }
-
-        $this->type = $json['type'];
-        $this->id = $json['id'];
+        $this->type = $json['type'] ?? null;
+        $this->id = $json['id'] ?? null;
 
         if (isset($json['attributes'])) {
             foreach ($json['attributes'] as $attribute => $value) {

@@ -15,9 +15,12 @@ final class InvalidApiPropertyConfig extends InvalidArgumentException
 
     public const TYPE_REMOVER = 'remover';
 
-    public function __construct(string $type, Throwable $previous = null)
+    public function __construct(string $type, ?string $propertyName = null, Throwable $previous = null)
     {
-        $message = "The api property config is invalid, the method '{$type}' does not exist";
+        $message = "The api property config is invalid, the method '{$type}' does not exist.";
+        if ($propertyName !== null) {
+            $message .= " Property name: {$propertyName}.";
+        }
         parent::__construct($message, 0, $previous);
     }
 }

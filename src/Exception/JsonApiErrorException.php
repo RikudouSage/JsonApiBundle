@@ -4,6 +4,7 @@ namespace Rikudou\JsonApiBundle\Exception;
 
 use function is_array;
 use function is_string;
+use Rikudou\JsonApiBundle\Structure\JsonApiError;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -11,7 +12,7 @@ use Throwable;
 final class JsonApiErrorException extends RuntimeException
 {
     /**
-     * @var string|array
+     * @var string|array|JsonApiError
      */
     private $data;
 
@@ -28,7 +29,7 @@ final class JsonApiErrorException extends RuntimeException
     }
 
     /**
-     * @return array|string
+     * @return array|string|JsonApiError
      */
     public function getData()
     {

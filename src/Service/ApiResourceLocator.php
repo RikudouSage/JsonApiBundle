@@ -63,6 +63,13 @@ final class ApiResourceLocator
         return $this->map[$resourceName];
     }
 
+    public function getEntityFromResourceType(string $resourceName): string
+    {
+        $controller = $this->findControllerForResource($resourceName);
+
+        return $controller->getClass();
+    }
+
     public function getResourceNames(bool $plural = true)
     {
         $this->populateMap();

@@ -9,6 +9,7 @@ use function is_object;
 use function method_exists;
 use Psr\Container\ContainerInterface;
 use Rikudou\JsonApiBundle\Exception\InvalidApiObjectException;
+use Rikudou\JsonApiBundle\Exception\InvalidJsonApiArrayException;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
 final class ApiObjectValidator implements ServiceSubscriberInterface
@@ -28,9 +29,21 @@ final class ApiObjectValidator implements ServiceSubscriberInterface
      *
      * @return bool
      */
-    public function isValid($object): bool
+    public function isObjectValid($object): bool
     {
         return is_object($object) && method_exists($object, 'getId');
+    }
+
+    public function isArrayValid(array $data): bool
+    {
+        if (!isset($data['type']) && !isset($data['data'])) {
+            return false;
+        }
+        if (isset($data['data']) && !isset($data['data']['type'])) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -38,8 +51,15 @@ final class ApiObjectValidator implements ServiceSubscriberInterface
      */
     public function throwOnInvalidObject($object): void
     {
-        if (!$this->isValid($object)) {
+        if (!$this->isObjectValid($object)) {
             throw new InvalidApiObjectException();
+        }
+    }
+
+    public function throwOnInvalidArray(array $data): void
+    {
+        if (!$this->isArrayValid($data)) {
+            throw new InvalidJsonApiArrayException();
         }
     }
 
@@ -61,12 +81,12 @@ final class ApiObjectValidator implements ServiceSubscriberInterface
     public static function getSubscribedServices()
     {
         return [
-            'doctrine',
+            'entity_manager' => EntityManagerInterface::class,
         ];
     }
 
     private function getEntityManager(): EntityManagerInterface
     {
-        return $this->container->get('doctrine.orm.entity_manager');
+        return $this->container->get('entity_manager');
     }
 }

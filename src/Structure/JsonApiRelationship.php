@@ -28,6 +28,11 @@ final class JsonApiRelationship implements JsonSerializable
      */
     private $data;
 
+    /**
+     * @var bool
+     */
+    private $hasData = false;
+
     public function __construct(string $name, array $json = [])
     {
         $this->name = $name;
@@ -52,6 +57,30 @@ final class JsonApiRelationship implements JsonSerializable
         ];
     }
 
+    /**
+     * @return JsonApiRelationshipData|JsonApiRelationshipData[]|null
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasData(): bool
+    {
+        return $this->hasData;
+    }
+
     private function parse(array $json)
     {
         $this->links = new JsonApiLinksCollection();
@@ -69,12 +98,13 @@ final class JsonApiRelationship implements JsonSerializable
             }
         }
         if (isset($json['data'])) {
-            if (isset($json['data']['type']) && isset($json['data']['id'])) {
-                $this->data = new JsonApiRelationshipData($json['data']['type'], $json['data']['id']);
+            $this->hasData = true;
+            if (isset($json['data']['type'])) {
+                $this->data = new JsonApiRelationshipData($json['data']['type'], $json['data']['id'] ?? null);
             } else {
                 $this->data = [];
                 foreach ($json['data'] as $data) {
-                    $this->data[] = new JsonApiRelationshipData($data['type'], $data['id']);
+                    $this->data[] = new JsonApiRelationshipData($data['type'], $data['id'] ?? null);
                 }
             }
         }

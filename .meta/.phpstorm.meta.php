@@ -86,6 +86,11 @@ namespace PHPSTORM_META {
         \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::TYPE_GET_ITEM,
         \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::TYPE_UPDATE_ITEM
     );
+    registerArgumentsSet(
+        'api_accessor_type',
+        \Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor::TYPE_PROPERTY,
+        \Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor::TYPE_METHOD,
+    );
 
     expectedArguments(
         \Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor::__construct(),
@@ -110,6 +115,15 @@ namespace PHPSTORM_META {
     expectedReturnValues(
         \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::getResponseType(),
         argumentsSet('event_response_type')
+    );
+    expectedArguments(
+        \Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor::__construct(),
+        0,
+        argumentsSet('api_accessor_type')
+    );
+    expectedReturnValues(
+        \Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor::getType(),
+        argumentsSet('api_accessor_type')
     );
 
 }
