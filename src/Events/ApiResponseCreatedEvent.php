@@ -14,6 +14,8 @@ final class ApiResponseCreatedEvent extends Event
 
     public const TYPE_UPDATE_ITEM = 'update_item';
 
+    public const TYPE_CREATE_ITEM = 'create_item';
+
     /**
      * @var JsonApiCollection|JsonApiObject
      */

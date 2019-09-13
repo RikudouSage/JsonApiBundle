@@ -33,12 +33,15 @@ final class JsonApiErrorExceptionListener implements EventSubscriberInterface
 
     public function handleJsonApiException(ExceptionEvent $event)
     {
-        if (!$this->enabled) {
-            return;
-        }
-
         $exception = $event->getException();
         if ($exception instanceof JsonApiErrorException) {
+            if (!$this->enabled) {
+                if ($previous = $exception->getPrevious()) {
+                    throw $previous;
+                }
+
+                return;
+            }
             if ($exception->getCode() >= Response::HTTP_OK) {
                 $statusCode = $exception->getCode();
             } else {

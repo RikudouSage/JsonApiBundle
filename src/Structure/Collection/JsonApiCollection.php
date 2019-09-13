@@ -30,6 +30,11 @@ final class JsonApiCollection implements JsonSerializable
         $this->parse($data);
     }
 
+    public function __toString()
+    {
+        return (string) json_encode($this->jsonSerialize());
+    }
+
     /**
      * @return JsonApiObject[]
      */

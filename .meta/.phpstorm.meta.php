@@ -84,7 +84,8 @@ namespace PHPSTORM_META {
         'event_response_types',
         \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::TYPE_GET_COLLECTION,
         \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::TYPE_GET_ITEM,
-        \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::TYPE_UPDATE_ITEM
+        \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::TYPE_UPDATE_ITEM,
+        \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::TYPE_CREATE_ITEM
     );
     registerArgumentsSet(
         'api_accessor_type',

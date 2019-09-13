@@ -236,7 +236,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
     public function getItem($id)
     {
         try {
-            $item = $this
+            $entity = $this
                 ->getFilteredQueryBuilder(false, false)
                 ->setMaxResults(1)
                 ->andWhere('entity.id = :itemId')
@@ -244,14 +244,14 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 ->getQuery()
                 ->getSingleResult();
         } catch (NoResultException | NonUniqueResultException $e) {
-            $item = null;
+            $entity = null;
         }
 
-        if ($item === null) {
+        if ($entity === null) {
             throw new JsonApiErrorException('The resource does not exist', Response::HTTP_NOT_FOUND);
         }
 
-        $response = new JsonApiObject($this->objectParser->getJsonApiArray($item));
+        $response = new JsonApiObject($this->objectParser->getJsonApiArray($entity));
 
         $event = new ApiResponseCreatedEvent(
             $response,
@@ -276,13 +276,24 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         try {
             $post = $this->getPostData();
 
-            if (!$post->get('data')) {
+            if (!$post->has('data')) {
                 throw new UnexpectedValueException("The JSON data must contain a root 'data' key");
+            }
+            $data = $post->get('data');
+
+            if (isset($data['id'])) {
+                throw new UnexpectedValueException('This api does not support user generated IDs. If you are trying to update resource, use the PATCH method');
+            }
+            if (!isset($data['type'])) {
+                throw new UnexpectedValueException("The JSON data must contain 'type'");
+            }
+            if ($data['type'] !== $this->resourceName) {
+                throw new UnexpectedValueException("The 'type' value does not match the type from URL");
             }
 
             /** @var ApiResourceInterface $entity */
             $entity = $this->objectParser->parseJsonApiArray([
-                'data' => $post->get('data'),
+                'data' => $data,
             ]);
 
             if (!is_a($entity, $this->getClass(), true)) {
@@ -292,17 +303,27 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             $this->entityManager->persist($entity);
             $this->entityManager->flush();
 
-            /** @var JsonApiResponse $response */
-            $response = $this->forward(get_class($this) . '::getItem', [
-                'id' => $entity->getId(),
-            ]);
+            $jsonApiObject = new JsonApiObject($this->objectParser->getJsonApiArray($entity));
+
+            $response = new JsonApiResponse($jsonApiObject);
             $response->setStatusCode(Response::HTTP_CREATED);
             $response->headers->set('Location', $this->route('rikudou_json_api.router', [
                 'resourceName' => $this->resourceName,
                 'id' => $entity->getId(),
             ]));
 
-            return $response;
+            $event = new ApiResponseCreatedEvent(
+                $jsonApiObject,
+                ApiResponseCreatedEvent::TYPE_CREATE_ITEM,
+                $this->resourceName,
+                $this->getClass()
+            );
+
+            /** @noinspection PhpMethodParametersCountMismatchInspection */
+            $this->eventDispatcher->dispatch($event, ApiEvents::PRE_RESPONSE);
+            $jsonApiObject = $event->getData();
+
+            return $response->setContent($jsonApiObject);
         } catch (InvalidArgumentException $e) {
             throw new JsonApiErrorException(
                 'Could not parse the request data',
@@ -327,7 +348,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
     public function deleteItem($id): Response
     {
         try {
-            $item = $this
+            $entity = $this
                 ->getFilteredQueryBuilder(false, false)
                 ->setMaxResults(1)
                 ->andWhere('entity.id = :itemId')
@@ -335,15 +356,15 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 ->getQuery()
                 ->getSingleResult();
         } catch (NoResultException | NonUniqueResultException $e) {
-            $item = null;
+            $entity = null;
         }
 
-        if ($item === null) {
+        if ($entity === null) {
             throw new JsonApiErrorException('The resource does not exist', Response::HTTP_NOT_FOUND);
         }
 
         try {
-            $this->entityManager->remove($item);
+            $this->entityManager->remove($entity);
             $this->entityManager->flush();
 
             return new JsonApiResponse(null, Response::HTTP_NO_CONTENT);
@@ -358,7 +379,91 @@ abstract class EntityApiController extends AbstractController implements ApiCont
 
     public function updateItem($id)
     {
-        // TODO: Implement updateItem() method.
+        try {
+            try {
+                /** @var ApiResourceInterface $entity */
+                $entity = $this
+                    ->getFilteredQueryBuilder(false, false)
+                    ->setMaxResults(1)
+                    ->andWhere('entity.id = :entityId')
+                    ->setParameter('entityId', $id)
+                    ->getQuery()
+                    ->getSingleResult();
+            } catch (NoResultException | NonUniqueResultException $e) {
+                $entity = null;
+            }
+
+            if ($entity === null) {
+                throw new JsonApiErrorException('The resource does not exist', Response::HTTP_NOT_FOUND);
+            }
+
+            $post = $this->getPostData();
+            if (!$post->has('data')) {
+                throw new UnexpectedValueException("The JSON data must contain a root 'data' key");
+            }
+            $data = $post->get('data');
+
+            if (!isset($data['id']) || !isset($data['type'])) {
+                throw new UnexpectedValueException("The JSON data must contain 'id' and 'type'");
+            }
+            if ($data['id'] !== $id) {
+                throw new UnexpectedValueException("The 'id' value does not match the id from URL");
+            }
+            if ($data['type'] !== $this->resourceName) {
+                throw new UnexpectedValueException("The 'type' value does not match the type from URL");
+            }
+
+            if (!isset($data['attributes']) && !isset($data['relationships'])) {
+                $response = new JsonApiObject($this->objectParser->getJsonApiArray($entity));
+            } else {
+                /** @var ApiResourceInterface $updatedEntity */
+                $updatedEntity = $this->objectParser->parseJsonApiArray([
+                    'data' => $data,
+                ]);
+                if ($updatedEntity->getId() !== $entity->getId()) {
+                    throw new LogicException('The updated entity ID is not the same as the original ID');
+                }
+                if (!is_a($updatedEntity, (string) $this->getClass(), true)) {
+                    throw new UnexpectedValueException("The parsed entity tree does not translate to type '{$this->getClass()}'");
+                }
+
+                $this->entityManager->persist($updatedEntity);
+                $this->entityManager->flush();
+                $response = new JsonApiObject($this->objectParser->getJsonApiArray($updatedEntity));
+            }
+
+            $event = new ApiResponseCreatedEvent(
+                $response,
+                ApiResponseCreatedEvent::TYPE_UPDATE_ITEM,
+                $this->resourceName,
+                $this->getClass()
+            );
+
+            /** @noinspection PhpMethodParametersCountMismatchInspection */
+            $this->eventDispatcher->dispatch($event, ApiEvents::PRE_RESPONSE);
+            /** @var JsonApiObject $response */
+            $response = $event->getData();
+
+            return $response;
+        } catch (InvalidArgumentException $e) {
+            throw new JsonApiErrorException(
+                'Could not parse the request data',
+                Response::HTTP_BAD_REQUEST,
+                $e
+            );
+        } catch (UnexpectedValueException $e) {
+            throw new JsonApiErrorException(
+                $e->getMessage(),
+                Response::HTTP_BAD_REQUEST,
+                $e
+            );
+        } catch (Exception $e) {
+            throw new JsonApiErrorException(
+                'The server encountered an internal error',
+                Response::HTTP_INTERNAL_SERVER_ERROR,
+                $e
+            );
+        }
     }
 
     protected function getFilteredQueryBuilder(bool $useFilter = true, bool $useSort = true): QueryBuilder

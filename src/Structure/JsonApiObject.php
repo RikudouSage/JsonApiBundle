@@ -46,6 +46,11 @@ final class JsonApiObject implements JsonSerializable
         $this->parse($json);
     }
 
+    public function __toString()
+    {
+        return (string) json_encode($this->jsonSerialize());
+    }
+
     /**
      * @return string
      */
