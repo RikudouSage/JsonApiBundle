@@ -10,6 +10,8 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Exception;
+use InvalidArgumentException;
 use LogicException;
 use function min;
 use ReflectionException;
@@ -18,16 +20,20 @@ use Rikudou\JsonApiBundle\ApiEvents;
 use Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent;
 use Rikudou\JsonApiBundle\Exception\JsonApiErrorException;
 use Rikudou\JsonApiBundle\Interfaces\ApiControllerInterface;
+use Rikudou\JsonApiBundle\Interfaces\ApiResourceInterface;
 use Rikudou\JsonApiBundle\Response\JsonApiResponse;
 use Rikudou\JsonApiBundle\Service\Filter\FilteredQueryBuilderInterface;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectParser;
 use Rikudou\JsonApiBundle\Structure\Collection\JsonApiCollection;
 use Rikudou\JsonApiBundle\Structure\JsonApiObject;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use UnexpectedValueException;
 
 abstract class EntityApiController extends AbstractController implements ApiControllerInterface
 {
@@ -123,10 +129,11 @@ abstract class EntityApiController extends AbstractController implements ApiCont
     }
 
     /**
-     * @throws AnnotationException
      * @throws ReflectionException
+     * @throws AnnotationException
      *
      * @return JsonApiCollection
+     *
      */
     public function getCollection()
     {
@@ -163,20 +170,20 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         $response->addLink(
             'prev',
             $currentPage > 1
-            ? $this->route(
-                'rikudou_json_api.router',
-                array_merge_recursive($queryParams->all(), ['page' => min($currentPage - 1, $lastPage)])
-            )
-            : null
+                ? $this->route(
+                    'rikudou_json_api.router',
+                    array_merge_recursive($queryParams->all(), ['page' => min($currentPage - 1, $lastPage)])
+                )
+                : null
         );
         $response->addLink(
             'next',
             $currentPage + 1 < $lastPage
-            ? $this->route(
-                'rikudou_json_api.router',
-                array_merge_recursive($queryParams->all(), ['page' => $currentPage + 1])
-            )
-            : null
+                ? $this->route(
+                    'rikudou_json_api.router',
+                    array_merge_recursive($queryParams->all(), ['page' => $currentPage + 1])
+                )
+                : null
         );
         $response->addMeta('totalItems', (int) $total);
         $response->addMeta('itemsPerPage', $perPage);
@@ -220,10 +227,11 @@ abstract class EntityApiController extends AbstractController implements ApiCont
     /**
      * @param int|string $id
      *
-     * @throws AnnotationException
      * @throws ReflectionException
+     * @throws AnnotationException
      *
      * @return JsonApiResponse|JsonApiObject
+     *
      */
     public function getItem($id)
     {
@@ -265,7 +273,55 @@ abstract class EntityApiController extends AbstractController implements ApiCont
 
     public function addItem()
     {
-        // TODO: Implement addItem() method.
+        try {
+            $post = $this->getPostData();
+
+            if (!$post->get('data')) {
+                throw new UnexpectedValueException("The JSON data must contain a root 'data' key");
+            }
+
+            /** @var ApiResourceInterface $entity */
+            $entity = $this->objectParser->parseJsonApiArray([
+                'data' => $post->get('data'),
+            ]);
+
+            if (!is_a($entity, $this->getClass(), true)) {
+                throw new UnexpectedValueException("The parsed entity tree does not translate to type '{$this->getClass()}'");
+            }
+
+            $this->entityManager->persist($entity);
+            $this->entityManager->flush();
+
+            /** @var JsonApiResponse $response */
+            $response = $this->forward(get_class($this) . '::getItem', [
+                'id' => $entity->getId(),
+            ]);
+            $response->setStatusCode(Response::HTTP_CREATED);
+            $response->headers->set('Location', $this->route('rikudou_json_api.router', [
+                'resourceName' => $this->resourceName,
+                'id' => $entity->getId(),
+            ]));
+
+            return $response;
+        } catch (InvalidArgumentException $e) {
+            throw new JsonApiErrorException(
+                'Could not parse the request data',
+                Response::HTTP_BAD_REQUEST,
+                $e
+            );
+        } catch (UnexpectedValueException $e) {
+            throw new JsonApiErrorException(
+                $e->getMessage(),
+                Response::HTTP_BAD_REQUEST,
+                $e
+            );
+        } catch (Exception $e) {
+            throw new JsonApiErrorException(
+                'The server encountered an internal error',
+                Response::HTTP_INTERNAL_SERVER_ERROR,
+                $e
+            );
+        }
     }
 
     public function deleteItem($id): Response
@@ -325,5 +381,26 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         }
 
         return $this->urlGenerator->generate($route, $parameters);
+    }
+
+    protected function getPostData(): ParameterBag
+    {
+        $request = $this->requestStack->getCurrentRequest();
+        if ($request === null) {
+            throw new RuntimeException('The request cannot be null');
+        }
+        if (fnmatch('application/*json*', (string) $request->getContentType())) {
+            /** @var string $body */
+            $body = $request->getContent();
+            /** @var array $data */
+            $data = @json_decode($body, true);
+            if (json_last_error()) {
+                throw new InvalidArgumentException(json_last_error_msg());
+            }
+
+            return new ParameterBag($data);
+        } else {
+            throw new UnexpectedValueException('The content type must be a valid JSON content type');
+        }
     }
 }
