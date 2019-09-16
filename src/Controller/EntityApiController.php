@@ -244,11 +244,11 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 ->getQuery()
                 ->getSingleResult();
         } catch (NoResultException | NonUniqueResultException $e) {
-            $entity = null;
-        }
-
-        if ($entity === null) {
-            throw new JsonApiErrorException('The resource does not exist', Response::HTTP_NOT_FOUND);
+            throw new JsonApiErrorException(
+                'The resource does not exist',
+                Response::HTTP_NOT_FOUND,
+                $e
+            );
         }
 
         $response = new JsonApiObject($this->objectParser->getJsonApiArray($entity));
@@ -356,11 +356,11 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 ->getQuery()
                 ->getSingleResult();
         } catch (NoResultException | NonUniqueResultException $e) {
-            $entity = null;
-        }
-
-        if ($entity === null) {
-            throw new JsonApiErrorException('The resource does not exist', Response::HTTP_NOT_FOUND);
+            throw new JsonApiErrorException(
+                'The resource does not exist',
+                Response::HTTP_NOT_FOUND,
+                $e
+            );
         }
 
         try {
@@ -390,11 +390,11 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                     ->getQuery()
                     ->getSingleResult();
             } catch (NoResultException | NonUniqueResultException $e) {
-                $entity = null;
-            }
-
-            if ($entity === null) {
-                throw new JsonApiErrorException('The resource does not exist', Response::HTTP_NOT_FOUND);
+                throw new JsonApiErrorException(
+                    'The resource does not exist',
+                    Response::HTTP_NOT_FOUND,
+                    $e
+                );
             }
 
             $post = $this->getPostData();

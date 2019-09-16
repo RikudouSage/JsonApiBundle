@@ -48,7 +48,7 @@ final class ApiRouter extends AbstractController
             $controller = $resourceLocator->findControllerForResource($resourceName);
             $controller->setResourceName($resourceName);
         } catch (ResourceNotFoundException $e) {
-            throw new JsonApiErrorException('Resource not found', Response::HTTP_NOT_FOUND);
+            throw new JsonApiErrorException('Resource not found', Response::HTTP_NOT_FOUND, $e);
         }
 
         $event = new RouterPreroutingEvent($resourceName, $id, $controller);
