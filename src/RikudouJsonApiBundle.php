@@ -2,11 +2,12 @@
 
 namespace Rikudou\JsonApiBundle;
 
+use Rikudou\JsonApiBundle\DependencyInjection\Compiler\CreateAutomaticEntityControllers;
 use Rikudou\JsonApiBundle\DependencyInjection\Compiler\CreateNameResolutionService;
-use Rikudou\JsonApiBundle\DependencyInjection\Compiler\CreateResourceServices;
 use Rikudou\JsonApiBundle\DependencyInjection\Compiler\FindFilteredQueryBuilder;
 use Rikudou\JsonApiBundle\DependencyInjection\Compiler\PopulateNormalizerLocator;
 use Rikudou\JsonApiBundle\DependencyInjection\Compiler\PopulateResourceLocator;
+use Rikudou\JsonApiBundle\DependencyInjection\Compiler\SetEntityControllerDependencies;
 use Rikudou\JsonApiBundle\Interfaces\ApiControllerInterface;
 use Rikudou\JsonApiBundle\Service\Filter\FilteredQueryBuilderInterface;
 use Rikudou\JsonApiBundle\Service\ObjectParser\Normalizer\ApiObjectNormalizerInterface;
@@ -20,14 +21,30 @@ final class RikudouJsonApiBundle extends Bundle
     {
         parent::build($container);
 
-        $container->registerForAutoconfiguration(ApiControllerInterface::class)->addTag('rikudou_api.api_controller');
-        $container->registerForAutoconfiguration(ApiObjectNormalizerInterface::class)->addTag('rikudou_api.api_normalizer');
-        $container->registerForAutoconfiguration(FilteredQueryBuilderInterface::class)->addTag('rikudou_api.filtered_query_builder');
+        $container->registerForAutoconfiguration(ApiControllerInterface::class)
+            ->addTag('rikudou_api.api_controller');
+        $container->registerForAutoconfiguration(ApiObjectNormalizerInterface::class)
+            ->addTag('rikudou_api.api_normalizer');
+        $container->registerForAutoconfiguration(FilteredQueryBuilderInterface::class)
+            ->addTag('rikudou_api.filtered_query_builder');
 
+        $container->addCompilerPass(
+            new PopulateResourceLocator(),
+            PassConfig::TYPE_BEFORE_OPTIMIZATION,
+            -3
+        );
+        $container->addCompilerPass(
+            new CreateAutomaticEntityControllers(),
+            PassConfig::TYPE_BEFORE_OPTIMIZATION,
+            -2
+        );
+        $container->addCompilerPass(
+            new FindFilteredQueryBuilder(),
+            PassConfig::TYPE_BEFORE_OPTIMIZATION,
+            -1
+        );
+        $container->addCompilerPass(new SetEntityControllerDependencies());
         $container->addCompilerPass(new CreateNameResolutionService());
         $container->addCompilerPass(new PopulateNormalizerLocator());
-        $container->addCompilerPass(new PopulateResourceLocator(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -1);
-        $container->addCompilerPass(new CreateResourceServices());
-        $container->addCompilerPass(new FindFilteredQueryBuilder());
     }
 }

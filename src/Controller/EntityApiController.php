@@ -87,26 +87,6 @@ abstract class EntityApiController extends AbstractController implements ApiCont
      */
     private $urlGenerator;
 
-    public function __construct(
-        FilteredQueryBuilderInterface $filteredQueryBuilder,
-        RequestStack $requestStack,
-        bool $paginationEnabled,
-        int $defaultPerPageLimit,
-        ApiObjectParser $objectParser,
-        EventDispatcherInterface $eventDispatcher,
-        EntityManagerInterface $entityManager,
-        UrlGeneratorInterface $urlGenerator
-    ) {
-        $this->filteredQueryBuilder = $filteredQueryBuilder;
-        $this->requestStack = $requestStack;
-        $this->paginationEnabled = $paginationEnabled;
-        $this->defaultPerPageLimit = $defaultPerPageLimit;
-        $this->objectParser = $objectParser;
-        $this->eventDispatcher = $eventDispatcher;
-        $this->entityManager = $entityManager;
-        $this->urlGenerator = $urlGenerator;
-    }
-
     public function setResourceName(string $resourceName): void
     {
         $this->resourceName = $resourceName;
@@ -465,6 +445,90 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             );
         }
     }
+
+    //////////// CONTAINER ////////////
+
+    /**
+     * @param FilteredQueryBuilderInterface $filteredQueryBuilder
+     *
+     * @internal
+     */
+    public function setFilteredQueryBuilder(FilteredQueryBuilderInterface $filteredQueryBuilder)
+    {
+        $this->filteredQueryBuilder = $filteredQueryBuilder;
+    }
+
+    /**
+     * @param RequestStack $requestStack
+     *
+     * @internal
+     */
+    public function setRequestStack(RequestStack $requestStack)
+    {
+        $this->requestStack = $requestStack;
+    }
+
+    /**
+     * @param bool $paginationEnabled
+     *
+     * @internal
+     */
+    public function setPaginationEnabled(bool $paginationEnabled)
+    {
+        $this->paginationEnabled = $paginationEnabled;
+    }
+
+    /**
+     * @param int $defaultPerPageLimit
+     *
+     * @internal
+     */
+    public function setDefaultPerPageLimit(int $defaultPerPageLimit)
+    {
+        $this->defaultPerPageLimit = $defaultPerPageLimit;
+    }
+
+    /**
+     * @param ApiObjectParser $objectParser
+     *
+     * @internal
+     */
+    public function setObjectParser(ApiObjectParser $objectParser)
+    {
+        $this->objectParser = $objectParser;
+    }
+
+    /**
+     * @param EventDispatcherInterface $eventDispatcher
+     *
+     * @internal
+     */
+    public function setEventDispatcher(EventDispatcherInterface $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
+    /**
+     * @param EntityManagerInterface $entityManager
+     *
+     * @internal
+     */
+    public function setEntityManager(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
+    /**
+     * @param UrlGeneratorInterface $urlGenerator
+     *
+     * @internal
+     */
+    public function setUrlGenerator(UrlGeneratorInterface $urlGenerator)
+    {
+        $this->urlGenerator = $urlGenerator;
+    }
+
+    //////////////// CONTAINER END ////////////////
 
     protected function getFilteredQueryBuilder(bool $useFilter = true, bool $useSort = true): QueryBuilder
     {

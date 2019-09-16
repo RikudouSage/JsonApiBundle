@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-final class CreateResourceServices implements CompilerPassInterface
+final class CreateAutomaticEntityControllers implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {

@@ -18,19 +18,6 @@ services:
     tags:
       - controller.service_arguments
 
-  rikudou_api.controller.entity_base:
-    class: Rikudou\JsonApiBundle\Controller\EntityApiController
-    abstract: true
-    arguments:
-      - '@rikudou_api.query_builder.default'
-      - '@request_stack'
-      - '%rikudou_api.pagination%'
-      - '%rikudou_api.per_page_limit%'
-      - '@rikudou_api.object_parser.parser'
-      - '@event_dispatcher'
-      - '@doctrine.orm.entity_manager'
-      - '@router.default'
-
   rikudou_api.listener.json_api_response:
     class: Rikudou\JsonApiBundle\Listener\JsonApiStructureResponseListener
     tags:
