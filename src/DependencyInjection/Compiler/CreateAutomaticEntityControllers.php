@@ -5,6 +5,7 @@ namespace Rikudou\JsonApiBundle\DependencyInjection\Compiler;
 use Doctrine\Common\Annotations\AnnotationReader;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionException;
 use Rikudou\JsonApiBundle\Annotation\ApiResource;
 use Rikudou\JsonApiBundle\Controller\DefaultEntityApiController;
 use Rikudou\JsonApiBundle\Interfaces\ApiResourceInterface;
@@ -13,6 +14,7 @@ use SplFileInfo;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 
 final class CreateAutomaticEntityControllers implements CompilerPassInterface
 {
@@ -49,7 +51,7 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
 
             try {
                 $class = $reflection->getClass();
-            } catch (\ReflectionException $e) {
+            } catch (ReflectionException $e) {
                 continue;
             }
 
@@ -57,7 +59,7 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
                 $class->implementsInterface(ApiResourceInterface::class)
                 || $annotationReader->getClassAnnotation($class, ApiResource::class)
             ) {
-                $definition = new ChildDefinition('rikudou_api.controller.entity_base');
+                $definition = new Definition();
                 $definition->setClass(DefaultEntityApiController::class);
                 $definition->addMethodCall('setClassName', [$class->getName()]);
                 $definition->addTag('rikudou_api.api_controller');
