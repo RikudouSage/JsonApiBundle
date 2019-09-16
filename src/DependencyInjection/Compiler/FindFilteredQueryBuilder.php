@@ -6,6 +6,7 @@ use Rikudou\JsonApiBundle\Service\Filter\DefaultFilteredQueryBuilder;
 use Rikudou\JsonApiBundle\Service\Filter\FilteredQueryBuilderInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
 
 final class FindFilteredQueryBuilder implements CompilerPassInterface
 {
@@ -29,6 +30,16 @@ final class FindFilteredQueryBuilder implements CompilerPassInterface
         if ($resultingBuilder === null) {
             $resultingBuilder = 'rikudou_api.query_builder.default';
         }
+
+        $definition = $container->getDefinition($resultingBuilder);
+        $definition->addMethodCall(
+            'setEntityManager',
+            [new Reference('doctrine.orm.entity_manager')]
+        );
+        $definition->addMethodCall(
+            'setPropertyParser',
+            [new Reference('rikudou_api.object_parser.property_parser')]
+        );
 
         $container->setAlias(FilteredQueryBuilderInterface::class, (string) $resultingBuilder);
     }

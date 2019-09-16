@@ -28,12 +28,6 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
      */
     private $propertyParser;
 
-    public function __construct(EntityManagerInterface $entityManager, ApiPropertyParser $propertyParser)
-    {
-        $this->entityManager = $entityManager;
-        $this->propertyParser = $propertyParser;
-    }
-
     /**
      * @param string       $class
      * @param ParameterBag $queryParams
@@ -113,5 +107,27 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
         }
 
         return $builder;
+    }
+
+    ////////////// CONTAINER //////////////
+
+    /**
+     * @param EntityManagerInterface $entityManager
+     *
+     * @internal
+     */
+    public function setEntityManager(EntityManagerInterface $entityManager): void
+    {
+        $this->entityManager = $entityManager;
+    }
+
+    /**
+     * @param ApiPropertyParser $propertyParser
+     *
+     * @internal
+     */
+    public function setPropertyParser(ApiPropertyParser $propertyParser): void
+    {
+        $this->propertyParser = $propertyParser;
     }
 }
