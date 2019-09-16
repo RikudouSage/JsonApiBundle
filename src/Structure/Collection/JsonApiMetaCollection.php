@@ -4,8 +4,8 @@ namespace Rikudou\JsonApiBundle\Structure\Collection;
 
 use function array_merge;
 use JsonSerializable;
+use Rikudou\JsonApiBundle\Structure\EmptyObject;
 use Rikudou\JsonApiBundle\Structure\JsonApiMeta;
-use stdClass;
 
 /**
  * @method JsonApiMeta current()
@@ -21,7 +21,7 @@ final class JsonApiMetaCollection extends AbstractCollection implements JsonSeri
             'meta' => [],
         ];
         if (!$this->count()) {
-            $result['meta'] = new stdClass();
+            $result['meta'] = new EmptyObject();
         } else {
             /** @var JsonApiMeta $meta */
             foreach ($this->data as $meta) {

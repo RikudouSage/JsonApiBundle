@@ -4,8 +4,8 @@ namespace Rikudou\JsonApiBundle\Structure\Collection;
 
 use function array_merge;
 use JsonSerializable;
+use Rikudou\JsonApiBundle\Structure\EmptyObject;
 use Rikudou\JsonApiBundle\Structure\JsonApiRelationship;
-use stdClass;
 
 /**
  * @method JsonApiRelationship current()
@@ -21,7 +21,7 @@ final class JsonApiRelationshipCollection extends AbstractCollection implements 
             'relationships' => [],
         ];
         if (!$this->count()) {
-            $result['relationships'] = new stdClass();
+            $result['relationships'] = new EmptyObject();
         } else {
             /** @var JsonApiRelationship $relationship */
             foreach ($this->data as $relationship) {

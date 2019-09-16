@@ -173,7 +173,7 @@ final class JsonApiObject implements JsonSerializable
 
     public function jsonSerialize()
     {
-        return array_merge(
+        $result = array_merge(
             [
                 'id' => $this->id,
                 'type' => $this->type,
@@ -183,6 +183,15 @@ final class JsonApiObject implements JsonSerializable
             $this->meta->jsonSerialize(),
             $this->links->jsonSerialize()
         );
+
+        if (!count($result['meta'])) {
+            unset($result['meta']);
+        }
+        if (!count($result['links'])) {
+            unset($result['links']);
+        }
+
+        return $result;
     }
 
     private function parse(array $json)
