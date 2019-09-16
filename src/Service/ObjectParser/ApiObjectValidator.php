@@ -87,6 +87,6 @@ final class ApiObjectValidator implements ServiceSubscriberInterface
 
     private function getEntityManager(): EntityManagerInterface
     {
-        return $this->container->get('entity_manager');
+        return $this->container->get('doctrine.orm.entity_manager');
     }
 }
