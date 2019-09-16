@@ -28,10 +28,13 @@ final class RikudouJsonApiBundle extends Bundle
         $container->registerForAutoconfiguration(FilteredQueryBuilderInterface::class)
             ->addTag('rikudou_api.filtered_query_builder');
 
+        $container->addCompilerPass(new CreateNameResolutionService());
+        $container->addCompilerPass(new PopulateNormalizerLocator());
+
         $container->addCompilerPass(
-            new PopulateResourceLocator(),
+            new FindFilteredQueryBuilder(),
             PassConfig::TYPE_BEFORE_OPTIMIZATION,
-            -3
+            -1
         );
         $container->addCompilerPass(
             new CreateAutomaticEntityControllers(),
@@ -39,12 +42,14 @@ final class RikudouJsonApiBundle extends Bundle
             -2
         );
         $container->addCompilerPass(
-            new FindFilteredQueryBuilder(),
+            new SetEntityControllerDependencies(),
             PassConfig::TYPE_BEFORE_OPTIMIZATION,
-            -1
+            -3
         );
-        $container->addCompilerPass(new SetEntityControllerDependencies());
-        $container->addCompilerPass(new CreateNameResolutionService());
-        $container->addCompilerPass(new PopulateNormalizerLocator());
+        $container->addCompilerPass(
+            new PopulateResourceLocator(),
+            PassConfig::TYPE_BEFORE_OPTIMIZATION,
+            -4
+        );
     }
 }
