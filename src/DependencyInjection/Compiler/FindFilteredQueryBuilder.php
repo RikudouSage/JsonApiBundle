@@ -31,7 +31,7 @@ final class FindFilteredQueryBuilder implements CompilerPassInterface
             $resultingBuilder = 'rikudou_api.query_builder.default';
         }
 
-        $definition = $container->getDefinition($resultingBuilder);
+        $definition = $container->getDefinition((string) $resultingBuilder);
         $definition->addMethodCall(
             'setEntityManager',
             [new Reference('doctrine.orm.entity_manager')]

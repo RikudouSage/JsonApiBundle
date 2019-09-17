@@ -49,11 +49,13 @@ final class JsonApiRelationship implements JsonSerializable
                 $data[] = $datum->jsonSerialize();
             }
         } else {
-            $data = [];
+            $data = null;
         }
 
         return [
-            $this->name => $data,
+            $this->name => [
+                'data' => $data,
+            ],
         ];
     }
 
