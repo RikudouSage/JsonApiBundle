@@ -17,7 +17,7 @@ final class InvalidApiPropertyConfig extends InvalidArgumentException
 
     public function __construct(string $type, ?string $propertyName = null, Throwable $previous = null)
     {
-        $message = "The api property config is invalid, the method '{$type}' does not exist.";
+        $message = "The api property config is invalid, the property {$type} does not exist.";
         if ($propertyName !== null) {
             $message .= " Property name: {$propertyName}.";
         }
