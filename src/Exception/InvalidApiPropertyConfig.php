@@ -21,7 +21,7 @@ final class InvalidApiPropertyConfig extends InvalidArgumentException
         if ($propertyName !== null) {
             $message .= " (property '{$propertyName}')";
         }
-        $message .= ".";
+        $message .= '.';
         parent::__construct($message, 0, $previous);
     }
 }

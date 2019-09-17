@@ -51,11 +51,29 @@ final class ApiResourceLocator
         $this->populateMap();
 
         if (!isset($this->map[$resourceName])) {
-            if (isset($this->map[Inflector::pluralize($resourceName)])) {
-                $resourceName = Inflector::pluralize($resourceName);
-            } elseif (isset($this->map[Inflector::singularize($resourceName)])) {
-                $resourceName = Inflector::singularize($resourceName);
-            } else {
+            $found = false;
+
+            $plural = Inflector::pluralize($resourceName);
+            $singular = Inflector::singularize($resourceName);
+
+            if (!is_array($plural)) {
+                $plural = [$plural];
+            }
+            if (!is_array($singular)) {
+                $singular = [$singular];
+            }
+
+            $result = array_merge($plural, $singular);
+
+            foreach ($result as $word) {
+                if (isset($this->map[$word])) {
+                    $resourceName = $word;
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found) {
                 throw new ResourceNotFoundException($resourceName);
             }
         }
