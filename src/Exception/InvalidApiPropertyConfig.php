@@ -17,10 +17,11 @@ final class InvalidApiPropertyConfig extends InvalidArgumentException
 
     public function __construct(string $type, ?string $propertyName = null, Throwable $previous = null)
     {
-        $message = "The api property config is invalid, the property {$type} does not exist.";
+        $message = "Invalid api property {$type}";
         if ($propertyName !== null) {
-            $message .= " Property name: {$propertyName}.";
+            $message .= " (property '{$propertyName}')";
         }
+        $message .= ".";
         parent::__construct($message, 0, $previous);
     }
 }
