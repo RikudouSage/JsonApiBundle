@@ -194,16 +194,28 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
         }
 
         if ($getter !== null && !$class->hasMethod($getter)) {
-            throw new InvalidApiPropertyConfig(InvalidApiPropertyConfig::TYPE_GETTER);
+            throw new InvalidApiPropertyConfig(
+                InvalidApiPropertyConfig::TYPE_GETTER,
+                $property->getName()
+            );
         }
         if ($setter !== null && !$class->hasMethod($setter)) {
-            throw new InvalidApiPropertyConfig(InvalidApiPropertyConfig::TYPE_SETTER);
+            throw new InvalidApiPropertyConfig(
+                InvalidApiPropertyConfig::TYPE_SETTER,
+                $property->getName()
+            );
         }
         if ($adder !== null && !$class->hasMethod($adder)) {
-            throw new InvalidApiPropertyConfig(InvalidApiPropertyConfig::TYPE_ADDER);
+            throw new InvalidApiPropertyConfig(
+                InvalidApiPropertyConfig::TYPE_ADDER,
+                $property->getName()
+            );
         }
         if ($remover !== null && !$class->hasMethod($remover)) {
-            throw new InvalidApiPropertyConfig(InvalidApiPropertyConfig::TYPE_REMOVER);
+            throw new InvalidApiPropertyConfig(
+                InvalidApiPropertyConfig::TYPE_REMOVER,
+                $property->getName()
+            );
         }
 
         if ($getter === null) {
@@ -219,7 +231,10 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
                 }
             }
             if ($getter === null) {
-                throw new InvalidApiPropertyConfig(InvalidApiPropertyConfig::TYPE_GETTER);
+                throw new InvalidApiPropertyConfig(
+                    InvalidApiPropertyConfig::TYPE_GETTER,
+                    $property->getName()
+                );
             }
         }
 
