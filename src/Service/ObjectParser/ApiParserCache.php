@@ -60,7 +60,9 @@ final class ApiParserCache
         $this->objectValidator->throwOnInvalidObject($object);
 
         try {
-            return $this->cacheAdapter->getItem($this->getCacheName($object, 'ResourceObject'));
+            return $this->cacheAdapter->getItem(
+                $this->getCacheName($object, 'ResourceObject', false)
+            );
         } catch (InvalidArgumentException $e) {
             throw new ExceptionThatShouldntHappen($e);
         }
@@ -74,13 +76,13 @@ final class ApiParserCache
         $this->cacheAdapter->save($cacheItem);
     }
 
-    private function getCacheName($object, ?string $postfix = null): string
+    private function getCacheName($object, ?string $postfix = null, bool $includeId = true): string
     {
         assert(method_exists($object, 'getId'));
         $name = sprintf(
             'ApiObjectParserCache_%s_%s',
             $this->objectValidator->getRealClass($object),
-            $object->getId()
+            $includeId ? $object->getId() : ''
         );
         if ($postfix) {
             $name .= "_{$postfix}";

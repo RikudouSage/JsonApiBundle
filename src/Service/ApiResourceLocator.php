@@ -3,8 +3,8 @@
 namespace Rikudou\JsonApiBundle\Service;
 
 use ArgumentCountError;
-use ReflectionClass;
 use function count;
+use ReflectionClass;
 use Rikudou\JsonApiBundle\Exception\ResourceNotFoundException;
 use Rikudou\JsonApiBundle\Interfaces\ApiControllerInterface;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectParser;
@@ -107,6 +107,7 @@ final class ApiResourceLocator
         if (!count($this->map)) {
             foreach ($this->controllers as $controller) {
                 $className = $controller->getClass();
+
                 try {
                     $this->map[$this->objectParser->getResourceName(new $className)] = $controller;
                 } catch (ArgumentCountError $error) {
