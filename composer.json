@@ -20,8 +20,7 @@
         "symfony/inflector": "^4.3",
         "symfony/orm-pack": "^1.0",
         "rikudou/reflection-file": "^1.2.2",
-        "rikudou/array-merge-recursive": "^1.0",
-        "rikudou/installer": "^2.2"
+        "rikudou/array-merge-recursive": "^1.0"
     },
     "autoload": {
         "psr-4": {
