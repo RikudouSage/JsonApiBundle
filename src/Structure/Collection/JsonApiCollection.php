@@ -95,7 +95,7 @@ final class JsonApiCollection implements JsonSerializable
         );
 
         foreach ($this->data as $apiObject) {
-            $result['data'][] = $apiObject->jsonSerialize();
+            $result['data'][] = $apiObject->jsonSerialize()['data'];
         }
 
         return $result;

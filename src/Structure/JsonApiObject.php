@@ -191,7 +191,7 @@ final class JsonApiObject implements JsonSerializable
             unset($result['links']);
         }
 
-        return $result;
+        return ['data' => $result];
     }
 
     private function parse(array $json)
