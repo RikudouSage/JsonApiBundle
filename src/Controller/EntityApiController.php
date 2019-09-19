@@ -558,7 +558,9 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         if ($request === null) {
             throw new RuntimeException('The request cannot be null');
         }
-        if (fnmatch('application/*json*', (string) $request->getContentType())) {
+        /** @var string $contentType */
+        $contentType = $request->headers->get('Content-Type');
+        if (fnmatch('application/*json*', $contentType)) {
             /** @var string $body */
             $body = $request->getContent();
             /** @var array $data */
