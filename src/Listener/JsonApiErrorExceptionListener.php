@@ -3,6 +3,7 @@
 namespace Rikudou\JsonApiBundle\Listener;
 
 use function is_array;
+use Rikudou\JsonApiBundle\Exception\InvalidJsonApiArrayException;
 use Rikudou\JsonApiBundle\Exception\JsonApiErrorException;
 use Rikudou\JsonApiBundle\Response\JsonApiResponse;
 use Rikudou\JsonApiBundle\Structure\Collection\JsonApiErrorCollection;
@@ -37,6 +38,12 @@ final class JsonApiErrorExceptionListener implements EventSubscriberInterface
         if ($exception instanceof JsonApiErrorException) {
             if (!$this->enabled) {
                 if ($previous = $exception->getPrevious()) {
+                    if (
+                        $previous instanceof InvalidJsonApiArrayException
+                        && $previous->getPrevious() !== null
+                    ) {
+                        $previous = $previous->getPrevious();
+                    }
                     throw $previous;
                 }
 
