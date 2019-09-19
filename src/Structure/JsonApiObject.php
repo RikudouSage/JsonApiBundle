@@ -190,6 +190,9 @@ final class JsonApiObject implements JsonSerializable
         if (!count($result['links'])) {
             unset($result['links']);
         }
+        if (!count($result['relationships'])) {
+            unset($result['relationships']);
+        }
 
         return ['data' => $result];
     }
