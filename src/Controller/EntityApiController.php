@@ -16,8 +16,10 @@ use LogicException;
 use function min;
 use ReflectionException;
 use function Rikudou\ArrayMergeRecursive\array_merge_recursive;
+use Rikudou\JsonApiBundle\ApiEntityEvents;
 use Rikudou\JsonApiBundle\ApiEvents;
 use Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent;
+use Rikudou\JsonApiBundle\Events\EntityPreCreateEvent;
 use Rikudou\JsonApiBundle\Exception\JsonApiErrorException;
 use Rikudou\JsonApiBundle\Interfaces\ApiControllerInterface;
 use Rikudou\JsonApiBundle\Interfaces\ApiResourceInterface;
@@ -279,6 +281,12 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             if (!is_a($entity, $this->getClass(), true)) {
                 throw new UnexpectedValueException("The parsed entity tree does not translate to type '{$this->getClass()}'");
             }
+
+            $event = new EntityPreCreateEvent($entity);
+            /** @noinspection PhpMethodParametersCountMismatchInspection */
+            $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_CREATE);
+            $entity = $event->getEntity();
+            assert(method_exists($entity, 'getId'));
 
             $this->entityManager->persist($entity);
             $this->entityManager->flush();
