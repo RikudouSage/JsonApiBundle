@@ -7,6 +7,14 @@ services:
     arguments:
       - '@rikudou_api.name_resolution.camel_case'
 
+  rikudou_api.cache.clear:
+    class: Rikudou\JsonApiBundle\Service\Cache\CacheClearHook
+    arguments:
+      - '%rikudou_api.clear_cache_hook%'
+      - '@cache.api_annotations'
+    tags:
+      - kernel.cache_clearer
+
   rikudou_api.query_builder.default:
     class: Rikudou\JsonApiBundle\Service\Filter\DefaultFilteredQueryBuilder
     arguments:
@@ -20,14 +28,6 @@ services:
 
   rikudou_api.listener.json_api_response:
     class: Rikudou\JsonApiBundle\Listener\JsonApiStructureResponseListener
-    tags:
-      - kernel.event_subscriber
-
-  rikudou_api.listener.cache_clear_listener:
-    class: Rikudou\JsonApiBundle\Listener\CacheClearHookListener
-    arguments:
-      - '%rikudou_api.clear_cache_hook%'
-      - '@cache.api_annotations'
     tags:
       - kernel.event_subscriber
 

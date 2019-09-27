@@ -35,7 +35,7 @@ final class Configuration implements ConfigurationInterface
                     ->defaultValue('/api')
                 ->end()
                 ->booleanNode('clear_cache_hook')
-                    ->info('Whether the bundle should hook into cache:clear command to clear the api cache')
+                    ->info('Whether the bundle should hook into cache clearing process to clear the api cache')
                     ->defaultTrue()
                 ->end()
                 ->booleanNode('property_cache_enabled')
