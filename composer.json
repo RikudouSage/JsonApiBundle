@@ -18,7 +18,6 @@
         "doctrine/annotations": "^1.7",
         "symfony/cache": "^4.3",
         "symfony/inflector": "^4.3",
-        "symfony/orm-pack": "^1.0",
         "rikudou/reflection-file": "^1.2.2",
         "rikudou/array-merge-recursive": "^1.0"
     },
@@ -29,7 +28,11 @@
     },
     "require-dev": {
         "phpstan/phpstan": "^0.11.15",
-        "friendsofphp/php-cs-fixer": "^2.15"
+        "friendsofphp/php-cs-fixer": "^2.15",
+        "symfony/orm-pack": "^1.0"
+    },
+    "suggest": {
+        "symfony/orm-pack": "To use the api bundle with Doctrine entities"
     },
     "scripts": {
         "fixer": "php-cs-fixer fix src --verbose --allow-risky=yes",
