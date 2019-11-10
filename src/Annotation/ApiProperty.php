@@ -6,7 +6,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * @Annotation
- * @Target("PROPERTY", "METHOD")
+ * @Target({"PROPERTY", "METHOD"})
  */
 final class ApiProperty
 {
