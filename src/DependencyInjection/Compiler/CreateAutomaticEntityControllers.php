@@ -28,54 +28,59 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
         if (!$container->getParameter('rikudou_api.auto_discover_resources')) {
             return;
         }
-        /** @var string $directory */
-        $directory = $container->getParameter('kernel.project_dir');
+        /** @var array $directories */
+        $directories = $container->getParameter('rikudou_api.auto_discover_paths');
+        if (!is_countable($directories) || !count($directories)) {
+            $directories = [$container->getParameter('kernel.project_dir')];
+        }
 
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($directory)
-        );
+        foreach ($directories as $directory) {
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($directory)
+            );
 
-        $annotationReader = new AnnotationReader();
+            $annotationReader = new AnnotationReader();
 
-        /** @var SplFileInfo $file */
-        foreach ($iterator as $file) {
-            if (!$file->isFile()) {
-                continue;
-            }
-            if ($file->getExtension() !== 'php') {
-                continue;
-            }
-            if (!$path = $file->getRealPath()) {
-                continue;
-            }
+            /** @var SplFileInfo $file */
+            foreach ($iterator as $file) {
+                if (!$file->isFile()) {
+                    continue;
+                }
+                if ($file->getExtension() !== 'php') {
+                    continue;
+                }
+                if (!$path = $file->getRealPath()) {
+                    continue;
+                }
 
-            $reflection = new ReflectionFile($path);
-            if (!$reflection->containsClass()) {
-                continue;
-            }
+                $reflection = new ReflectionFile($path);
+                if (!$reflection->containsClass()) {
+                    continue;
+                }
 
-            try {
-                $class = $reflection->getClass();
-            } catch (ReflectionException | Error $e) {
-                continue;
-            }
+                try {
+                    $class = $reflection->getClass();
+                } catch (ReflectionException | Error $e) {
+                    continue;
+                }
 
-            if (in_array($class->getName(), self::IGNORED_CLASSES)) {
-                continue;
-            }
+                if (in_array($class->getName(), self::IGNORED_CLASSES)) {
+                    continue;
+                }
 
-            if (
-                $class->implementsInterface(ApiResourceInterface::class)
-                || $annotationReader->getClassAnnotation($class, ApiResource::class)
-            ) {
-                $definition = new Definition();
-                $definition->setClass(DefaultEntityApiController::class);
-                $definition->addMethodCall('setClassName', [$class->getName()]);
-                $definition->addTag('rikudou_api.api_controller');
-                $definition->addTag('controller.service_arguments');
-                $definition->setPublic(true);
+                if (
+                    $class->implementsInterface(ApiResourceInterface::class)
+                    || $annotationReader->getClassAnnotation($class, ApiResource::class)
+                ) {
+                    $definition = new Definition();
+                    $definition->setClass(DefaultEntityApiController::class);
+                    $definition->addMethodCall('setClassName', [$class->getName()]);
+                    $definition->addTag('rikudou_api.api_controller');
+                    $definition->addTag('controller.service_arguments');
+                    $definition->setPublic(true);
 
-                $container->setDefinition("rikudou.api_controller.default.{$class->getName()}", $definition);
+                    $container->setDefinition("rikudou.api_controller.default.{$class->getName()}", $definition);
+                }
             }
         }
     }
