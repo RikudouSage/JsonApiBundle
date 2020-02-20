@@ -3,6 +3,7 @@
 namespace Rikudou\JsonApiBundle\DependencyInjection\Compiler;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use Error;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionException;
@@ -50,7 +51,7 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
 
             try {
                 $class = $reflection->getClass();
-            } catch (ReflectionException $e) {
+            } catch (ReflectionException | Error $e) {
                 continue;
             }
 
