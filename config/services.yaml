@@ -25,6 +25,7 @@ services:
     class: Rikudou\JsonApiBundle\Controller\ApiRouter
     tags:
       - controller.service_arguments
+      - container.service_subscriber
 
   rikudou_api.listener.json_api_response:
     class: Rikudou\JsonApiBundle\Listener\JsonApiStructureResponseListener
