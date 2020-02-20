@@ -30,6 +30,11 @@ final class Configuration implements ConfigurationInterface
         $rootNode
             ->addDefaultsIfNotSet()
             ->children()
+                ->arrayNode('auto_discover_paths')
+                    ->scalarPrototype()
+                        ->defaultValue('%kernel.project_dir%')
+                    ->end()
+                ->end()
                 ->scalarNode('api_prefix')
                     ->info('The route prefix used with default routing file')
                     ->defaultValue('/api')
