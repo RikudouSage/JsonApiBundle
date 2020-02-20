@@ -23,7 +23,7 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
             return;
         }
         /** @var string $directory */
-        $directory = $container->getParameter('kernel.root_dir');
+        $directory = $container->getParameter('kernel.project_dir');
 
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($directory)
