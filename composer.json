@@ -11,13 +11,13 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "symfony/framework-bundle": "^4.3",
-        "symfony/yaml": "^4.3",
+        "symfony/framework-bundle": "^4.3 | ^5.0",
+        "symfony/yaml": "^4.3 | ^5.0",
         "php": "^7.1",
         "ext-json": "*",
         "doctrine/annotations": "^1.7",
-        "symfony/cache": "^4.3",
-        "symfony/inflector": "^4.3",
+        "symfony/cache": "^4.3 | ^5.0",
+        "symfony/inflector": "^4.3 | ^5.0",
         "rikudou/reflection-file": "^1.2.2",
         "rikudou/array-merge-recursive": "^1.0",
         "symfony/orm-pack": "^1.0"
