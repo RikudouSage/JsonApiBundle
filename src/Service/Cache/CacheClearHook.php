@@ -5,12 +5,13 @@ namespace Rikudou\JsonApiBundle\Service\Cache;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\HttpKernel\CacheClearer\CacheClearerInterface;
 
-class CacheClearHook implements CacheClearerInterface
+final class CacheClearHook implements CacheClearerInterface
 {
     /**
      * @var bool
      */
     private $enabled;
+
     /**
      * @var AdapterInterface
      */

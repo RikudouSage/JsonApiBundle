@@ -15,9 +15,14 @@ use SplFileInfo;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\Routing\Loader\AnnotationClassLoader;
 
 final class CreateAutomaticEntityControllers implements CompilerPassInterface
 {
+    private const IGNORED_CLASSES = [
+        AnnotationClassLoader::class,
+    ];
+
     public function process(ContainerBuilder $container)
     {
         if (!$container->getParameter('rikudou_api.auto_discover_resources')) {
@@ -52,6 +57,10 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
             try {
                 $class = $reflection->getClass();
             } catch (ReflectionException | Error $e) {
+                continue;
+            }
+
+            if (in_array($class->getName(), self::IGNORED_CLASSES)) {
                 continue;
             }
 
