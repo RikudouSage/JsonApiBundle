@@ -32,8 +32,6 @@ final class Configuration implements ConfigurationInterface
             ->children()
                 ->arrayNode('auto_discover_paths')
                     ->info('The paths to scan for auto discovered endpoints')
-                    ->useAttributeAsKey('dir')
-                    ->addDefaultChildrenIfNoneSet(['%kernel.project_dir%'])
                     ->scalarPrototype()->end()
                 ->end()
                 ->scalarNode('api_prefix')
