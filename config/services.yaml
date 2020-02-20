@@ -23,6 +23,10 @@ services:
 
   rikudou_api.controller.api_router:
     class: Rikudou\JsonApiBundle\Controller\ApiRouter
+    calls:
+      - method: setContainer
+        arguments:
+          - '@service_container'
     tags:
       - controller.service_arguments
       - container.service_subscriber
