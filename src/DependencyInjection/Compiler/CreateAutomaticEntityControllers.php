@@ -15,6 +15,7 @@ use SplFileInfo;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Routing\Loader\AnnotationClassLoader;
 
 final class CreateAutomaticEntityControllers implements CompilerPassInterface
@@ -75,8 +76,10 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
                     $definition = new Definition();
                     $definition->setClass(DefaultEntityApiController::class);
                     $definition->addMethodCall('setClassName', [$class->getName()]);
+                    $definition->addMethodCall('setContainer', [new Reference('service_container')]);
                     $definition->addTag('rikudou_api.api_controller');
                     $definition->addTag('controller.service_arguments');
+                    $definition->addTag('container.service_subscriber');
                     $definition->setPublic(true);
 
                     $container->setDefinition("rikudou.api_controller.default.{$class->getName()}", $definition);
