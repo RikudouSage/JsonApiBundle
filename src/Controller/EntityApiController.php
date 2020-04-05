@@ -367,6 +367,10 @@ abstract class EntityApiController extends AbstractController implements ApiCont
 
     public function updateItem($id)
     {
+        if (is_string($id) && is_numeric($id) && strval(intval($id)) === $id) {
+            $id = (int) $id;
+        }
+
         try {
             try {
                 /** @var ApiResourceInterface $entity */
