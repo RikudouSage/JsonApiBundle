@@ -11,6 +11,7 @@ use Rikudou\JsonApiBundle\Annotation\ApiResource;
 use Rikudou\JsonApiBundle\Controller\DefaultEntityApiController;
 use Rikudou\JsonApiBundle\Interfaces\ApiResourceInterface;
 use Rikudou\ReflectionFile;
+use RuntimeException;
 use SplFileInfo;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -61,7 +62,7 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
 
                 try {
                     $class = $reflection->getClass();
-                } catch (ReflectionException | Error $e) {
+                } catch (ReflectionException | Error | RuntimeException $e) {
                     continue;
                 }
 
