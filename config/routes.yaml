@@ -1,0 +1,9 @@
+rikudou_json_api.router:
+  path: '%rikudou_api.api_prefix%/{resourceName}/{id}'
+  controller: rikudou_api.controller.api_router::router
+  defaults:
+    id: ~
+
+rikudou_json_api.home:
+  path: '%rikudou_api.api_prefix%'
+  controller: rikudou_api.controller.api_router::home
