@@ -82,10 +82,11 @@ namespace PHPSTORM_META {
     );
     registerArgumentsSet(
         'event_response_types',
-        \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::TYPE_GET_COLLECTION,
-        \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::TYPE_GET_ITEM,
-        \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::TYPE_UPDATE_ITEM,
-        \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::TYPE_CREATE_ITEM
+        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::TYPE_GET_COLLECTION,
+        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::TYPE_GET_ITEM,
+        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::TYPE_UPDATE_ITEM,
+        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::TYPE_CREATE_ITEM,
+        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::TYPE_DELETE_ITEM
     );
     registerArgumentsSet(
         'api_accessor_type',
@@ -109,12 +110,12 @@ namespace PHPSTORM_META {
         argumentsSet('status_codes')
     );
     expectedArguments(
-        \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::__construct(),
+        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::__construct(),
         1,
         argumentsSet('event_response_types')
     );
     expectedReturnValues(
-        \Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent::getResponseType(),
+        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::getResponseType(),
         argumentsSet('event_response_type')
     );
     expectedArguments(

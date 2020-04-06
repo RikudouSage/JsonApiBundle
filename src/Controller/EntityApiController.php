@@ -18,7 +18,7 @@ use ReflectionException;
 use function Rikudou\ArrayMergeRecursive\array_merge_recursive;
 use Rikudou\JsonApiBundle\ApiEntityEvents;
 use Rikudou\JsonApiBundle\ApiEvents;
-use Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent;
+use Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent;
 use Rikudou\JsonApiBundle\Events\EntityPreCreateEvent;
 use Rikudou\JsonApiBundle\Exception\JsonApiErrorException;
 use Rikudou\JsonApiBundle\Interfaces\ApiControllerInterface;
@@ -188,15 +188,15 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             }
         }
 
-        $event = new ApiResponseCreatedEvent(
+        $event = new EntityApiResponseCreatedEvent(
             $response,
-            ApiResponseCreatedEvent::TYPE_GET_COLLECTION,
+            EntityApiResponseCreatedEvent::TYPE_GET_COLLECTION,
             $this->resourceName,
             $this->getClass()
         );
 
         /** @noinspection PhpMethodParametersCountMismatchInspection */
-        $this->eventDispatcher->dispatch($event, ApiEvents::PRE_RESPONSE);
+        $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
 
         $response = $event->getData();
         if (!$response instanceof JsonApiCollection) {
@@ -235,15 +235,15 @@ abstract class EntityApiController extends AbstractController implements ApiCont
 
         $response = new JsonApiObject($this->objectParser->getJsonApiArray($entity));
 
-        $event = new ApiResponseCreatedEvent(
+        $event = new EntityApiResponseCreatedEvent(
             $response,
-            ApiResponseCreatedEvent::TYPE_GET_ITEM,
+            EntityApiResponseCreatedEvent::TYPE_GET_ITEM,
             $this->resourceName,
             $this->getClass()
         );
 
         /** @noinspection PhpMethodParametersCountMismatchInspection */
-        $this->eventDispatcher->dispatch($event, ApiEvents::PRE_RESPONSE);
+        $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
         $response = $event->getData();
 
         if (!$response instanceof JsonApiObject) {
@@ -300,15 +300,15 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 'id' => $entity->getId(),
             ]));
 
-            $event = new ApiResponseCreatedEvent(
+            $event = new EntityApiResponseCreatedEvent(
                 $jsonApiObject,
-                ApiResponseCreatedEvent::TYPE_CREATE_ITEM,
+                EntityApiResponseCreatedEvent::TYPE_CREATE_ITEM,
                 $this->resourceName,
                 $this->getClass()
             );
 
             /** @noinspection PhpMethodParametersCountMismatchInspection */
-            $this->eventDispatcher->dispatch($event, ApiEvents::PRE_RESPONSE);
+            $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
             $jsonApiObject = $event->getData();
 
             return $response->setContent($jsonApiObject);
@@ -333,7 +333,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         }
     }
 
-    public function deleteItem($id): Response
+    public function deleteItem($id)
     {
         try {
             $entity = $this
@@ -355,7 +355,21 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             $this->entityManager->remove($entity);
             $this->entityManager->flush();
 
-            return new JsonApiResponse(null, Response::HTTP_NO_CONTENT);
+            $event = new EntityApiResponseCreatedEvent(
+                null,
+                EntityApiResponseCreatedEvent::TYPE_DELETE_ITEM,
+                $this->resourceName,
+                $this->getClass()
+            );
+            /** @noinspection PhpMethodParametersCountMismatchInspection */
+            $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
+
+            $response = $event->getData();
+            if ($response === null) {
+                return new JsonApiResponse(null, Response::HTTP_NO_CONTENT);
+            }
+
+            return $response;
         } catch (ORMException $e) {
             throw new JsonApiErrorException(
                 'Internal server error',
@@ -424,15 +438,15 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 $response = new JsonApiObject($this->objectParser->getJsonApiArray($updatedEntity));
             }
 
-            $event = new ApiResponseCreatedEvent(
+            $event = new EntityApiResponseCreatedEvent(
                 $response,
-                ApiResponseCreatedEvent::TYPE_UPDATE_ITEM,
+                EntityApiResponseCreatedEvent::TYPE_UPDATE_ITEM,
                 $this->resourceName,
                 $this->getClass()
             );
 
             /** @noinspection PhpMethodParametersCountMismatchInspection */
-            $this->eventDispatcher->dispatch($event, ApiEvents::PRE_RESPONSE);
+            $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
             /** @var JsonApiObject $response */
             $response = $event->getData();
 

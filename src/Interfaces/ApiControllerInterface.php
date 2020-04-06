@@ -44,9 +44,9 @@ interface ApiControllerInterface
      *
      * @param string|int $id
      *
-     * @return Response
+     * @return Response|JsonApiResponse
      */
-    public function deleteItem($id): Response;
+    public function deleteItem($id);
 
     /**
      * Updates the item with given id

@@ -6,7 +6,7 @@ use Rikudou\JsonApiBundle\Structure\Collection\JsonApiCollection;
 use Rikudou\JsonApiBundle\Structure\JsonApiObject;
 use Symfony\Contracts\EventDispatcher\Event;
 
-final class ApiResponseCreatedEvent extends Event
+final class EntityApiResponseCreatedEvent extends Event
 {
     public const TYPE_GET_ITEM = 'get_item';
 
@@ -16,8 +16,10 @@ final class ApiResponseCreatedEvent extends Event
 
     public const TYPE_CREATE_ITEM = 'create_item';
 
+    public const TYPE_DELETE_ITEM = 'delete_item';
+
     /**
-     * @var JsonApiCollection|JsonApiObject
+     * @var JsonApiCollection|JsonApiObject|null
      */
     private $data;
 
@@ -37,7 +39,7 @@ final class ApiResponseCreatedEvent extends Event
     private $apiResourceClass;
 
     /**
-     * @param JsonApiObject|JsonApiCollection $data
+     * @param JsonApiObject|JsonApiCollection|null $data
      * @param string                          $responseType
      * @param string                          $apiResource
      * @param string                          $apiResourceClass
@@ -51,7 +53,7 @@ final class ApiResponseCreatedEvent extends Event
     }
 
     /**
-     * @return JsonApiCollection|JsonApiObject
+     * @return JsonApiCollection|JsonApiObject|null
      */
     public function getData()
     {
@@ -85,7 +87,7 @@ final class ApiResponseCreatedEvent extends Event
     /**
      * @param JsonApiCollection|JsonApiObject $data
      *
-     * @return ApiResponseCreatedEvent
+     * @return EntityApiResponseCreatedEvent
      */
     public function setData($data)
     {
