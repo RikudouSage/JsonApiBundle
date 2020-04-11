@@ -103,7 +103,8 @@ final class JsonApiCollection implements JsonSerializable
         $result = array_merge(
             $this->meta->jsonSerialize() ?: [],
             $this->links->jsonSerialize() ?: [],
-            ['data' => []]
+            ['data' => []],
+            $this->includes->jsonSerialize() ?: [],
         );
 
         foreach ($this->data as $apiObject) {

@@ -201,8 +201,8 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                             }
 
                             foreach ($relationshipData as $relationshipDatum) {
-                                $includeResponse = json_decode($this->forward('rikudou_json_api.router', [
-                                    'resourceName' => $relationship->getName(),
+                                $includeResponse = json_decode($this->forward('rikudou_api.controller.api_router::router', [
+                                    'resourceName' => $relationshipDatum->getType(),
                                     'id' => $relationshipDatum->getId(),
                                 ])->getContent(), true)['data'];
 
