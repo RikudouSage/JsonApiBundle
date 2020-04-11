@@ -104,7 +104,7 @@ final class JsonApiCollection implements JsonSerializable
             $this->meta->jsonSerialize() ?: [],
             $this->links->jsonSerialize() ?: [],
             ['data' => []],
-            $this->includes->jsonSerialize() ?: [],
+            $this->includes->jsonSerialize() ?: []
         );
 
         foreach ($this->data as $apiObject) {
