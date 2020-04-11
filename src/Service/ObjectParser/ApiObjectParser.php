@@ -145,6 +145,13 @@ final class ApiObjectParser
             }
         }
 
+        if (!count($result['relationships'])) {
+            unset($result['relationships']);
+        }
+        if (!count($result['attributes'])) {
+            unset($result['attributes']);
+        }
+
         return $result;
     }
 

@@ -13,7 +13,7 @@ final class JsonApiIncludesCollection extends AbstractCollection implements Json
     public function jsonSerialize()
     {
         return [
-            'included' => array_map(function(JsonApiObject $item) {
+            'included' => array_map(function (JsonApiObject $item) {
                 return $item->jsonSerialize()['data'];
             }, $this->data),
         ];
