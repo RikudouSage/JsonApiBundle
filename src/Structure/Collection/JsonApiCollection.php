@@ -64,6 +64,14 @@ final class JsonApiCollection implements JsonSerializable
         return $this->links;
     }
 
+    /**
+     * @return JsonApiIncludesCollection
+     */
+    public function getIncludes(): JsonApiIncludesCollection
+    {
+        return $this->includes;
+    }
+
     public function addObject(JsonApiObject $object)
     {
         $this->data[] = $object;

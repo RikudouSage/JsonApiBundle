@@ -130,6 +130,14 @@ final class JsonApiObject implements JsonSerializable
     }
 
     /**
+     * @return JsonApiIncludesCollection
+     */
+    public function getIncludes(): JsonApiIncludesCollection
+    {
+        return $this->includes;
+    }
+
+    /**
      * @param string                           $name
      * @param int|string|bool|float|array|null $value
      *

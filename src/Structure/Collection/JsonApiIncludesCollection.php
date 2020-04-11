@@ -19,6 +19,18 @@ final class JsonApiIncludesCollection extends AbstractCollection implements Json
         ];
     }
 
+    public function contains(JsonApiObject $include): bool
+    {
+        /** @var JsonApiObject $datum */
+        foreach ($this->data as $datum) {
+            if ($datum->getType() === $include->getType() && $datum->getId() === $include->getId()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @inheritDoc
      */

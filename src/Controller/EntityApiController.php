@@ -208,6 +208,9 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                                 ])->getContent(), true)['data'];
 
                                 $includeObject = new JsonApiObject($includeResponse);
+                                if ($response->getIncludes()->contains($includeObject)) {
+                                    continue;
+                                }
                                 $response->addInclude($includeObject);
                             }
                         }
@@ -283,6 +286,9 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                                 ])->getContent(), true)['data'];
 
                             $includeObject = new JsonApiObject($includeResponse);
+                            if ($response->getIncludes()->contains($includeObject)) {
+                                continue;
+                            }
                             $response->addInclude($includeObject);
                         }
                     }
