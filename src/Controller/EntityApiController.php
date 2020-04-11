@@ -187,11 +187,12 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             }
         }
 
+        // todo refactor
         if ($includes = $request->query->get('include')) {
             $includes = explode(',', $includes);
             $objects = $response->getData();
-            if (count($objects)) {
-                $relationships = $objects[0]->getRelationships();
+            foreach ($objects as $object) {
+                $relationships = $object->getRelationships();
                 foreach ($includes as $include) {
                     foreach ($relationships as $relationship) {
                         if ($relationship->getName() === $include) {
@@ -261,6 +262,33 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         }
 
         $response = new JsonApiObject($this->objectParser->getJsonApiArray($entity));
+
+        $request = $this->requestStack->getCurrentRequest();
+        // todo refactor
+        if ($includes = $request->query->get('include')) {
+            $includes = explode(',', $includes);
+            $relationships = $response->getRelationships();
+            foreach ($includes as $include) {
+                foreach ($relationships as $relationship) {
+                    if ($relationship->getName() === $include) {
+                        $relationshipData = $relationship->getData();
+                        if (!is_iterable($relationshipData)) {
+                            $relationshipData = [$relationshipData];
+                        }
+
+                        foreach ($relationshipData as $relationshipDatum) {
+                            $includeResponse = json_decode($this->forward('rikudou_api.controller.api_router::router', [
+                                    'resourceName' => $relationshipDatum->getType(),
+                                    'id' => $relationshipDatum->getId(),
+                                ])->getContent(), true)['data'];
+
+                            $includeObject = new JsonApiObject($includeResponse);
+                            $response->addInclude($includeObject);
+                        }
+                    }
+                }
+            }
+        }
 
         $event = new EntityApiResponseCreatedEvent(
             $response,
