@@ -187,6 +187,34 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             }
         }
 
+        if ($includes = $request->query->get('include')) {
+            $includes = explode(',', $includes);
+            $objects = $response->getData();
+            if (count($objects)) {
+                $relationships = $objects[0]->getRelationships();
+                foreach ($includes as $include) {
+                    foreach ($relationships as $relationship) {
+                        if ($relationship->getName() === $include) {
+                            $relationshipData = $relationship->getData();
+                            if (!is_iterable($relationshipData)) {
+                                $relationshipData = [$relationshipData];
+                            }
+
+                            foreach ($relationshipData as $relationshipDatum) {
+                                $includeResponse = json_decode($this->forward('rikudou_json_api.router', [
+                                    'resourceName' => $relationship->getName(),
+                                    'id' => $relationshipDatum->getId(),
+                                ])->getContent(), true)['data'];
+
+                                $includeObject = new JsonApiObject($includeResponse);
+                                $response->addInclude($includeObject);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         $event = new EntityApiResponseCreatedEvent(
             $response,
             EntityApiResponseCreatedEvent::TYPE_GET_COLLECTION,
