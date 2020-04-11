@@ -25,6 +25,11 @@ final class JsonApiCollection implements JsonSerializable
      */
     private $links;
 
+    /**
+     * @var JsonApiIncludesCollection
+     */
+    private $includes;
+
     public function __construct(array $data = [])
     {
         $this->parse($data);
@@ -62,6 +67,13 @@ final class JsonApiCollection implements JsonSerializable
     public function addObject(JsonApiObject $object)
     {
         $this->data[] = $object;
+
+        return $this;
+    }
+
+    public function addInclude(JsonApiObject $include)
+    {
+        $this->includes[] = $include;
 
         return $this;
     }
@@ -105,6 +117,7 @@ final class JsonApiCollection implements JsonSerializable
     {
         $this->meta = new JsonApiMetaCollection();
         $this->links = new JsonApiLinksCollection();
+        $this->includes = new JsonApiIncludesCollection();
 
         if (isset($json['meta'])) {
             foreach ($json['meta'] as $key => $value) {
@@ -121,6 +134,12 @@ final class JsonApiCollection implements JsonSerializable
         if (isset($json['data'])) {
             foreach ($json['data'] as $object) {
                 $this->data[] = new JsonApiObject($object);
+            }
+        }
+
+        if (isset($json['included'])) {
+            foreach ($json['included'] as $include) {
+                $this->includes[] = new JsonApiObject($include);
             }
         }
     }

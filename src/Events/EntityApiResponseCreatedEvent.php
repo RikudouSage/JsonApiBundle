@@ -40,9 +40,9 @@ final class EntityApiResponseCreatedEvent extends Event
 
     /**
      * @param JsonApiObject|JsonApiCollection|null $data
-     * @param string                          $responseType
-     * @param string                          $apiResource
-     * @param string                          $apiResourceClass
+     * @param string                               $responseType
+     * @param string                               $apiResource
+     * @param string                               $apiResourceClass
      */
     public function __construct($data, string $responseType, string $apiResource, string $apiResourceClass)
     {

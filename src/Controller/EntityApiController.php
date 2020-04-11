@@ -17,7 +17,6 @@ use function min;
 use ReflectionException;
 use function Rikudou\ArrayMergeRecursive\array_merge_recursive;
 use Rikudou\JsonApiBundle\ApiEntityEvents;
-use Rikudou\JsonApiBundle\ApiEvents;
 use Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent;
 use Rikudou\JsonApiBundle\Events\EntityPreCreateEvent;
 use Rikudou\JsonApiBundle\Exception\JsonApiErrorException;

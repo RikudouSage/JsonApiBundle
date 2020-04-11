@@ -5,6 +5,7 @@ namespace Rikudou\JsonApiBundle\Structure;
 use function array_merge;
 use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\Collection\JsonApiAttributesCollection;
+use Rikudou\JsonApiBundle\Structure\Collection\JsonApiIncludesCollection;
 use Rikudou\JsonApiBundle\Structure\Collection\JsonApiLinksCollection;
 use Rikudou\JsonApiBundle\Structure\Collection\JsonApiMetaCollection;
 use Rikudou\JsonApiBundle\Structure\Collection\JsonApiRelationshipCollection;
@@ -40,6 +41,11 @@ final class JsonApiObject implements JsonSerializable
      * @var JsonApiRelationshipCollection
      */
     private $relationships;
+
+    /**
+     * @var JsonApiIncludesCollection
+     */
+    private $includes;
 
     public function __construct(array $json = [])
     {
@@ -171,6 +177,18 @@ final class JsonApiObject implements JsonSerializable
         return $this;
     }
 
+    /**
+     * @param JsonApiObject $include
+     *
+     * @return $this
+     */
+    public function addInclude(JsonApiObject $include)
+    {
+        $this->includes[] = $include;
+
+        return $this;
+    }
+
     public function jsonSerialize()
     {
         $result = array_merge(
@@ -181,7 +199,8 @@ final class JsonApiObject implements JsonSerializable
             $this->attributes->jsonSerialize(),
             $this->relationships->jsonSerialize(),
             $this->meta->jsonSerialize(),
-            $this->links->jsonSerialize()
+            $this->links->jsonSerialize(),
+            $this->includes->jsonSerialize()
         );
 
         if (!count($result['meta'])) {
@@ -193,6 +212,9 @@ final class JsonApiObject implements JsonSerializable
         if (!count($result['relationships'])) {
             unset($result['relationships']);
         }
+        if (!count($result['included'])) {
+            unset($result['included']);
+        }
 
         return ['data' => $result];
     }
@@ -203,6 +225,7 @@ final class JsonApiObject implements JsonSerializable
         $this->links =  new JsonApiLinksCollection();
         $this->meta = new JsonApiMetaCollection();
         $this->relationships = new JsonApiRelationshipCollection();
+        $this->includes = new JsonApiIncludesCollection();
 
         $this->type = $json['type'] ?? null;
         $this->id = $json['id'] ?? null;
@@ -225,6 +248,11 @@ final class JsonApiObject implements JsonSerializable
         if (isset($json['relationships'])) {
             foreach ($json['relationships'] as $name => $relationship) {
                 $this->relationships[] = new JsonApiRelationship($name, $relationship);
+            }
+        }
+        if (isset($json['included'])) {
+            foreach ($json['included'] as $include) {
+                $this->includes[] = new JsonApiObject($include);
             }
         }
     }
