@@ -219,9 +219,6 @@ final class JsonApiObject implements JsonSerializable
         if (!count($json['relationships'])) {
             unset($json['relationships']);
         }
-        if (!count($json['included'])) {
-            unset($json['included']);
-        }
 
         $result = ['data' => $json];
         $includes = $this->includes->jsonSerialize();
