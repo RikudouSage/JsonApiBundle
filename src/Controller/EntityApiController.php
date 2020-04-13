@@ -202,6 +202,9 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                             }
 
                             foreach ($relationshipData as $relationshipDatum) {
+                                if ($relationshipDatum === null) {
+                                    continue;
+                                }
                                 $includeResponse = json_decode($this->forward('rikudou_api.controller.api_router::router', [
                                     'resourceName' => $relationshipDatum->getType(),
                                     'id' => $relationshipDatum->getId(),
@@ -280,10 +283,13 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                         }
 
                         foreach ($relationshipData as $relationshipDatum) {
+                            if ($relationshipDatum === null) {
+                                continue;
+                            }
                             $includeResponse = json_decode($this->forward('rikudou_api.controller.api_router::router', [
-                                    'resourceName' => $relationshipDatum->getType(),
-                                    'id' => $relationshipDatum->getId(),
-                                ])->getContent(), true)['data'];
+                                'resourceName' => $relationshipDatum->getType(),
+                                'id' => $relationshipDatum->getId(),
+                            ])->getContent(), true)['data'];
 
                             $includeObject = new JsonApiObject($includeResponse);
                             if ($response->getIncludes()->contains($includeObject)) {
