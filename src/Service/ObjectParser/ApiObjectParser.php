@@ -345,9 +345,7 @@ final class ApiObjectParser
                 );
             }
             if (!$relationship->hasData()) {
-                throw new InvalidJsonApiArrayException(
-                    new UnexpectedValueException("The relationship '{$relationship->getName()}' config must contain a data array")
-                );
+                continue;
             }
 
             $data = $relationship->getData();
