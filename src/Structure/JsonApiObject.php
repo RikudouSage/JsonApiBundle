@@ -199,7 +199,7 @@ final class JsonApiObject implements JsonSerializable
 
     public function jsonSerialize()
     {
-        $result = array_merge(
+        $json = array_merge(
             [
                 'id' => $this->id,
                 'type' => $this->type,
@@ -207,30 +207,35 @@ final class JsonApiObject implements JsonSerializable
             $this->attributes->jsonSerialize(),
             $this->relationships->jsonSerialize(),
             $this->meta->jsonSerialize(),
-            $this->links->jsonSerialize(),
-            $this->includes->jsonSerialize()
+            $this->links->jsonSerialize()
         );
 
-        if (!count($result['meta'])) {
-            unset($result['meta']);
+        if (!count($json['meta'])) {
+            unset($json['meta']);
         }
-        if (!count($result['links'])) {
-            unset($result['links']);
+        if (!count($json['links'])) {
+            unset($json['links']);
         }
-        if (!count($result['relationships'])) {
-            unset($result['relationships']);
+        if (!count($json['relationships'])) {
+            unset($json['relationships']);
         }
-        if (!count($result['included'])) {
-            unset($result['included']);
+        if (!count($json['included'])) {
+            unset($json['included']);
         }
 
-        return ['data' => $result];
+        $result = ['data' => $json];
+        $includes = $this->includes->jsonSerialize();
+        if (count($includes)) {
+            $result = array_merge($result, $includes);
+        }
+
+        return $result;
     }
 
     private function parse(array $json)
     {
         $this->attributes = new JsonApiAttributesCollection();
-        $this->links =  new JsonApiLinksCollection();
+        $this->links = new JsonApiLinksCollection();
         $this->meta = new JsonApiMetaCollection();
         $this->relationships = new JsonApiRelationshipCollection();
         $this->includes = new JsonApiIncludesCollection();
