@@ -3,21 +3,19 @@
 namespace Rikudou\JsonApiBundle\DependencyInjection\Compiler;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use Error;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use ReflectionException;
 use Rikudou\JsonApiBundle\Annotation\ApiResource;
 use Rikudou\JsonApiBundle\Controller\DefaultEntityApiController;
 use Rikudou\JsonApiBundle\Interfaces\ApiResourceInterface;
 use Rikudou\ReflectionFile;
-use RuntimeException;
 use SplFileInfo;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Routing\Loader\AnnotationClassLoader;
+use Throwable;
 
 final class CreateAutomaticEntityControllers implements CompilerPassInterface
 {
@@ -62,7 +60,7 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
 
                 try {
                     $class = $reflection->getClass();
-                } catch (ReflectionException | Error | RuntimeException $e) {
+                } catch (Throwable $e) {
                     continue;
                 }
 
