@@ -43,13 +43,25 @@ final class ApiObjectAccessor
      */
     private $isRelation;
 
+    /**
+     * @var bool
+     */
+    private $readonly;
+
+    /**
+     * @var bool
+     */
+    private $silentFail;
+
     public function __construct(
         int $type,
         string $getter,
         ?string $setter,
         ?string $adder,
         ?string $remover,
-        ?bool $isRelation
+        ?bool $isRelation,
+        bool $readonly,
+        bool $silentFail
     ) {
         $this->type = $type;
         $this->getter = $getter;
@@ -57,6 +69,8 @@ final class ApiObjectAccessor
         $this->adder = $adder;
         $this->remover = $remover;
         $this->isRelation = $isRelation;
+        $this->readonly = $readonly;
+        $this->silentFail = $silentFail;
     }
 
     /**
@@ -127,5 +141,21 @@ final class ApiObjectAccessor
             default:
                 throw new InvalidArgumentException('The type is not a valid type');
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isReadonly(): bool
+    {
+        return $this->readonly;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSilentFail(): bool
+    {
+        return $this->silentFail;
     }
 }

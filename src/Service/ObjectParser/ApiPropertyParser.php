@@ -182,6 +182,12 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
         $remover = $annotation->remover;
         $isRelation = $annotation->relation;
 
+        if ($annotation->readonly) {
+            $setter = null;
+            $adder = null;
+            $remover = null;
+        }
+
         if ($getter === null && $property->isPublic()) {
             return new ApiObjectAccessor(
                 ApiObjectAccessor::TYPE_PROPERTY,
@@ -189,7 +195,9 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
                 null,
                 null,
                 null,
-                $isRelation
+                $isRelation,
+                $annotation->readonly,
+                $annotation->silentFail
             );
         }
 
@@ -238,9 +246,15 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
             }
         }
 
-        $setter = $setter ?? $this->nameResolution->getSetter($property->getName());
-        $adder = $adder ?? $this->nameResolution->getAdder($property->getName());
-        $remover = $remover ?? $this->nameResolution->getRemover($property->getName());
+        if (!$annotation->readonly) {
+            $setter = $setter ?? $this->nameResolution->getSetter($property->getName());
+            $adder = $adder ?? $this->nameResolution->getAdder($property->getName());
+            $remover = $remover ?? $this->nameResolution->getRemover($property->getName());
+        } else {
+            $setter = '';
+            $adder = '';
+            $remover = '';
+        }
 
         return new ApiObjectAccessor(
             ApiObjectAccessor::TYPE_METHOD,
@@ -248,7 +262,9 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
             $class->hasMethod($setter) ? $setter : null,
             $class->hasMethod($adder) ? $adder : null,
             $class->hasMethod($remover) ? $remover : null,
-            $isRelation
+            $isRelation,
+            $annotation->readonly,
+            $annotation->silentFail
         );
     }
 
@@ -287,7 +303,9 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
                 $annotation->setter,
                 $annotation->adder,
                 $annotation->remover,
-                $annotation->relation
+                $annotation->relation,
+                $annotation->readonly,
+                $annotation->silentFail
             );
         }
 

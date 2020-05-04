@@ -53,4 +53,18 @@ final class ApiProperty
      * @var bool
      */
     public $relation = null;
+
+    /**
+     * Whether the property is readonly or not
+     *
+     * @var bool
+     */
+    public $readonly = false;
+
+    /**
+     * Whether unsupported operation should fail silently (e.g. trying to set property with no setter)
+     *
+     * @var bool
+     */
+    public $silentFail = false;
 }

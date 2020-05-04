@@ -19,6 +19,7 @@ use function method_exists;
 use ReflectionClass;
 use ReflectionException;
 use Rikudou\JsonApiBundle\Annotation\ApiResource;
+use Rikudou\JsonApiBundle\Exception\AccessViolationException;
 use Rikudou\JsonApiBundle\Exception\InvalidApiPropertyConfig;
 use Rikudou\JsonApiBundle\Exception\InvalidJsonApiArrayException;
 use Rikudou\JsonApiBundle\NameResolution\ApiNameResolutionInterface;
@@ -274,10 +275,17 @@ final class ApiObjectParser
             switch ($config->getType()) {
                 case ApiObjectAccessor::TYPE_PROPERTY:
                     $getter = $config->getGetter();
-                    $object->{$getter} = $attribute->getValue();
+                    if (!$config->isReadonly()) {
+                        $object->{$getter} = $attribute->getValue();
+                    } elseif (!$config->isSilentFail()) {
+                        throw new AccessViolationException("The property '{$attribute->getName()}' is readonly");
+                    }
                     break;
                 case ApiObjectAccessor::TYPE_METHOD:
-                    if (!$config->getSetter() && !$config->getAdder()) {
+                    if (!$config->getSetter() && !$config->getAdder() || $config->isReadonly()) {
+                        if ($config->isSilentFail()) {
+                            break;
+                        }
                         throw new InvalidJsonApiArrayException(
                             new UnexpectedValueException("The property '{$attribute->getName()}' is read-only")
                         );
