@@ -13,6 +13,8 @@ final class ApiEntityEvents
 
     /**
      * Triggered before the json data are parsed into an entity
+     *
+     * @Event("Rikudou\JsonApiBundle\Events\EntityPreParseEvent")
      */
     public const PRE_PARSE = 'rikudou_api.entity.pre_parse';
 
