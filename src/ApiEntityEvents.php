@@ -21,7 +21,7 @@ final class ApiEntityEvents
     /**
      * Triggered before rendering the response, you can modify the json api object that will be sent to browser.
      *
-     * @Event("Rikudou\JsonApiBundle\Events\ApiResponseCreatedEvent")
+     * @Event("Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent")
      */
     public const PRE_RESPONSE = 'rikudou_api.entity.pre_response';
 }
