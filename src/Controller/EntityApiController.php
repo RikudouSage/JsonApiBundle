@@ -19,6 +19,7 @@ use function Rikudou\ArrayMergeRecursive\array_merge_recursive;
 use Rikudou\JsonApiBundle\ApiEntityEvents;
 use Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent;
 use Rikudou\JsonApiBundle\Events\EntityPreCreateEvent;
+use Rikudou\JsonApiBundle\Events\EntityPreParseEvent;
 use Rikudou\JsonApiBundle\Exception\JsonApiErrorException;
 use Rikudou\JsonApiBundle\Interfaces\ApiControllerInterface;
 use Rikudou\JsonApiBundle\Interfaces\ApiResourceInterface;
@@ -340,10 +341,15 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 throw new UnexpectedValueException("The 'type' value does not match the type from URL");
             }
 
-            /** @var ApiResourceInterface $entity */
-            $entity = $this->objectParser->parseJsonApiArray([
+            $event = new EntityPreParseEvent([
                 'data' => $data,
             ]);
+            /** @noinspection PhpMethodParametersCountMismatchInspection */
+            $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_PARSE);
+            $data = $event->getData();
+
+            /** @var ApiResourceInterface $entity */
+            $entity = $this->objectParser->parseJsonApiArray($data);
 
             if (!is_a($entity, $this->getClass(), true)) {
                 throw new UnexpectedValueException("The parsed entity tree does not translate to type '{$this->getClass()}'");
