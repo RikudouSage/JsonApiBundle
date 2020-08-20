@@ -28,6 +28,13 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
         if (!$container->getParameter('rikudou_api.auto_discover_resources')) {
             return;
         }
+
+        if ($container->getParameter('rikudou_api.disable_autoconfiguration')) {
+            $allowedClasses = $container->getParameter('rikudou_api.enabled_resources');
+        } else {
+            $allowedClasses = [];
+        }
+
         /** @var array $directories */
         $directories = $container->getParameter('rikudou_api.auto_discover_paths');
         if (!is_countable($directories) || !count($directories)) {
@@ -64,7 +71,11 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
                     continue;
                 }
 
-                if (in_array($class->getName(), self::IGNORED_CLASSES)) {
+                if (in_array($class->getName(), self::IGNORED_CLASSES, true)) {
+                    continue;
+                }
+
+                if (count($allowedClasses) && !in_array($class->getName(), $allowedClasses, true)) {
                     continue;
                 }
 
