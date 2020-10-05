@@ -16,27 +16,26 @@ final class Inflector
         }
     }
 
-    /**
-     * @param string $string
-     *
-     * @return string|string[]
-     */
-    public function singularize(string $string)
+    public function singularize(string $string): string
     {
-        return $this->inflector !== null
+        $result = $this->inflector !== null
             ? $this->inflector->singularize($string)
             : SymfonyOldInflector::singularize($string);
+
+        return is_array($result) ? reset($result) : $result;
     }
 
     /**
      * @param string $string
      *
-     * @return string|string[]
+     * @return string
      */
-    public function pluralize(string $string)
+    public function pluralize(string $string): string
     {
-        return $this->inflector !== null
+        $result = $this->inflector !== null
             ? $this->inflector->pluralize($string)
             : SymfonyOldInflector::pluralize($string);
+
+        return is_array($result) ? reset($result) : $result;
     }
 }

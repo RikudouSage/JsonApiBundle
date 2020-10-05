@@ -60,15 +60,8 @@ final class ApiResourceLocator
         if (!isset($this->map[$resourceName])) {
             $found = false;
 
-            $plural = $this->inflector->pluralize($resourceName);
-            $singular = $this->inflector->singularize($resourceName);
-
-            if (!is_array($plural)) {
-                $plural = [$plural];
-            }
-            if (!is_array($singular)) {
-                $singular = [$singular];
-            }
+            $plural = [$this->inflector->pluralize($resourceName)];
+            $singular = [$this->inflector->singularize($resourceName)];
 
             $result = array_merge($plural, $singular);
 
