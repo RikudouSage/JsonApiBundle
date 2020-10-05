@@ -8,7 +8,6 @@ use ReflectionClass;
 use Rikudou\JsonApiBundle\Exception\ResourceNotFoundException;
 use Rikudou\JsonApiBundle\Interfaces\ApiControllerInterface;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectParser;
-use Symfony\Component\Inflector\Inflector;
 
 final class ApiResourceLocator
 {
@@ -24,9 +23,15 @@ final class ApiResourceLocator
      */
     private $objectParser;
 
-    public function __construct(ApiObjectParser $objectParser)
+    /**
+     * @var Inflector
+     */
+    private $inflector;
+
+    public function __construct(ApiObjectParser $objectParser, Inflector $inflector)
     {
         $this->objectParser = $objectParser;
+        $this->inflector = $inflector;
     }
 
     /**
@@ -55,8 +60,8 @@ final class ApiResourceLocator
         if (!isset($this->map[$resourceName])) {
             $found = false;
 
-            $plural = Inflector::pluralize($resourceName);
-            $singular = Inflector::singularize($resourceName);
+            $plural = $this->inflector->pluralize($resourceName);
+            $singular = $this->inflector->singularize($resourceName);
 
             if (!is_array($plural)) {
                 $plural = [$plural];
@@ -96,7 +101,7 @@ final class ApiResourceLocator
 
         $result = [];
         foreach ($this->map as $key => $value) {
-            $result[] = $plural ? Inflector::pluralize($key) : $key;
+            $result[] = $plural ? $this->inflector->pluralize($key) : $key;
         }
 
         return $result;

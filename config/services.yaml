@@ -1,10 +1,16 @@
 services:
+  rikudou_api.inflector:
+    class: Rikudou\JsonApiBundle\Service\Inflector
+
   rikudou_api.name_resolution.camel_case:
     class: Rikudou\JsonApiBundle\NameResolution\CamelCaseApiNameResolution
+    arguments:
+      - '@rikudou_api.inflector'
 
   rikudou_api.name_resolution.kebab_case:
     class: Rikudou\JsonApiBundle\NameResolution\KebabCaseApiNameResolution
     arguments:
+      - '@rikudou_api.inflector'
       - '@rikudou_api.name_resolution.camel_case'
 
   rikudou_api.cache.clear:
@@ -30,6 +36,8 @@ services:
     tags:
       - controller.service_arguments
       - container.service_subscriber
+    arguments:
+      - '@rikudou_api.inflector'
 
   rikudou_api.listener.json_api_response:
     class: Rikudou\JsonApiBundle\Listener\JsonApiStructureResponseListener
@@ -85,6 +93,7 @@ services:
     class: Rikudou\JsonApiBundle\Service\ApiResourceLocator
     arguments:
       - '@rikudou_api.object_parser.parser'
+      - '@rikudou_api.inflector'
 
   rikudou_api.api_normalizer_locator:
     class: Rikudou\JsonApiBundle\Service\ApiNormalizerLocator

@@ -8,12 +8,12 @@ use Rikudou\JsonApiBundle\Exception\JsonApiErrorException;
 use Rikudou\JsonApiBundle\Exception\ResourceNotFoundException;
 use Rikudou\JsonApiBundle\Response\JsonApiResponse;
 use Rikudou\JsonApiBundle\Service\ApiResourceLocator;
+use Rikudou\JsonApiBundle\Service\Inflector;
 use Rikudou\JsonApiBundle\Structure\JsonApiObject;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Inflector\Inflector;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class ApiRouter extends AbstractController
@@ -27,6 +27,16 @@ final class ApiRouter extends AbstractController
     private const DELETE_ITEM_METHOD = 'deleteItem';
 
     private const UPDATE_ITEM_METHOD = 'updateItem';
+
+    /**
+     * @var Inflector
+     */
+    private $inflector;
+
+    public function __construct(Inflector $inflector)
+    {
+        $this->inflector = $inflector;
+    }
 
     /**
      * @param string                   $resourceName
@@ -112,7 +122,7 @@ final class ApiRouter extends AbstractController
 
         foreach ($names as $name) {
             $links[$name] = $urlGenerator->generate('rikudou_json_api.router', [
-                'resourceName' => Inflector::pluralize($name),
+                'resourceName' => $this->inflector->pluralize($name),
             ], UrlGeneratorInterface::ABSOLUTE_URL);
         }
 

@@ -5,20 +5,30 @@ namespace Rikudou\JsonApiBundle\NameResolution;
 use function is_array;
 use function lcfirst;
 use function preg_replace_callback;
+use Rikudou\JsonApiBundle\Service\Inflector;
 use RuntimeException;
 use function sprintf;
 use function strlen;
 use function strpos;
 use function strtoupper;
 use function substr;
-use Symfony\Component\Inflector\Inflector;
 use function ucfirst;
 
 abstract class AbstractApiNameResolution implements ApiNameResolutionInterface
 {
+    /**
+     * @var Inflector
+     */
+    protected $inflector;
+
+    public function __construct(Inflector $inflector)
+    {
+        $this->inflector = $inflector;
+    }
+
     public function getResourceNamePlural(string $className): string
     {
-        return $this->getSingleInflectorResult(Inflector::pluralize($this->getResourceName($className)));
+        return $this->getSingleInflectorResult($this->inflector->pluralize($this->getResourceName($className)));
     }
 
     public function getGetter(string $propertyName): string
@@ -34,14 +44,14 @@ abstract class AbstractApiNameResolution implements ApiNameResolutionInterface
     public function getAdder(string $propertyName): string
     {
         return 'add' . $this->getSingleInflectorResult(
-            Inflector::singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)))
+            $this->inflector->singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)))
         );
     }
 
     public function getRemover(string $propertyName): string
     {
         return 'remove' . $this->getSingleInflectorResult(
-            Inflector::singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)))
+            $this->inflector->singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)))
         );
     }
 

@@ -4,6 +4,7 @@ namespace Rikudou\JsonApiBundle\NameResolution;
 
 use function preg_replace_callback;
 use ReflectionException;
+use Rikudou\JsonApiBundle\Service\Inflector;
 use function strtolower;
 
 final class KebabCaseApiNameResolution extends AbstractApiNameResolution
@@ -13,8 +14,9 @@ final class KebabCaseApiNameResolution extends AbstractApiNameResolution
      */
     private $camelCase;
 
-    public function __construct(CamelCaseApiNameResolution $camelCase)
+    public function __construct(Inflector $inflector, CamelCaseApiNameResolution $camelCase)
     {
+        parent::__construct($inflector);
         $this->camelCase = $camelCase;
     }
 
