@@ -44,6 +44,18 @@ final class JsonApiAttribute implements JsonSerializable
         return $this->value;
     }
 
+    /**
+     * @param array|bool|float|int|string|null $value
+     *
+     * @return JsonApiAttribute
+     */
+    public function setValue($value)
+    {
+        $this->value = $value;
+
+        return $this;
+    }
+
     public function jsonSerialize()
     {
         return [
