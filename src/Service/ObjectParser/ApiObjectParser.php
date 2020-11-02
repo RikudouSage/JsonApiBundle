@@ -25,6 +25,7 @@ use Rikudou\JsonApiBundle\Exception\InvalidJsonApiArrayException;
 use Rikudou\JsonApiBundle\NameResolution\ApiNameResolutionInterface;
 use Rikudou\JsonApiBundle\Service\ApiNormalizerLocator;
 use Rikudou\JsonApiBundle\Service\ApiResourceLocator;
+use Rikudou\JsonApiBundle\Service\Inflector;
 use Rikudou\JsonApiBundle\Structure\JsonApiObject;
 use Rikudou\JsonApiBundle\Structure\JsonApiRelationshipData;
 use TypeError;
@@ -67,13 +68,19 @@ final class ApiObjectParser
      */
     private $resourceLocator;
 
+    /**
+     * @var Inflector
+     */
+    private $inflector;
+
     public function __construct(
         ApiPropertyParser $propertyParser,
         ApiObjectValidator $objectValidator,
         ApiParserCache $parserCache,
         ApiNameResolutionInterface $nameResolution,
         ApiNormalizerLocator $normalizerLocator,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        Inflector $inflector
     ) {
         $this->propertyParser = $propertyParser;
         $this->objectValidator = $objectValidator;
@@ -81,6 +88,7 @@ final class ApiObjectParser
         $this->nameResolution = $nameResolution;
         $this->normalizerLocator = $normalizerLocator;
         $this->entityManager = $entityManager;
+        $this->inflector = $inflector;
     }
 
     /**
@@ -193,6 +201,21 @@ final class ApiObjectParser
      */
     public function getResourceName($object): string
     {
+        return $this->getResourceNames($object)->name;
+    }
+
+    public function getPluralResourceName($object): string
+    {
+        return $this->getResourceNames($object)->plural;
+    }
+
+    public function setApiResourceLocator(ApiResourceLocator $resourceLocator)
+    {
+        $this->resourceLocator = $resourceLocator;
+    }
+
+    private function getResourceNames($object): ApiResource
+    {
         $this->objectValidator->throwOnInvalidObject($object);
 
         $cacheItem = $this->parserCache->getResourceCacheItem($object);
@@ -211,16 +234,14 @@ final class ApiObjectParser
         if (!$annotation->name) {
             $annotation->name = $this->nameResolution->getResourceName($reflection->getName());
         }
+        if (!$annotation->plural) {
+            $annotation->plural = $this->inflector->pluralize($annotation->name);
+        }
 
-        $cacheItem->set($annotation->name);
+        $cacheItem->set($annotation);
         $this->parserCache->save($cacheItem);
 
-        return $annotation->name;
-    }
-
-    public function setApiResourceLocator(ApiResourceLocator $resourceLocator)
-    {
-        $this->resourceLocator = $resourceLocator;
+        return $annotation;
     }
 
     private function getJsonObject(array $jsonData): JsonApiObject

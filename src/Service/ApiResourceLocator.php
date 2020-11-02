@@ -58,27 +58,28 @@ final class ApiResourceLocator
         $this->populateMap();
 
         if (!isset($this->map[$resourceName])) {
-            $found = false;
-
-            $plural = [$this->inflector->pluralize($resourceName)];
-            $singular = [$this->inflector->singularize($resourceName)];
-
-            $result = array_merge($plural, $singular);
-
-            foreach ($result as $word) {
-                if (isset($this->map[$word])) {
-                    $resourceName = $word;
-                    $found = true;
-                    break;
-                }
-            }
-
-            if (!$found) {
-                throw new ResourceNotFoundException($resourceName);
-            }
+            throw new ResourceNotFoundException($resourceName);
+//            $found = false;
+//
+//            $plural = [$this->inflector->pluralize($resourceName)];
+//            $singular = [$this->inflector->singularize($resourceName)];
+//
+//            $result = array_merge($plural, $singular);
+//
+//            foreach ($result as $word) {
+//                if (isset($this->map[$word])) {
+//                    $resourceName = $word;
+//                    $found = true;
+//                    break;
+//                }
+//            }
+//
+//            if (!$found) {
+//                throw new ResourceNotFoundException($resourceName);
+//            }
         }
 
-        return $this->map[$resourceName];
+        return $this->map[$resourceName]['controller'];
     }
 
     public function getEntityFromResourceType(string $resourceName): string
@@ -93,8 +94,12 @@ final class ApiResourceLocator
         $this->populateMap();
 
         $result = [];
-        foreach ($this->map as $key => $value) {
-            $result[] = $plural ? $this->inflector->pluralize($key) : $key;
+        $copy = array_filter($this->map, function ($item) use ($plural) {
+            return $item['plural'] === $plural;
+        });
+        assert(is_array($copy));
+        foreach ($copy as $key => $value) {
+            $result[] = $key;
         }
 
         return $result;
@@ -107,12 +112,25 @@ final class ApiResourceLocator
                 $className = $controller->getClass();
 
                 try {
-                    $this->map[$this->objectParser->getResourceName(new $className)] = $controller;
+                    $names = [
+                        $this->objectParser->getResourceName(new $className),
+                        $this->objectParser->getPluralResourceName(new $className),
+                    ];
                 } catch (ArgumentCountError $error) {
                     $reflection = new ReflectionClass($className);
-                    $this->map[
-                        $this->objectParser->getResourceName($reflection->newInstanceWithoutConstructor())
-                    ] = $controller;
+                    $names = [
+                        $this->objectParser->getResourceName($reflection->newInstanceWithoutConstructor()),
+                        $this->objectParser->getPluralResourceName($reflection->newInstanceWithoutConstructor()),
+                    ];
+                }
+
+                $i = 0;
+                foreach ($names as $name) {
+                    $this->map[$name] = [
+                        'controller' => $controller,
+                        'plural' => $i % 2 === 1,
+                    ];
+                    ++$i;
                 }
             }
         }

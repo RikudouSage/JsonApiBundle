@@ -32,4 +32,11 @@ final class ApiResource
      * @var ApiProperty[]
      */
     public $enabledProperties = [];
+
+    /**
+     * The plural name of the resource, will be guessed automatically if empty
+     *
+     * @var string
+     */
+    public $plural;
 }
