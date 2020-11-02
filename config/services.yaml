@@ -60,6 +60,7 @@ services:
       - '@rikudou_api.name_resolution.camel_case'
       - '@rikudou_api.api_normalizer_locator'
       - '@doctrine.orm.entity_manager'
+      - '@rikudou_api.inflector'
     calls:
       - method: setApiResourceLocator
         arguments:
