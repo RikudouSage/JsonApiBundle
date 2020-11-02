@@ -115,14 +115,16 @@ final class ApiRouter extends AbstractController
 
     public function home(ApiResourceLocator $resourceLocator, UrlGeneratorInterface $urlGenerator)
     {
-        $names = $resourceLocator->getResourceNames(false);
         $links = [
             'self' => $urlGenerator->generate('rikudou_json_api.home', [], UrlGeneratorInterface::ABSOLUTE_URL),
         ];
 
-        foreach ($names as $name) {
+        $names = $resourceLocator->getResourceNames(false);
+        $namesPlural = $resourceLocator->getResourceNames(true);
+
+        foreach ($names as $index => $name) {
             $links[$name] = $urlGenerator->generate('rikudou_json_api.router', [
-                'resourceName' => $this->inflector->pluralize($name),
+                'resourceName' => $namesPlural[$index],
             ], UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
