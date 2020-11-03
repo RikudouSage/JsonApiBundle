@@ -6,11 +6,9 @@ use Exception;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
-use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\Yaml\Yaml;
 
-final class RikudouJsonApiExtension extends Extension implements PrependExtensionInterface
+final class RikudouJsonApiExtension extends Extension
 {
     public function getConfiguration(array $config, ContainerBuilder $container)
     {
@@ -36,6 +34,8 @@ final class RikudouJsonApiExtension extends Extension implements PrependExtensio
         $isDebug = $container->getParameter('kernel.debug');
         $configs = $this->processConfiguration(new Configuration($isDebug), $configs);
 
+        $container->setAlias('cache.api_annotations', $configs['cache_adapter']);
+
         $container->setParameter('rikudou_api.api_prefix', $configs['api_prefix']);
         $container->setParameter('rikudou_api.clear_cache_hook', $configs['clear_cache_hook']);
         $container->setParameter('rikudou_api.property_cache_enabled', $configs['property_cache_enabled']);
@@ -49,29 +49,5 @@ final class RikudouJsonApiExtension extends Extension implements PrependExtensio
         $container->setParameter('rikudou_api.auto_discover_paths', $configs['auto_discover_paths']);
         $container->setParameter('rikudou_api.disable_autoconfiguration', $configs['disable_autoconfiguration']);
         $container->setParameter('rikudou_api.enabled_resources', $configs['enabled_resources']);
-    }
-
-    /**
-     * Allow an extension to prepend the extension configurations.
-     *
-     * @param ContainerBuilder $container
-     */
-    public function prepend(ContainerBuilder $container)
-    {
-        $isDebug = $container->getParameter('kernel.debug');
-        $configs = $this->processConfiguration(
-            new Configuration($isDebug),
-            $container->getExtensionConfig($this->getAlias())
-        );
-
-        $this->prependCache($configs, $container);
-    }
-
-    private function prependCache(array $configs, ContainerBuilder $container)
-    {
-        $cacheConfig = Yaml::parseFile(__DIR__ . '/../../config/cache.yaml');
-        $cacheConfig['framework']['cache']['pools']['cache.api_annotation']['adapter']
-            = $configs['cache_adapter'];
-        $container->prependExtensionConfig('framework', $cacheConfig['framework']);
     }
 }
