@@ -82,6 +82,10 @@ final class Configuration implements ConfigurationInterface
                     ->info('Whether exceptions with special semantic meaning (like JsonApiErrorException) should by handled by the bundle. Should be enabled on production.')
                     ->defaultValue(!$this->isDebug)
                 ->end()
+                ->scalarNode('cache_adapter')
+                    ->info('The cache adapter to use for caching properties etc.')
+                    ->defaultValue('cache.app')
+                ->end()
             ->end();
 
         return $treeBuilder;

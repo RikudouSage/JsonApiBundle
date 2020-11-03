@@ -70,6 +70,8 @@ final class RikudouJsonApiExtension extends Extension implements PrependExtensio
     private function prependCache(array $configs, ContainerBuilder $container)
     {
         $cacheConfig = Yaml::parseFile(__DIR__ . '/../../config/cache.yaml');
+        $cacheConfig['framework']['cache']['pools']['cache.api_annotation']['adapter']
+            = $configs['cache_adapter'];
         $container->prependExtensionConfig('framework', $cacheConfig['framework']);
     }
 }
