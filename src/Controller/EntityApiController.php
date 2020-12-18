@@ -482,6 +482,12 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             }
             $data = $post->get('data');
 
+            $event = new EntityPreParseEvent([
+                'data' => $data,
+            ]);
+            $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_PARSE);
+            $data = $event->getData();
+
             if (!isset($data['id']) || !isset($data['type'])) {
                 throw new UnexpectedValueException("The JSON data must contain 'id' and 'type'");
             }
