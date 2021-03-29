@@ -124,7 +124,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
 
         $queryParams = $request->query;
         $currentPage = $queryParams->getInt('page', 1);
-        $query = $this->getFilteredQueryBuilder(true, false);
+        $query = $this->getFilteredQueryBuilder();
         $paginator = new Paginator($query);
         $total = $paginator->count();
 
@@ -172,18 +172,17 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         $response->addMeta('currentPage', $currentPage);
 
         if ($total > 0) {
-            $query = $this->getFilteredQueryBuilder();
             if ($perPage > 0) {
                 $query
                     ->setFirstResult(($currentPage - 1) * $perPage)
                     ->setMaxResults($perPage);
             }
 
-            $query = $query
+            $result = $query
                 ->getQuery()
                 ->getResult();
 
-            foreach ($query as $item) {
+            foreach ($result as $item) {
                 $response->addObject(new JsonApiObject($this->objectParser->getJsonApiArray($item)));
             }
         }
@@ -230,7 +229,6 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             $this->getClass()
         );
 
-        /** @noinspection PhpMethodParametersCountMismatchInspection */
         $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
 
         $response = $event->getData();
@@ -310,7 +308,6 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             $this->getClass()
         );
 
-        /** @noinspection PhpMethodParametersCountMismatchInspection */
         $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
         $response = $event->getData();
 
@@ -344,7 +341,6 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             $event = new EntityPreParseEvent([
                 'data' => $data,
             ]);
-            /** @noinspection PhpMethodParametersCountMismatchInspection */
             $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_PARSE);
             $data = $event->getData();
 
@@ -356,7 +352,6 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             }
 
             $event = new EntityPreCreateEvent($entity);
-            /** @noinspection PhpMethodParametersCountMismatchInspection */
             $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_CREATE);
             $entity = $event->getEntity();
             assert(method_exists($entity, 'getId'));
@@ -380,7 +375,6 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 $this->getClass()
             );
 
-            /** @noinspection PhpMethodParametersCountMismatchInspection */
             $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
             $jsonApiObject = $event->getData();
 
@@ -434,7 +428,6 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 $this->resourceName,
                 $this->getClass()
             );
-            /** @noinspection PhpMethodParametersCountMismatchInspection */
             $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
 
             $response = $event->getData();
@@ -524,7 +517,6 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 $this->getClass()
             );
 
-            /** @noinspection PhpMethodParametersCountMismatchInspection */
             $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
             /** @var JsonApiObject $response */
             $response = $event->getData();
