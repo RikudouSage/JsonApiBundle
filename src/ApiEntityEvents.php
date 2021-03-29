@@ -12,6 +12,16 @@ final class ApiEntityEvents
     public const PRE_CREATE = 'rikudou_api.entity.pre_create';
 
     /**
+     * @Event("Rikudou\JsonApiBundle\Events\EntityPreUpdateEvent")
+     */
+    public const PRE_UPDATE = 'rikudou_api.entity.pre_update';
+
+    /**
+     * @Event("Rikudou\JsonApiBundle\Events\EntityPreDeleteEvent")
+     */
+    public const PRE_DELETE = 'rikudou_api.entity.pre_delete';
+
+    /**
      * Triggered before the json data are parsed into an entity
      *
      * @Event("Rikudou\JsonApiBundle\Events\EntityPreParseEvent")

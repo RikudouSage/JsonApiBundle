@@ -19,7 +19,9 @@ use function Rikudou\ArrayMergeRecursive\array_merge_recursive;
 use Rikudou\JsonApiBundle\ApiEntityEvents;
 use Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent;
 use Rikudou\JsonApiBundle\Events\EntityPreCreateEvent;
+use Rikudou\JsonApiBundle\Events\EntityPreDeleteEvent;
 use Rikudou\JsonApiBundle\Events\EntityPreParseEvent;
+use Rikudou\JsonApiBundle\Events\EntityPreUpdateEvent;
 use Rikudou\JsonApiBundle\Exception\JsonApiErrorException;
 use Rikudou\JsonApiBundle\Interfaces\ApiControllerInterface;
 use Rikudou\JsonApiBundle\Interfaces\ApiResourceInterface;
@@ -418,6 +420,10 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             );
         }
 
+        $event = new EntityPreDeleteEvent($entity);
+        $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_DELETE);
+        $entity = $event->getEntity();
+
         try {
             $this->entityManager->remove($entity);
             $this->entityManager->flush();
@@ -504,6 +510,10 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 if (!is_a($updatedEntity, (string) $this->getClass(), true)) {
                     throw new UnexpectedValueException("The parsed entity tree does not translate to type '{$this->getClass()}'");
                 }
+
+                $event = new EntityPreUpdateEvent($updatedEntity);
+                $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_UPDATE);
+                $updatedEntity = $event->getEntity();
 
                 $this->entityManager->persist($updatedEntity);
                 $this->entityManager->flush();
