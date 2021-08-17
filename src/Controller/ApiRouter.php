@@ -8,7 +8,6 @@ use Rikudou\JsonApiBundle\Exception\JsonApiErrorException;
 use Rikudou\JsonApiBundle\Exception\ResourceNotFoundException;
 use Rikudou\JsonApiBundle\Response\JsonApiResponse;
 use Rikudou\JsonApiBundle\Service\ApiResourceLocator;
-use Rikudou\JsonApiBundle\Service\Inflector;
 use Rikudou\JsonApiBundle\Structure\JsonApiObject;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -28,32 +27,13 @@ final class ApiRouter extends AbstractController
 
     private const UPDATE_ITEM_METHOD = 'updateItem';
 
-    /**
-     * @var Inflector
-     */
-    private $inflector;
-
-    public function __construct(Inflector $inflector)
-    {
-        $this->inflector = $inflector;
-    }
-
-    /**
-     * @param string                   $resourceName
-     * @param int|string|null          $id
-     * @param EventDispatcherInterface $eventDispatcher
-     * @param ApiResourceLocator       $resourceLocator
-     * @param Request                  $request
-     *
-     * @return Response|JsonApiObject
-     */
     public function router(
         string $resourceName,
-        $id,
+        int|string|null $id,
         EventDispatcherInterface $eventDispatcher,
         ApiResourceLocator $resourceLocator,
-        Request $request
-    ) {
+        Request $request,
+    ): JsonApiObject|Response {
         try {
             $controller = $resourceLocator->findControllerForResource($resourceName);
             $controller->setResourceName($resourceName);
@@ -63,7 +43,6 @@ final class ApiRouter extends AbstractController
 
         $event = new RouterPreroutingEvent($resourceName, $id, $controller);
 
-        /** @noinspection PhpMethodParametersCountMismatchInspection */
         $eventDispatcher->dispatch($event, ApiEvents::PREROUTING);
 
         if ($event->getResourceName() !== $resourceName || $event->getId() !== $id) {
@@ -72,7 +51,7 @@ final class ApiRouter extends AbstractController
                 $event->getId(),
                 $eventDispatcher,
                 $resourceLocator,
-                $request
+                $request,
             );
         }
 
@@ -104,7 +83,7 @@ final class ApiRouter extends AbstractController
             default:
                 throw new JsonApiErrorException(
                     "Unsupported method '{$request->getMethod()}'",
-                    Response::HTTP_METHOD_NOT_ALLOWED
+                    Response::HTTP_METHOD_NOT_ALLOWED,
                 );
         }
 
@@ -113,8 +92,10 @@ final class ApiRouter extends AbstractController
         ], $request->query->all());
     }
 
-    public function home(ApiResourceLocator $resourceLocator, UrlGeneratorInterface $urlGenerator)
-    {
+    public function home(
+        ApiResourceLocator $resourceLocator,
+        UrlGeneratorInterface $urlGenerator,
+    ): JsonApiResponse {
         $links = [
             'self' => $urlGenerator->generate('rikudou_json_api.home', [], UrlGeneratorInterface::ABSOLUTE_URL),
         ];

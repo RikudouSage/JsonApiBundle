@@ -6,11 +6,8 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 final class EntityPreUpdateEvent extends Event
 {
-    private object $entity;
-
-    public function __construct(object $entity)
+    public function __construct(private object $entity)
     {
-        $this->entity = $entity;
     }
 
     public function getEntity(): object
@@ -18,7 +15,7 @@ final class EntityPreUpdateEvent extends Event
         return $this->entity;
     }
 
-    public function setEntity(object $entity): EntityPreUpdateEvent
+    public function setEntity(object $entity): self
     {
         $this->entity = $entity;
 

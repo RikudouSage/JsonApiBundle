@@ -3,7 +3,6 @@
 namespace Rikudou\JsonApiBundle\Controller;
 
 use function assert;
-use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -41,72 +40,36 @@ use UnexpectedValueException;
 
 abstract class EntityApiController extends AbstractController implements ApiControllerInterface
 {
-    /**
-     * @var FilteredQueryBuilderInterface
-     */
-    protected $filteredQueryBuilder;
+    protected FilteredQueryBuilderInterface $filteredQueryBuilder;
 
-    /**
-     * @var string
-     */
-    protected $resourceName;
+    protected string $resourceName;
 
-    /**
-     * @var string
-     */
-    protected $serviceName;
+    protected string $serviceName;
 
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
+    private RequestStack $requestStack;
 
-    /**
-     * @var bool
-     */
-    private $paginationEnabled;
+    private bool $paginationEnabled;
 
-    /**
-     * @var int
-     */
-    private $defaultPerPageLimit;
+    private int $defaultPerPageLimit;
 
-    /**
-     * @var ApiObjectParser
-     */
-    private $objectParser;
+    private ApiObjectParser $objectParser;
 
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
+    private EventDispatcherInterface $eventDispatcher;
 
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
-    /**
-     * @var UrlGeneratorInterface
-     */
-    private $urlGenerator;
+    private UrlGeneratorInterface $urlGenerator;
 
     public function setResourceName(string $resourceName): void
     {
         $this->resourceName = $resourceName;
     }
 
-    /**
-     * @param string $serviceName
-     */
     public function setServiceName(string $serviceName): void
     {
         $this->serviceName = $serviceName;
     }
 
-    /**
-     * @return string
-     */
     public function getServiceName(): string
     {
         return $this->serviceName;
@@ -114,12 +77,10 @@ abstract class EntityApiController extends AbstractController implements ApiCont
 
     /**
      * @throws ReflectionException
-     * @throws AnnotationException
      *
      * @return JsonApiCollection
-     *
      */
-    public function getCollection()
+    public function getCollection(): JsonApiCollection
     {
         $request = $this->requestStack->getCurrentRequest();
         assert($request !== null);
@@ -141,33 +102,33 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         $response = new JsonApiCollection();
         $response->addLink('self', $this->route(
             'rikudou_json_api.router',
-            $queryParams->all()
+            $queryParams->all(),
         ));
         $response->addLink('first', $this->route(
             'rikudou_json_api.router',
-            array_merge_recursive($queryParams->all(), ['page' => 1])
+            array_merge_recursive($queryParams->all(), ['page' => 1]),
         ));
         $response->addLink('last', $this->route(
             'rikudou_json_api.router',
-            array_merge_recursive($queryParams->all(), ['page' => $lastPage])
+            array_merge_recursive($queryParams->all(), ['page' => $lastPage]),
         ));
         $response->addLink(
             'prev',
             $currentPage > 1
                 ? $this->route(
                     'rikudou_json_api.router',
-                    array_merge_recursive($queryParams->all(), ['page' => min($currentPage - 1, $lastPage)])
+                    array_merge_recursive($queryParams->all(), ['page' => min($currentPage - 1, $lastPage)]),
                 )
-                : null
+                : null,
         );
         $response->addLink(
             'next',
             $currentPage + 1 < $lastPage
                 ? $this->route(
                     'rikudou_json_api.router',
-                    array_merge_recursive($queryParams->all(), ['page' => $currentPage + 1])
+                    array_merge_recursive($queryParams->all(), ['page' => $currentPage + 1]),
                 )
-                : null
+                : null,
         );
         $response->addMeta('totalItems', (int) $total);
         $response->addMeta('itemsPerPage', $perPage);
@@ -228,7 +189,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             $response,
             EntityApiResponseCreatedEvent::TYPE_GET_COLLECTION,
             $this->resourceName,
-            $this->getClass()
+            $this->getClass(),
         );
 
         $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
@@ -242,15 +203,9 @@ abstract class EntityApiController extends AbstractController implements ApiCont
     }
 
     /**
-     * @param int|string $id
-     *
      * @throws ReflectionException
-     * @throws AnnotationException
-     *
-     * @return JsonApiResponse|JsonApiObject
-     *
      */
-    public function getItem($id)
+    public function getItem(int|string $id): JsonApiObject
     {
         try {
             $entity = $this
@@ -264,7 +219,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             throw new JsonApiErrorException(
                 'The resource does not exist',
                 Response::HTTP_NOT_FOUND,
-                $e
+                $e,
             );
         }
 
@@ -307,7 +262,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             $response,
             EntityApiResponseCreatedEvent::TYPE_GET_ITEM,
             $this->resourceName,
-            $this->getClass()
+            $this->getClass(),
         );
 
         $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
@@ -320,7 +275,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         return $response;
     }
 
-    public function addItem()
+    public function addItem(): JsonApiResponse
     {
         try {
             $post = $this->getPostData();
@@ -374,7 +329,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 $jsonApiObject,
                 EntityApiResponseCreatedEvent::TYPE_CREATE_ITEM,
                 $this->resourceName,
-                $this->getClass()
+                $this->getClass(),
             );
 
             $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
@@ -385,24 +340,24 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             throw new JsonApiErrorException(
                 'Could not parse the request data',
                 Response::HTTP_BAD_REQUEST,
-                $e
+                $e,
             );
         } catch (UnexpectedValueException $e) {
             throw new JsonApiErrorException(
                 $e->getMessage(),
                 Response::HTTP_BAD_REQUEST,
-                $e
+                $e,
             );
         } catch (Exception $e) {
             throw new JsonApiErrorException(
                 'The server encountered an internal error',
                 Response::HTTP_INTERNAL_SERVER_ERROR,
-                $e
+                $e,
             );
         }
     }
 
-    public function deleteItem($id)
+    public function deleteItem(int|string $id): JsonApiResponse|JsonApiObject
     {
         try {
             $entity = $this
@@ -416,7 +371,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             throw new JsonApiErrorException(
                 'The resource does not exist',
                 Response::HTTP_NOT_FOUND,
-                $e
+                $e,
             );
         }
 
@@ -432,7 +387,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 null,
                 EntityApiResponseCreatedEvent::TYPE_DELETE_ITEM,
                 $this->resourceName,
-                $this->getClass()
+                $this->getClass(),
             );
             $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
 
@@ -446,12 +401,12 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             throw new JsonApiErrorException(
                 'Internal server error',
                 Response::HTTP_INTERNAL_SERVER_ERROR,
-                $e
+                $e,
             );
         }
     }
 
-    public function updateItem($id)
+    public function updateItem(int|string $id): JsonApiObject
     {
         if (is_string($id) && is_numeric($id) && strval(intval($id)) === $id) {
             $id = (int) $id;
@@ -471,7 +426,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 throw new JsonApiErrorException(
                     'The resource does not exist',
                     Response::HTTP_NOT_FOUND,
-                    $e
+                    $e,
                 );
             }
 
@@ -524,31 +479,29 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 $response,
                 EntityApiResponseCreatedEvent::TYPE_UPDATE_ITEM,
                 $this->resourceName,
-                $this->getClass()
+                $this->getClass(),
             );
 
             $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
-            /** @var JsonApiObject $response */
-            $response = $event->getData();
 
-            return $response;
+            return $event->getData();
         } catch (InvalidArgumentException $e) {
             throw new JsonApiErrorException(
                 'Could not parse the request data',
                 Response::HTTP_BAD_REQUEST,
-                $e
+                $e,
             );
         } catch (UnexpectedValueException $e) {
             throw new JsonApiErrorException(
                 $e->getMessage(),
                 Response::HTTP_BAD_REQUEST,
-                $e
+                $e,
             );
         } catch (Exception $e) {
             throw new JsonApiErrorException(
                 'The server encountered an internal error',
                 Response::HTTP_INTERNAL_SERVER_ERROR,
-                $e
+                $e,
             );
         }
     }
@@ -556,81 +509,66 @@ abstract class EntityApiController extends AbstractController implements ApiCont
     //////////// CONTAINER ////////////
 
     /**
-     * @param FilteredQueryBuilderInterface $filteredQueryBuilder
-     *
      * @internal
      */
-    public function setFilteredQueryBuilder(FilteredQueryBuilderInterface $filteredQueryBuilder)
-    {
+    public function setFilteredQueryBuilder(
+        FilteredQueryBuilderInterface $filteredQueryBuilder,
+    ): void {
         $this->filteredQueryBuilder = $filteredQueryBuilder;
     }
 
     /**
-     * @param RequestStack $requestStack
-     *
      * @internal
      */
-    public function setRequestStack(RequestStack $requestStack)
+    public function setRequestStack(RequestStack $requestStack): void
     {
         $this->requestStack = $requestStack;
     }
 
     /**
-     * @param bool $paginationEnabled
-     *
      * @internal
      */
-    public function setPaginationEnabled(bool $paginationEnabled)
+    public function setPaginationEnabled(bool $paginationEnabled): void
     {
         $this->paginationEnabled = $paginationEnabled;
     }
 
     /**
-     * @param int $defaultPerPageLimit
-     *
      * @internal
      */
-    public function setDefaultPerPageLimit(int $defaultPerPageLimit)
+    public function setDefaultPerPageLimit(int $defaultPerPageLimit): void
     {
         $this->defaultPerPageLimit = $defaultPerPageLimit;
     }
 
     /**
-     * @param ApiObjectParser $objectParser
-     *
      * @internal
      */
-    public function setObjectParser(ApiObjectParser $objectParser)
+    public function setObjectParser(ApiObjectParser $objectParser): void
     {
         $this->objectParser = $objectParser;
     }
 
     /**
-     * @param EventDispatcherInterface $eventDispatcher
-     *
      * @internal
      */
-    public function setEventDispatcher(EventDispatcherInterface $eventDispatcher)
+    public function setEventDispatcher(EventDispatcherInterface $eventDispatcher): void
     {
         $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
-     * @param EntityManagerInterface $entityManager
-     *
      * @internal
      */
-    public function setEntityManager(EntityManagerInterface $entityManager)
+    public function setEntityManager(EntityManagerInterface $entityManager): void
     {
         $this->entityManager = $entityManager;
     }
 
     /**
-     * @param UrlGeneratorInterface $urlGenerator
-     *
      * @internal
      */
-    public function setUrlGenerator(UrlGeneratorInterface $urlGenerator)
+    public function setUrlGenerator(UrlGeneratorInterface $urlGenerator): void
     {
         $this->urlGenerator = $urlGenerator;
     }
@@ -646,11 +584,11 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             $this->getClass(),
             $request->query,
             $useFilter,
-            $useSort
+            $useSort,
         );
     }
 
-    protected function route(string $route, array $parameters = [])
+    protected function route(string $route, array $parameters = []): string
     {
         if (!isset($parameters['resourceName'])) {
             $parameters['resourceName'] = $this->resourceName;

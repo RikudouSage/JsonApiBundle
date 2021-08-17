@@ -13,11 +13,9 @@ use Symfony\Component\DependencyInjection\Reference;
 final class SetEntityControllerDependencies implements CompilerPassInterface
 {
     /**
-     * @param ContainerBuilder $container
-     *
      * @throws ReflectionException
      */
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $controllers = $container->findTaggedServiceIds('rikudou_api.api_controller');
         foreach ($controllers as $controller => $tags) {
@@ -33,35 +31,35 @@ final class SetEntityControllerDependencies implements CompilerPassInterface
 
             $definition->addMethodCall(
                 'setFilteredQueryBuilder',
-                [new Reference(FilteredQueryBuilderInterface::class)]
+                [new Reference(FilteredQueryBuilderInterface::class)],
             );
             $definition->addMethodCall(
                 'setRequestStack',
-                [new Reference('request_stack')]
+                [new Reference('request_stack')],
             );
             $definition->addMethodCall(
                 'setPaginationEnabled',
-                [$container->getParameter('rikudou_api.pagination')]
+                [$container->getParameter('rikudou_api.pagination')],
             );
             $definition->addMethodCall(
                 'setDefaultPerPageLimit',
-                [$container->getParameter('rikudou_api.per_page_limit')]
+                [$container->getParameter('rikudou_api.per_page_limit')],
             );
             $definition->addMethodCall(
                 'setObjectParser',
-                [new Reference('rikudou_api.object_parser.parser')]
+                [new Reference('rikudou_api.object_parser.parser')],
             );
             $definition->addMethodCall(
                 'setEventDispatcher',
-                [new Reference('event_dispatcher')]
+                [new Reference('event_dispatcher')],
             );
             $definition->addMethodCall(
                 'setEntityManager',
-                [new Reference('doctrine.orm.entity_manager')]
+                [new Reference('doctrine.orm.entity_manager')],
             );
             $definition->addMethodCall(
                 'setUrlGenerator',
-                [new Reference('router')]
+                [new Reference('router')],
             );
         }
     }

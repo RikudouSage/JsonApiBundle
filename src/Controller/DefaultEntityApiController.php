@@ -4,10 +4,7 @@ namespace Rikudou\JsonApiBundle\Controller;
 
 final class DefaultEntityApiController extends EntityApiController
 {
-    /**
-     * @var string
-     */
-    private $className;
+    private string $className;
 
     public function setClassName(string $className)
     {

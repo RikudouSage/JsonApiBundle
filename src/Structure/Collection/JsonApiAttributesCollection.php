@@ -3,19 +3,20 @@
 namespace Rikudou\JsonApiBundle\Structure\Collection;
 
 use function array_merge;
+use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\Pure;
 use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\EmptyObject;
 use Rikudou\JsonApiBundle\Structure\JsonApiAttribute;
 
 /**
- * @method JsonApiAttribute current()
- * @method JsonApiAttribute offsetGet($offset)
- * @method void offsetSet($offset, JsonApiAttribute $value)
- * @method $this add(JsonApiAttribute $value)
+ * @extends() AbstractCollection<JsonApiAttribute>
  */
 final class JsonApiAttributesCollection extends AbstractCollection implements JsonSerializable
 {
-    public function jsonSerialize()
+    #[Pure]
+    #[ArrayShape(['attributes' => "array|\Rikudou\JsonApiBundle\Structure\EmptyObject"])]
+    public function jsonSerialize(): array
     {
         $result = [
             'attributes' => [],
@@ -23,7 +24,6 @@ final class JsonApiAttributesCollection extends AbstractCollection implements Js
         if (!$this->count()) {
             $result['attributes'] = new EmptyObject();
         } else {
-            /** @var JsonApiAttribute $attribute */
             foreach ($this->data as $attribute) {
                 $result['attributes'] = array_merge($result['attributes'], $attribute->jsonSerialize());
             }
@@ -33,12 +33,9 @@ final class JsonApiAttributesCollection extends AbstractCollection implements Js
     }
 
     /**
-     * Returns the allowed type of value for this collection.
-     * Return null to allow every type.
-     *
-     * @return array|null
+     * @return string[]
      */
-    protected function getAllowedTypes(): ?array
+    protected function getAllowedTypes(): array
     {
         return [
             JsonApiAttribute::class,

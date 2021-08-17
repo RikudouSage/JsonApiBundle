@@ -1,6 +1,11 @@
 services:
+  rikudou_api.internal.english_inflector:
+    class: Symfony\Component\String\Inflector\EnglishInflector
+
   rikudou_api.inflector:
     class: Rikudou\JsonApiBundle\Service\Inflector
+    arguments:
+      - '@rikudou_api.internal.english_inflector'
 
   rikudou_api.name_resolution.camel_case:
     class: Rikudou\JsonApiBundle\NameResolution\CamelCaseApiNameResolution
@@ -36,8 +41,6 @@ services:
     tags:
       - controller.service_arguments
       - container.service_subscriber
-    arguments:
-      - '@rikudou_api.inflector'
 
   rikudou_api.listener.json_api_response:
     class: Rikudou\JsonApiBundle\Listener\JsonApiStructureResponseListener

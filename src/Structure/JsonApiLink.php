@@ -6,39 +6,21 @@ use JsonSerializable;
 
 final class JsonApiLink implements JsonSerializable
 {
-    /**
-     * @var string
-     */
-    private $name;
-
-    /**
-     * @var string|null
-     */
-    private $link;
-
-    public function __construct(string $name, ?string $link)
+    public function __construct(private string $name, private ?string $link)
     {
-        $this->name = $name;
-        $this->link = $link;
     }
 
-    /**
-     * @return string
-     */
     public function getLink(): ?string
     {
         return $this->link;
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return [
             $this->name => $this->link,

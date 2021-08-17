@@ -3,18 +3,6 @@
 namespace PHPSTORM_META {
 
     registerArgumentsSet(
-        'accessor_type',
-        \Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor::TYPE_PROPERTY,
-        \Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor::TYPE_METHOD
-    );
-    registerArgumentsSet(
-        'invalid_property_type',
-        \Rikudou\JsonApiBundle\Exception\InvalidApiPropertyConfig::TYPE_GETTER,
-        \Rikudou\JsonApiBundle\Exception\InvalidApiPropertyConfig::TYPE_SETTER,
-        \Rikudou\JsonApiBundle\Exception\InvalidApiPropertyConfig::TYPE_ADDER,
-        \Rikudou\JsonApiBundle\Exception\InvalidApiPropertyConfig::TYPE_REMOVER
-    );
-    registerArgumentsSet(
         'status_codes',
         \Symfony\Component\HttpFoundation\Response::HTTP_CONTINUE,
         \Symfony\Component\HttpFoundation\Response::HTTP_SWITCHING_PROTOCOLS,
@@ -80,52 +68,11 @@ namespace PHPSTORM_META {
         \Symfony\Component\HttpFoundation\Response::HTTP_NOT_EXTENDED,
         \Symfony\Component\HttpFoundation\Response::HTTP_NETWORK_AUTHENTICATION_REQUIRED
     );
-    registerArgumentsSet(
-        'event_response_types',
-        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::TYPE_GET_COLLECTION,
-        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::TYPE_GET_ITEM,
-        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::TYPE_UPDATE_ITEM,
-        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::TYPE_CREATE_ITEM,
-        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::TYPE_DELETE_ITEM
-    );
-    registerArgumentsSet(
-        'api_accessor_type',
-        \Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor::TYPE_PROPERTY,
-        \Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor::TYPE_METHOD,
-    );
 
-    expectedArguments(
-        \Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor::__construct(),
-        0,
-        argumentsSet('accessor_type')
-    );
-    expectedArguments(
-        \Rikudou\JsonApiBundle\Exception\InvalidApiPropertyConfig::__construct(),
-        0,
-        argumentsSet('invalid_property_type')
-    );
     expectedArguments(
         \Rikudou\JsonApiBundle\Exception\JsonApiErrorException::__construct(),
         1,
         argumentsSet('status_codes')
-    );
-    expectedArguments(
-        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::__construct(),
-        1,
-        argumentsSet('event_response_types')
-    );
-    expectedReturnValues(
-        \Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent::getResponseType(),
-        argumentsSet('event_response_type')
-    );
-    expectedArguments(
-        \Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor::__construct(),
-        0,
-        argumentsSet('api_accessor_type')
-    );
-    expectedReturnValues(
-        \Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor::getType(),
-        argumentsSet('api_accessor_type')
     );
 
 }

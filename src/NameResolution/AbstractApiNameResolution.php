@@ -2,33 +2,25 @@
 
 namespace Rikudou\JsonApiBundle\NameResolution;
 
-use function is_array;
 use function lcfirst;
 use function preg_replace_callback;
 use Rikudou\JsonApiBundle\Service\Inflector;
 use RuntimeException;
 use function sprintf;
 use function strlen;
-use function strpos;
 use function strtoupper;
 use function substr;
 use function ucfirst;
 
 abstract class AbstractApiNameResolution implements ApiNameResolutionInterface
 {
-    /**
-     * @var Inflector
-     */
-    protected $inflector;
-
-    public function __construct(Inflector $inflector)
+    public function __construct(protected Inflector $inflector)
     {
-        $this->inflector = $inflector;
     }
 
     public function getResourceNamePlural(string $className): string
     {
-        return $this->getSingleInflectorResult($this->inflector->pluralize($this->getResourceName($className)));
+        return $this->inflector->pluralize($this->getResourceName($className));
     }
 
     public function getGetter(string $propertyName): string
@@ -43,16 +35,16 @@ abstract class AbstractApiNameResolution implements ApiNameResolutionInterface
 
     public function getAdder(string $propertyName): string
     {
-        return 'add' . $this->getSingleInflectorResult(
+        return 'add' .
             $this->inflector->singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)))
-        );
+            ;
     }
 
     public function getRemover(string $propertyName): string
     {
-        return 'remove' . $this->getSingleInflectorResult(
+        return 'remove' .
             $this->inflector->singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)))
-        );
+            ;
     }
 
     public function getIsser(string $propertyName): string
@@ -74,7 +66,7 @@ abstract class AbstractApiNameResolution implements ApiNameResolutionInterface
         ];
 
         foreach ($prefixes as $prefix) {
-            if (strpos($methodName, $prefix) === 0) {
+            if (str_starts_with($methodName, $prefix)) {
                 return $this->getAttributeNameFromProperty(lcfirst(substr($methodName, strlen($prefix))));
             }
         }
@@ -84,22 +76,10 @@ abstract class AbstractApiNameResolution implements ApiNameResolutionInterface
 
     protected function snakeCaseToCamelCase(string $propertyName): string
     {
-        return (string) preg_replace_callback('@_([a-z])@', function ($matches) {
-            return strtoupper($matches[1]);
-        }, $propertyName);
-    }
-
-    /**
-     * @param array|string $result
-     *
-     * @return string
-     */
-    private function getSingleInflectorResult($result): string
-    {
-        if (is_array($result)) {
-            return $result[0];
-        }
-
-        return $result;
+        return (string) preg_replace_callback(
+            '@_([a-z])@',
+            fn ($matches): string => strtoupper($matches[1]),
+            $propertyName,
+        );
     }
 }

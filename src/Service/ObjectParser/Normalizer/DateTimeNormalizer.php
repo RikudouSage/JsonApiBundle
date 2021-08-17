@@ -9,30 +9,11 @@ use DateTimeInterface;
 
 final class DateTimeNormalizer implements DisablableApiObjectNormalizerInterface
 {
-    /**
-     * @var bool
-     */
-    private $enabled;
-
-    /**
-     * @var string
-     */
-    private $format;
-
-    public function __construct(bool $enabled, string $format)
+    public function __construct(private bool $enabled, private string $format)
     {
-        $this->enabled = $enabled;
-        $this->format = $format;
     }
 
-    /**
-     * Returns the value in a normalized format that can be handled by api
-     *
-     * @param object $object
-     *
-     * @return int|string|bool|float|array
-     */
-    public function getNormalizedValue($object)
+    public function getNormalizedValue(object $object): string
     {
         assert($object instanceof DateTimeInterface);
 
@@ -40,8 +21,6 @@ final class DateTimeNormalizer implements DisablableApiObjectNormalizerInterface
     }
 
     /**
-     * Returns the classes/interfaces that can be handled by the normalizer
-     *
      * @return string[]
      */
     public function handles(): array
@@ -54,11 +33,6 @@ final class DateTimeNormalizer implements DisablableApiObjectNormalizerInterface
         ];
     }
 
-    /**
-     * Whether the normalizer is enabled
-     *
-     * @return bool
-     */
     public function isEnabled(): bool
     {
         return $this->enabled;

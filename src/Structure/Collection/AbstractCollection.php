@@ -15,91 +15,83 @@ use LogicException;
 use Rikudou\JsonApiBundle\Exception\LockedCollectionException;
 use function sprintf;
 
+/**
+ * @template() T
+ */
 abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
 {
-    /**
-     * @var array
-     */
-    protected $data;
+    protected array $keys = [];
+
+    protected int $current = 0;
+
+    protected int $count = 0;
+
+    private bool $locked = false;
 
     /**
-     * @var array
+     * @param T[] $data
      */
-    protected $keys;
-
-    /**
-     * @var int
-     */
-    protected $current = 0;
-
-    /**
-     * @var int
-     */
-    protected $count = 0;
-
-    /**
-     * @var bool
-     */
-    private $locked = false;
-
-    public function __construct(array $data = [])
+    public function __construct(protected array $data = [])
     {
-        $this->data = $data;
         $this->validate();
         $this->refresh();
     }
 
     /**
-     * @param mixed $value
-     *
-     * @return $this
+     * @param T $value
      */
-    public function add($value)
+    public function add(mixed $value): static
     {
         $this->offsetSet(null, $value);
 
         return $this;
     }
 
-    public function current()
+    /**
+     * @return T
+     */
+    public function current(): mixed
     {
         return $this->offsetGet($this->keys[$this->current]);
     }
 
-    public function next()
+    public function next(): void
     {
         ++$this->current;
     }
 
-    /**
-     * @return int
-     */
-    public function key()
+    public function key(): int
     {
         return $this->keys[$this->current] ?? -1;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return isset($this->keys[$this->current]) && $this->offsetExists($this->keys[$this->current]);
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         $this->current = 0;
     }
 
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return isset($this->data[$offset]);
     }
 
-    public function offsetGet($offset)
+    /**
+     * @return T
+     */
+    public function offsetGet($offset): mixed
     {
         return $this->data[$offset];
     }
 
-    public function offsetSet($offset, $value)
+    /**
+     * @param T $value
+     */
+    public function offsetSet($offset, mixed $value): void
     {
         if ($this->locked) {
             throw new LockedCollectionException();
@@ -113,7 +105,7 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
         $this->refresh();
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         if ($this->locked) {
             throw new LockedCollectionException();
@@ -122,7 +114,7 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
         $this->refresh();
     }
 
-    public function count()
+    public function count(): int
     {
         return $this->count;
     }
@@ -131,7 +123,7 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
      * Returns the allowed type of value for this collection.
      * Return null to allow every type.
      *
-     * @return array|null
+     * @return string[]|null
      */
     abstract protected function getAllowedTypes(): ?array;
 
@@ -142,26 +134,22 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
         $this->rewind();
     }
 
-    private function lock()
+    private function lock(): void
     {
         $this->locked = true;
     }
 
-    private function unlock()
+    private function unlock(): void
     {
         $this->locked = false;
     }
 
-    /**
-     * @param mixed $value
-     */
-    private function validate($value = null)
+    private function validate(mixed $value = null)
     {
         if ($this->getAllowedTypes() === null) {
             return;
         }
 
-        /** @var string[] $allowedTypes */
         $allowedTypes = $this->getAllowedTypes();
 
         $allowedTypes = array_filter($allowedTypes, function (string $class) {
@@ -187,7 +175,7 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
             }
             if (!$success) {
                 throw new InvalidArgumentException(
-                    sprintf('The collection accepts only instances of %s', implode(', ', $allowedTypes))
+                    sprintf('The collection accepts only instances of %s', implode(', ', $allowedTypes)),
                 );
             }
         }

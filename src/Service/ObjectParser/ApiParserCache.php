@@ -14,37 +14,14 @@ use Symfony\Component\Cache\Adapter\AdapterInterface;
 
 final class ApiParserCache
 {
-    /**
-     * @var AdapterInterface
-     */
-    private $cacheAdapter;
-
-    /**
-     * @var ApiObjectValidator
-     */
-    private $objectValidator;
-
-    /**
-     * @var bool
-     */
-    private $propertyCacheEnabled;
-
     public function __construct(
-        AdapterInterface $cacheAdapter,
-        ApiObjectValidator $objectValidator,
-        bool $propertyCacheEnabled
+        private AdapterInterface $cacheAdapter,
+        private ApiObjectValidator $objectValidator,
+        private bool $propertyCacheEnabled,
     ) {
-        $this->cacheAdapter = $cacheAdapter;
-        $this->objectValidator = $objectValidator;
-        $this->propertyCacheEnabled = $propertyCacheEnabled;
     }
 
-    /**
-     * @param object $object
-     *
-     * @return CacheItemInterface
-     */
-    public function getApiCacheItem($object): CacheItemInterface
+    public function getApiCacheItem(object $object): CacheItemInterface
     {
         $this->objectValidator->throwOnInvalidObject($object);
 
@@ -61,7 +38,7 @@ final class ApiParserCache
 
         try {
             return $this->cacheAdapter->getItem(
-                $this->getCacheName($object, 'ResourceObject', false)
+                $this->getCacheName($object, 'ResourceObject', false),
             );
         } catch (InvalidArgumentException $e) {
             throw new ExceptionThatShouldntHappen($e);
@@ -82,7 +59,7 @@ final class ApiParserCache
         $name = sprintf(
             'ApiObjectParserCache_%s_%s',
             $this->objectValidator->getRealClass($object),
-            $includeId ? $object->getId() : ''
+            $includeId ? $object->getId() : '',
         );
         if ($postfix) {
             $name .= "_{$postfix}";

@@ -2,49 +2,27 @@
 
 namespace Rikudou\JsonApiBundle\Structure;
 
+use JetBrains\PhpStorm\ArrayShape;
 use JsonSerializable;
 
 final class JsonApiRelationshipData implements JsonSerializable
 {
-    /**
-     * @var string
-     */
-    private $type;
-
-    /**
-     * @var int|string|null
-     */
-    private $id;
-
-    /**
-     * JsonApiRelationshipData constructor.
-     *
-     * @param string          $type
-     * @param int|string|null $id
-     */
-    public function __construct(string $type, $id)
+    public function __construct(private string $type, private int|string|null $id)
     {
-        $this->type = $type;
-        $this->id = $id;
     }
 
-    /**
-     * @return string
-     */
     public function getType(): string
     {
         return $this->type;
     }
 
-    /**
-     * @return int|string|null
-     */
-    public function getId()
+    public function getId(): int|string|null
     {
         return $this->id;
     }
 
-    public function jsonSerialize()
+    #[ArrayShape(['id' => 'int|null|string', 'type' => 'string'])]
+    public function jsonSerialize(): array
     {
         return [
             'id' => $this->id,

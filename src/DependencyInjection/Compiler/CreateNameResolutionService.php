@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 final class CreateNameResolutionService implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $serviceId = $container->getParameter('rikudou_api.name_resolution_service');
         $service = $container->getDefinition($serviceId);
@@ -19,8 +19,8 @@ final class CreateNameResolutionService implements CompilerPassInterface
             throw new LogicException(
                 sprintf(
                     'The name resolution service must implement the %s interface',
-                    ApiNameResolutionInterface::class
-                )
+                    ApiNameResolutionInterface::class,
+                ),
             );
         }
 

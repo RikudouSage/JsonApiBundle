@@ -3,19 +3,20 @@
 namespace Rikudou\JsonApiBundle\Structure\Collection;
 
 use function array_merge;
+use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\Pure;
 use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\EmptyObject;
 use Rikudou\JsonApiBundle\Structure\JsonApiMeta;
 
 /**
- * @method JsonApiMeta current()
- * @method JsonApiMeta offsetGet($offset)
- * @method void offsetSet($offset, JsonApiMeta $value)
- * @method $this add(JsonApiMeta $value)
+ * @extends() AbstractCollection<JsonApiMeta>
  */
 final class JsonApiMetaCollection extends AbstractCollection implements JsonSerializable
 {
-    public function jsonSerialize()
+    #[Pure]
+    #[ArrayShape(['meta' => "array|\Rikudou\JsonApiBundle\Structure\EmptyObject"])]
+    public function jsonSerialize(): array
     {
         $result = [
             'meta' => [],
@@ -23,7 +24,6 @@ final class JsonApiMetaCollection extends AbstractCollection implements JsonSeri
         if (!$this->count()) {
             $result['meta'] = new EmptyObject();
         } else {
-            /** @var JsonApiMeta $meta */
             foreach ($this->data as $meta) {
                 $result['meta'] = array_merge($result['meta'], $meta->jsonSerialize());
             }
@@ -32,13 +32,7 @@ final class JsonApiMetaCollection extends AbstractCollection implements JsonSeri
         return $result;
     }
 
-    /**
-     * Returns the allowed type of value for this collection.
-     * Return null to allow every type.
-     *
-     * @return array|null
-     */
-    protected function getAllowedTypes(): ?array
+    protected function getAllowedTypes(): array
     {
         return [
             JsonApiMeta::class,

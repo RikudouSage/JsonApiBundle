@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 final class FindFilteredQueryBuilder implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $builders = $container->findTaggedServiceIds('rikudou_api.filtered_query_builder');
         $resultingBuilder = null;
@@ -34,11 +34,11 @@ final class FindFilteredQueryBuilder implements CompilerPassInterface
         $definition = $container->getDefinition((string) $resultingBuilder);
         $definition->addMethodCall(
             'setEntityManager',
-            [new Reference('doctrine.orm.entity_manager')]
+            [new Reference('doctrine.orm.entity_manager')],
         );
         $definition->addMethodCall(
             'setPropertyParser',
-            [new Reference('rikudou_api.object_parser.property_parser')]
+            [new Reference('rikudou_api.object_parser.property_parser')],
         );
 
         $container->setAlias(FilteredQueryBuilderInterface::class, (string) $resultingBuilder);

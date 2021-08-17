@@ -2,34 +2,24 @@
 
 namespace Rikudou\JsonApiBundle\Structure;
 
+use JetBrains\PhpStorm\ArrayShape;
 use JsonSerializable;
 use Symfony\Component\HttpFoundation\Response;
 
 final class JsonApiError implements JsonSerializable
 {
-    /**
-     * @var string
-     */
-    private $title;
+    private string $statusCode;
 
-    /**
-     * @var string
-     */
-    private $description;
-
-    /**
-     * @var string
-     */
-    private $statusCode;
-
-    public function __construct(string $title, string $description = '', int $statusCode = Response::HTTP_BAD_REQUEST)
-    {
-        $this->title = $title;
-        $this->description = $description;
+    public function __construct(
+        private string $title,
+        private string $description = '',
+        int $statusCode = Response::HTTP_BAD_REQUEST,
+    ) {
         $this->statusCode = (string) $statusCode;
     }
 
-    public function jsonSerialize()
+    #[ArrayShape(['title' => 'string', 'detail' => 'string', 'status' => 'string'])]
+    public function jsonSerialize(): array
     {
         return [
             'title' => $this->title,
@@ -38,60 +28,36 @@ final class JsonApiError implements JsonSerializable
         ];
     }
 
-    /**
-     * @return string
-     */
     public function getTitle(): string
     {
         return $this->title;
     }
 
-    /**
-     * @param string $title
-     *
-     * @return JsonApiError
-     */
-    public function setTitle(string $title): JsonApiError
+    public function setTitle(string $title): self
     {
         $this->title = $title;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getDescription(): string
     {
         return $this->description;
     }
 
-    /**
-     * @param string $description
-     *
-     * @return JsonApiError
-     */
-    public function setDescription(string $description): JsonApiError
+    public function setDescription(string $description): self
     {
         $this->description = $description;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getStatusCode(): string
     {
         return $this->statusCode;
     }
 
-    /**
-     * @param string $statusCode
-     *
-     * @return JsonApiError
-     */
-    public function setStatusCode(string $statusCode): JsonApiError
+    public function setStatusCode(string $statusCode): self
     {
         $this->statusCode = $statusCode;
 

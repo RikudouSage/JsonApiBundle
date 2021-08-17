@@ -7,22 +7,11 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 final class Configuration implements ConfigurationInterface
 {
-    /**
-     * @var bool
-     */
-    private $isDebug;
-
-    public function __construct(bool $isDebug)
+    public function __construct(private bool $isDebug)
     {
-        $this->isDebug = $isDebug;
     }
 
-    /**
-     * Generates the configuration tree builder.
-     *
-     * @return TreeBuilder The tree builder
-     */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('rikudou_json_api_bundle');
         $rootNode = $treeBuilder->getRootNode();
@@ -43,7 +32,7 @@ final class Configuration implements ConfigurationInterface
                     ->defaultValue(!$this->isDebug)
                 ->end()
                 ->booleanNode('auto_discover_resources')
-                    ->info('Whether the bundle should look for all classes marked with ApiResource annotation and enable them automatically')
+                    ->info('Whether the bundle should look for all classes marked with ApiResource attribute and enable them automatically')
                     ->defaultTrue()
                 ->end()
                 ->arrayNode('auto_discover_paths')

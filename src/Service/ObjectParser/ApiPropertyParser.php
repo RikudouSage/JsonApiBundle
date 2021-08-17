@@ -4,64 +4,37 @@ namespace Rikudou\JsonApiBundle\Service\ObjectParser;
 
 use function array_merge;
 use function assert;
-use Doctrine\Common\Annotations\AnnotationException;
-use Doctrine\Common\Annotations\AnnotationReader;
 use function in_array;
+use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\Pure;
 use function method_exists;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionMethod;
 use ReflectionProperty;
-use Rikudou\JsonApiBundle\Annotation\ApiProperty;
-use Rikudou\JsonApiBundle\Annotation\ApiResource;
+use Rikudou\JsonApiBundle\Attribute\ApiProperty;
+use Rikudou\JsonApiBundle\Attribute\ApiResource;
 use Rikudou\JsonApiBundle\Exception\InvalidApiPropertyConfig;
 use Rikudou\JsonApiBundle\NameResolution\ApiNameResolutionInterface;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
 final class ApiPropertyParser implements ServiceSubscriberInterface
 {
-    /**
-     * @var ApiObjectValidator
-     */
-    private $objectValidator;
-
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
-
-    /**
-     * @var ApiParserCache
-     */
-    private $parserCache;
-
-    /**
-     * @var ApiNameResolutionInterface
-     */
-    private $nameResolution;
-
     public function __construct(
-        ApiObjectValidator $objectValidator,
-        ContainerInterface $container,
-        ApiParserCache $parserCache,
-        ApiNameResolutionInterface $nameResolution
+        private ApiObjectValidator $objectValidator,
+        private ContainerInterface $container,
+        private ApiParserCache $parserCache,
+        private ApiNameResolutionInterface $nameResolution,
     ) {
-        $this->objectValidator = $objectValidator;
-        $this->container = $container;
-        $this->parserCache = $parserCache;
-        $this->nameResolution = $nameResolution;
     }
 
     /**
-     * @param object $object
-     *
-     *@throws \ReflectionException
-     * @throws AnnotationException
+     * @throws ReflectionException
      *
      * @return ApiObjectAccessor[]
-     *
      */
-    public function getApiProperties($object)
+    public function getApiProperties(object $object): array
     {
         $this->objectValidator->throwOnInvalidObject($object);
         assert(method_exists($object, 'getId'));
@@ -84,7 +57,8 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
         return $cache->get();
     }
 
-    public static function getSubscribedServices()
+    #[ArrayShape(['rikudou_api.object_parser.parser' => 'string'])]
+    public static function getSubscribedServices(): array
     {
         return [
             'rikudou_api.object_parser.parser' => ApiObjectParser::class,
@@ -96,24 +70,23 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
         return $this->container->get('rikudou_api.object_parser.parser');
     }
 
-    /**
-     * @param ReflectionClass $class
-     *
-     * @throws AnnotationException
-     *
-     * @return array
-     */
-    private function getResourcePropertyConfig(ReflectionClass $class)
+    #[Pure]
+    #[ArrayShape(['enabled' => 'array|mixed', 'disabled' => 'array|mixed'])]
+    private function getResourcePropertyConfig(ReflectionClass $class): array
     {
         $result = [
             'enabled' => [],
             'disabled' => [],
         ];
-        $annotationReader = new AnnotationReader();
-        $annotation = $annotationReader->getClassAnnotation($class, ApiResource::class);
-        if ($annotation instanceof ApiResource) {
-            $result['enabled'] = $annotation->enabledProperties;
-            $result['disabled'] = $annotation->disabledProperties;
+        $attributes = $class->getAttributes(ApiResource::class);
+        if (!count($attributes)) {
+            return $result;
+        }
+
+        $attribute = $attributes[0];
+        if ($attribute instanceof ApiResource) {
+            $result['enabled'] = $attribute->enabledProperties;
+            $result['disabled'] = $attribute->disabledProperties;
         }
 
         return $result;
@@ -124,14 +97,13 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
      * @param ApiProperty[]        $classProperties
      * @param string[]             $disabled
      *
-     *@throws AnnotationException
-     *
      * @return ApiObjectAccessor[]
-     *
      */
-    private function parsedProperties(array $properties, array $classProperties, array $disabled)
-    {
-        $annotationReader = new AnnotationReader();
+    private function parsedProperties(
+        array $properties,
+        array $classProperties,
+        array $disabled,
+    ): array {
         $result = [];
 
         foreach ($properties as $property) {
@@ -139,50 +111,46 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
                 continue;
             }
             if (isset($classProperties[$property->getName()])) {
-                $annotation = $classProperties[$property->getName()];
+                $attribute = $classProperties[$property->getName()];
             } else {
-                $annotation = $annotationReader->getPropertyAnnotation($property, ApiProperty::class);
+                $attributes = $property->getAttributes(ApiProperty::class);
+                $attribute = $attributes[0] ?? null;
             }
 
-            if ($annotation === null) {
+            if ($attribute === null) {
                 if ($property->getName() === 'id') {
-                    $annotation = new ApiProperty();
+                    $attribute = new ApiProperty();
                 } else {
                     continue;
                 }
             }
-            assert($annotation instanceof ApiProperty);
+            assert($attribute instanceof ApiProperty);
 
-            if ($annotation->name) {
-                $name = $annotation->name;
+            if ($attribute->name) {
+                $name = $attribute->name;
             } else {
                 $name = $this->nameResolution->getAttributeNameFromProperty($property->getName());
             }
 
-            $result[$name] = $this->findPropertyAccessor($annotation, $property);
+            $result[$name] = $this->findPropertyAccessor($attribute, $property);
         }
 
         return $result;
     }
 
-    /**
-     * @param ApiProperty        $annotation
-     * @param ReflectionProperty $property
-     *
-     * @return ApiObjectAccessor
-     */
-    private function findPropertyAccessor(ApiProperty $annotation, ReflectionProperty $property)
-    {
+    private function findPropertyAccessor(
+        ApiProperty $attribute,
+        ReflectionProperty $property,
+    ): ApiObjectAccessor {
         $class = $property->getDeclaringClass();
 
-        /** @var string|null $getter */
-        $getter = $annotation->getter;
-        $setter = $annotation->setter;
-        $adder = $annotation->adder;
-        $remover = $annotation->remover;
-        $isRelation = $annotation->relation;
+        $getter = $attribute->getter;
+        $setter = $attribute->setter;
+        $adder = $attribute->adder;
+        $remover = $attribute->remover;
+        $isRelation = $attribute->relation;
 
-        if ($annotation->readonly) {
+        if ($attribute->readonly) {
             $setter = null;
             $adder = null;
             $remover = null;
@@ -196,33 +164,33 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
                 null,
                 null,
                 $isRelation,
-                $annotation->readonly,
-                $annotation->silentFail
+                $attribute->readonly,
+                $attribute->silentFail,
             );
         }
 
         if ($getter !== null && !$class->hasMethod($getter)) {
             throw new InvalidApiPropertyConfig(
                 InvalidApiPropertyConfig::TYPE_GETTER,
-                $property->getName()
+                $property->getName(),
             );
         }
         if ($setter !== null && !$class->hasMethod($setter)) {
             throw new InvalidApiPropertyConfig(
                 InvalidApiPropertyConfig::TYPE_SETTER,
-                $property->getName()
+                $property->getName(),
             );
         }
         if ($adder !== null && !$class->hasMethod($adder)) {
             throw new InvalidApiPropertyConfig(
                 InvalidApiPropertyConfig::TYPE_ADDER,
-                $property->getName()
+                $property->getName(),
             );
         }
         if ($remover !== null && !$class->hasMethod($remover)) {
             throw new InvalidApiPropertyConfig(
                 InvalidApiPropertyConfig::TYPE_REMOVER,
-                $property->getName()
+                $property->getName(),
             );
         }
 
@@ -241,12 +209,12 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
             if ($getter === null) {
                 throw new InvalidApiPropertyConfig(
                     InvalidApiPropertyConfig::TYPE_GETTER,
-                    $property->getName()
+                    $property->getName(),
                 );
             }
         }
 
-        if (!$annotation->readonly) {
+        if (!$attribute->readonly) {
             $setter = $setter ?? $this->nameResolution->getSetter($property->getName());
             $adder = $adder ?? $this->nameResolution->getAdder($property->getName());
             $remover = $remover ?? $this->nameResolution->getRemover($property->getName());
@@ -263,36 +231,34 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
             $class->hasMethod($adder) ? $adder : null,
             $class->hasMethod($remover) ? $remover : null,
             $isRelation,
-            $annotation->readonly,
-            $annotation->silentFail
+            $attribute->readonly,
+            $attribute->silentFail,
         );
     }
 
     /**
      * @param ReflectionMethod[] $methods
      *
-     * @throws AnnotationException
-     *
      * @return ApiObjectAccessor[]
      */
-    private function parsedMethods(array $methods)
+    private function parsedMethods(array $methods): array
     {
-        $annotationReader = new AnnotationReader();
         $result = [];
         foreach ($methods as $method) {
-            $annotation = $annotationReader->getMethodAnnotation($method, ApiProperty::class);
-            if ($annotation === null) {
+            $attributes = $method->getAttributes(ApiProperty::class);
+            $attribute = $attributes[0] ?? null;
+            if ($attribute === null) {
                 if ($method->getName() === 'getId') {
-                    $annotation = new ApiProperty();
+                    $attribute = new ApiProperty();
                 } else {
                     continue;
                 }
             }
 
-            assert($annotation instanceof ApiProperty);
+            assert($attribute instanceof ApiProperty);
 
-            if ($annotation->name) {
-                $name = $annotation->name;
+            if ($attribute->name) {
+                $name = $attribute->name;
             } else {
                 $name = $this->nameResolution->getAttributeNameFromMethod($method->getName());
             }
@@ -300,12 +266,12 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
             $result[$name] = new ApiObjectAccessor(
                 ApiObjectAccessor::TYPE_METHOD,
                 $method->getName(),
-                $annotation->setter,
-                $annotation->adder,
-                $annotation->remover,
-                $annotation->relation,
-                $annotation->readonly,
-                $annotation->silentFail
+                $attribute->setter,
+                $attribute->adder,
+                $attribute->remover,
+                $attribute->relation,
+                $attribute->readonly,
+                $attribute->silentFail,
             );
         }
 

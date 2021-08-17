@@ -12,40 +12,19 @@ use Rikudou\JsonApiBundle\Structure\Collection\JsonApiRelationshipCollection;
 
 final class JsonApiObject implements JsonSerializable
 {
-    /**
-     * @var string|null
-     */
-    private $type;
+    private ?string $type;
 
-    /**
-     * @var string|int|null
-     */
-    private $id;
+    private string|int|null $id;
 
-    /**
-     * @var JsonApiAttributesCollection
-     */
-    private $attributes;
+    private JsonApiAttributesCollection $attributes;
 
-    /**
-     * @var JsonApiLinksCollection
-     */
-    private $links;
+    private JsonApiLinksCollection $links;
 
-    /**
-     * @var JsonApiMetaCollection
-     */
-    private $meta;
+    private JsonApiMetaCollection $meta;
 
-    /**
-     * @var JsonApiRelationshipCollection
-     */
-    private $relationships;
+    private JsonApiRelationshipCollection $relationships;
 
-    /**
-     * @var JsonApiIncludesCollection
-     */
-    private $includes;
+    private JsonApiIncludesCollection $includes;
 
     public function __construct(array $json = [])
     {
@@ -57,126 +36,77 @@ final class JsonApiObject implements JsonSerializable
         return (string) json_encode($this->jsonSerialize());
     }
 
-    /**
-     * @return string
-     */
     public function getType(): ?string
     {
         return $this->type;
     }
 
-    /**
-     * @param string $type
-     *
-     * @return JsonApiObject
-     */
-    public function setType(string $type): JsonApiObject
+    public function setType(string $type): self
     {
         $this->type = $type;
 
         return $this;
     }
 
-    /**
-     * @return int|string|null
-     */
-    public function getId()
+    public function getId(): int|string|null
     {
         return $this->id;
     }
 
-    /**
-     * @param int|string $id
-     *
-     * @return JsonApiObject
-     */
-    public function setId($id)
+    public function setId(int|string $id): self
     {
         $this->id = $id;
 
         return $this;
     }
 
-    /**
-     * @return JsonApiAttributesCollection
-     */
     public function getAttributes(): JsonApiAttributesCollection
     {
         return $this->attributes;
     }
 
-    /**
-     * @return JsonApiLinksCollection
-     */
     public function getLinks(): JsonApiLinksCollection
     {
         return $this->links;
     }
 
-    /**
-     * @return JsonApiMetaCollection
-     */
     public function getMeta(): JsonApiMetaCollection
     {
         return $this->meta;
     }
 
-    /**
-     * @return JsonApiRelationshipCollection
-     */
     public function getRelationships(): JsonApiRelationshipCollection
     {
         return $this->relationships;
     }
 
-    /**
-     * @return JsonApiIncludesCollection
-     */
     public function getIncludes(): JsonApiIncludesCollection
     {
         return $this->includes;
     }
 
-    /**
-     * @param string                           $name
-     * @param int|string|bool|float|array|null $value
-     *
-     * @return JsonApiObject
-     */
-    public function addAttribute(string $name, $value)
+    public function addAttribute(string $name, float|array|bool|int|string|null $value): self
     {
         $this->attributes[] = new JsonApiAttribute($name, $value);
 
         return $this;
     }
 
-    public function addLink(string $name, string $link)
+    public function addLink(string $name, string $link): self
     {
         $this->links[] = new JsonApiLink($name, $link);
 
         return $this;
     }
 
-    /**
-     * @param string                           $name
-     * @param int|string|float|bool|array|null $value
-     *
-     * @return JsonApiObject
-     */
-    public function addMeta(string $name, $value)
+    public function addMeta(string $name, float|array|bool|int|string|null $value): self
     {
         $this->meta[] = new JsonApiMeta($name, $value);
 
         return $this;
     }
 
-    /**
-     * @param string $name
-     * @param array  $data
-     *
-     * @return JsonApiObject
-     */
-    public function addRelationship(string $name, array $data)
+    public function addRelationship(string $name, array $data): self
     {
         $this->relationships[] = new JsonApiRelationship($name, [
             'data' => $data,
@@ -185,19 +115,14 @@ final class JsonApiObject implements JsonSerializable
         return $this;
     }
 
-    /**
-     * @param JsonApiObject $include
-     *
-     * @return $this
-     */
-    public function addInclude(JsonApiObject $include)
+    public function addInclude(JsonApiObject $include): self
     {
         $this->includes[] = $include;
 
         return $this;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         $json = array_merge(
             [
@@ -207,7 +132,7 @@ final class JsonApiObject implements JsonSerializable
             $this->attributes->jsonSerialize(),
             $this->relationships->jsonSerialize(),
             $this->meta->jsonSerialize(),
-            $this->links->jsonSerialize()
+            $this->links->jsonSerialize(),
         );
 
         if (!count($json['meta'])) {
@@ -229,7 +154,7 @@ final class JsonApiObject implements JsonSerializable
         return $result;
     }
 
-    private function parse(array $json)
+    private function parse(array $json): void
     {
         $this->attributes = new JsonApiAttributesCollection();
         $this->links = new JsonApiLinksCollection();

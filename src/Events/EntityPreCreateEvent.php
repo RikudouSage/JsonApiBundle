@@ -6,35 +6,16 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 final class EntityPreCreateEvent extends Event
 {
-    /**
-     * @var object
-     */
-    private $entity;
-
-    /**
-     * EntityPreCreateEvent constructor.
-     *
-     * @param object $entity
-     */
-    public function __construct($entity)
+    public function __construct(private object $entity)
     {
-        $this->entity = $entity;
     }
 
-    /**
-     * @return object
-     */
-    public function getEntity()
+    public function getEntity(): object
     {
         return $this->entity;
     }
 
-    /**
-     * @param object $entity
-     *
-     * @return EntityPreCreateEvent
-     */
-    public function setEntity($entity): EntityPreCreateEvent
+    public function setEntity(object $entity): self
     {
         $this->entity = $entity;
 

@@ -2,24 +2,24 @@
 
 namespace Rikudou\JsonApiBundle\Structure\Collection;
 
+use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\Pure;
 use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\JsonApiError;
 
 /**
- * @method JsonApiError current()
- * @method JsonApiError offsetGet($offset)
- * @method void offsetSet($offset, JsonApiError $value)
- * @method $this add(JsonApiError $value)
+ * @extends() AbstractCollection<JsonApiError>
  */
 final class JsonApiErrorCollection extends AbstractCollection implements JsonSerializable
 {
-    public function jsonSerialize()
+    #[Pure]
+    #[ArrayShape(['errors' => 'array'])]
+    public function jsonSerialize(): array
     {
         $result = [
             'errors' => [],
         ];
 
-        /** @var JsonApiError $error */
         foreach ($this->data as $error) {
             $result['errors'][] = $error->jsonSerialize();
         }
@@ -27,13 +27,7 @@ final class JsonApiErrorCollection extends AbstractCollection implements JsonSer
         return $result;
     }
 
-    /**
-     * Returns the allowed type of value for this collection.
-     * Return null to allow every type.
-     *
-     * @return array|null
-     */
-    protected function getAllowedTypes(): ?array
+    protected function getAllowedTypes(): array
     {
         return [
             JsonApiError::class,

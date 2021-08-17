@@ -6,57 +6,28 @@ use JsonSerializable;
 
 final class JsonApiAttribute implements JsonSerializable
 {
-    /**
-     * @var string
-     */
-    private $name;
-
-    /**
-     * @var array|float|int|string|null|bool
-     */
-    private $value;
-
-    /**
-     * JsonApiObjectAttribute constructor.
-     *
-     * @param string                           $name
-     * @param string|int|float|null|array|bool $value
-     */
-    public function __construct(string $name, $value)
+    public function __construct(private string $name, private float|array|bool|int|string|null $value)
     {
-        $this->name = $name;
-        $this->value = $value;
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return array|float|int|string|null|bool
-     */
-    public function getValue()
+    public function getValue(): float|array|bool|int|string|null
     {
         return $this->value;
     }
 
-    /**
-     * @param array|bool|float|int|string|null $value
-     *
-     * @return JsonApiAttribute
-     */
-    public function setValue($value)
+    public function setValue(float|int|bool|array|string|null $value): self
     {
         $this->value = $value;
 
         return $this;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return [
             $this->name => $this->value,

@@ -11,68 +11,43 @@ interface ApiControllerInterface
 {
     /**
      * Returns the name of the class that this controller handles
-     *
-     * @return string
      */
     public function getClass(): string;
 
     /**
      * Returns the collection of items
-     *
-     * @return JsonApiCollection|JsonApiResponse
      */
-    public function getCollection();
+    public function getCollection(): JsonApiCollection|JsonApiResponse;
 
     /**
      * Returns the item with given id
-     *
-     * @param string|int $id
-     *
-     * @return JsonApiObject|JsonApiResponse
      */
-    public function getItem($id);
+    public function getItem(int|string $id): JsonApiObject|JsonApiResponse;
 
     /**
      * Adds a new item, should return the current item
-     *
-     * @return JsonApiObject|JsonApiResponse
      */
-    public function addItem();
+    public function addItem(): JsonApiObject|JsonApiResponse;
 
     /**
      * Deletes the item with given id
-     *
-     * @param string|int $id
-     *
-     * @return Response|JsonApiResponse
      */
-    public function deleteItem($id);
+    public function deleteItem(int|string $id): JsonApiResponse|Response|JsonApiObject;
 
     /**
      * Updates the item with given id
-     *
-     * @param int|string $id
-     *
-     * @return JsonApiObject|JsonApiResponse
      */
-    public function updateItem($id);
+    public function updateItem(int|string $id): JsonApiObject|JsonApiResponse;
 
     /**
      * This method is called by router to set the resource name
-     *
-     * @param string $resourceName
      */
     public function setResourceName(string $resourceName): void;
 
     /**
      * Called by the bundle, sets the controller's service name
-     *
-     * @param string $serviceName
      */
     public function setServiceName(string $serviceName): void;
 
-    /**
-     * @return string
-     */
     public function getServiceName(): string;
 }

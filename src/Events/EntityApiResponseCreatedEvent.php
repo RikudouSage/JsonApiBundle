@@ -2,6 +2,7 @@
 
 namespace Rikudou\JsonApiBundle\Events;
 
+use JetBrains\PhpStorm\ExpectedValues;
 use Rikudou\JsonApiBundle\Structure\Collection\JsonApiCollection;
 use Rikudou\JsonApiBundle\Structure\JsonApiObject;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -18,78 +19,37 @@ final class EntityApiResponseCreatedEvent extends Event
 
     public const TYPE_DELETE_ITEM = 'delete_item';
 
-    /**
-     * @var JsonApiCollection|JsonApiObject|null
-     */
-    private $data;
-
-    /**
-     * @var string
-     */
-    private $responseType;
-
-    /**
-     * @var string
-     */
-    private $apiResource;
-
-    /**
-     * @var string
-     */
-    private $apiResourceClass;
-
-    /**
-     * @param JsonApiObject|JsonApiCollection|null $data
-     * @param string                               $responseType
-     * @param string                               $apiResource
-     * @param string                               $apiResourceClass
-     */
-    public function __construct($data, string $responseType, string $apiResource, string $apiResourceClass)
-    {
-        $this->data = $data;
-        $this->responseType = $responseType;
-        $this->apiResource = $apiResource;
-        $this->apiResourceClass = $apiResourceClass;
+    public function __construct(
+        private JsonApiCollection|JsonApiObject|null $data,
+        #[ExpectedValues(valuesFromClass: EntityApiResponseCreatedEvent::class)]
+        private string $responseType,
+        private string $apiResource,
+        private string $apiResourceClass,
+    ) {
     }
 
-    /**
-     * @return JsonApiCollection|JsonApiObject|null
-     */
-    public function getData()
+    public function getData(): JsonApiCollection|JsonApiObject|null
     {
         return $this->data;
     }
 
-    /**
-     * @return string
-     */
+    #[ExpectedValues(valuesFromClass: EntityApiResponseCreatedEvent::class)]
     public function getResponseType(): string
     {
         return $this->responseType;
     }
 
-    /**
-     * @return string
-     */
     public function getApiResource(): string
     {
         return $this->apiResource;
     }
 
-    /**
-     * @return string
-     */
     public function getApiResourceClass(): string
     {
         return $this->apiResourceClass;
     }
 
-    /**
-     * @param JsonApiCollection|JsonApiObject $data
-     *
-     * @return EntityApiResponseCreatedEvent
-     */
-    public function setData($data)
+    public function setData(JsonApiCollection|JsonApiObject $data): self
     {
         $this->data = $data;
 

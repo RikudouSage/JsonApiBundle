@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 final class RikudouJsonApiBundle extends Bundle
 {
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         parent::build($container);
 
@@ -34,22 +34,22 @@ final class RikudouJsonApiBundle extends Bundle
         $container->addCompilerPass(
             new FindFilteredQueryBuilder(),
             PassConfig::TYPE_BEFORE_OPTIMIZATION,
-            -1
+            -1,
         );
         $container->addCompilerPass(
             new CreateAutomaticEntityControllers(),
             PassConfig::TYPE_BEFORE_OPTIMIZATION,
-            -2
+            -2,
         );
         $container->addCompilerPass(
             new SetEntityControllerDependencies(),
             PassConfig::TYPE_BEFORE_OPTIMIZATION,
-            -3
+            -3,
         );
         $container->addCompilerPass(
             new PopulateResourceLocator(),
             PassConfig::TYPE_BEFORE_OPTIMIZATION,
-            -4
+            -4,
         );
     }
 }

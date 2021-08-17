@@ -15,7 +15,7 @@ final class ApiNormalizerLocator
     /**
      * @var ApiObjectNormalizerInterface[]
      */
-    private $normalizers = [];
+    private array $normalizers = [];
 
     public function addNormalizer(ApiObjectNormalizerInterface $normalizer)
     {
@@ -24,13 +24,9 @@ final class ApiNormalizerLocator
         }
     }
 
-    /**
-     * @param string|object $classOrObject
-     *
-     * @return ApiObjectNormalizerInterface|null
-     */
-    public function getNormalizerForClass($classOrObject): ?ApiObjectNormalizerInterface
-    {
+    public function getNormalizerForClass(
+        object|string $classOrObject,
+    ): ?ApiObjectNormalizerInterface {
         if (is_string($classOrObject) && class_exists($classOrObject)) {
             $className = $classOrObject;
         } elseif (is_object($classOrObject)) {

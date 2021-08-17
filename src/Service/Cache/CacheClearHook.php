@@ -7,28 +7,11 @@ use Symfony\Component\HttpKernel\CacheClearer\CacheClearerInterface;
 
 final class CacheClearHook implements CacheClearerInterface
 {
-    /**
-     * @var bool
-     */
-    private $enabled;
-
-    /**
-     * @var AdapterInterface
-     */
-    private $cache;
-
-    public function __construct(bool $enabled, AdapterInterface $cache)
+    public function __construct(private bool $enabled, private AdapterInterface $cache)
     {
-        $this->enabled = $enabled;
-        $this->cache = $cache;
     }
 
-    /**
-     * Clears any caches necessary.
-     *
-     * @param string $cacheDir The cache directory
-     */
-    public function clear($cacheDir)
+    public function clear(string $cacheDir)
     {
         if (!$this->enabled) {
             return;

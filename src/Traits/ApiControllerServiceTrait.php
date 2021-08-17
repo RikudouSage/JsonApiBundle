@@ -4,15 +4,9 @@ namespace Rikudou\JsonApiBundle\Traits;
 
 trait ApiControllerServiceTrait
 {
-    /**
-     * @var string
-     */
-    private $resourceName;
+    private string $resourceName;
 
-    /**
-     * @var string
-     */
-    private $serviceName;
+    private string $serviceName;
 
     public function setResourceName(string $resourceName): void
     {

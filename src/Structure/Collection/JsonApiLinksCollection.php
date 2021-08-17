@@ -3,19 +3,20 @@
 namespace Rikudou\JsonApiBundle\Structure\Collection;
 
 use function array_merge;
+use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\Pure;
 use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\EmptyObject;
 use Rikudou\JsonApiBundle\Structure\JsonApiLink;
 
 /**
- * @method JsonApiLink current()
- * @method JsonApiLink offsetGet($offset)
- * @method void offsetSet($offset, JsonApiLink $value)
- * @method $this add(JsonApiLink $value)
+ * @extends() AbstractCollection<JsonApiLink>
  */
 final class JsonApiLinksCollection extends AbstractCollection implements JsonSerializable
 {
-    public function jsonSerialize()
+    #[Pure]
+    #[ArrayShape(['links' => "array|\Rikudou\JsonApiBundle\Structure\EmptyObject"])]
+    public function jsonSerialize(): array
     {
         $result = [
             'links' => [],
@@ -23,7 +24,6 @@ final class JsonApiLinksCollection extends AbstractCollection implements JsonSer
         if (!$this->count()) {
             $result['links'] = new EmptyObject();
         } else {
-            /** @var JsonApiLink $link */
             foreach ($this->data as $link) {
                 $result['links'] = array_merge($result['links'], $link->jsonSerialize());
             }
@@ -32,13 +32,7 @@ final class JsonApiLinksCollection extends AbstractCollection implements JsonSer
         return $result;
     }
 
-    /**
-     * Returns the allowed type of value for this collection.
-     * Return null to allow every type.
-     *
-     * @return array|null
-     */
-    protected function getAllowedTypes(): ?array
+    protected function getAllowedTypes(): array
     {
         return [
             JsonApiLink::class,

@@ -8,7 +8,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 final class PopulateResourceLocator implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $services = $container->findTaggedServiceIds('rikudou_api.api_controller');
         $locator = $container->getDefinition('rikudou_api.api_resource_locator');

@@ -2,10 +2,9 @@
 
 namespace Rikudou\JsonApiBundle\DependencyInjection\Compiler;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Rikudou\JsonApiBundle\Annotation\ApiResource;
+use Rikudou\JsonApiBundle\Attribute\ApiResource;
 use Rikudou\JsonApiBundle\Controller\DefaultEntityApiController;
 use Rikudou\JsonApiBundle\Interfaces\ApiResourceInterface;
 use Rikudou\ReflectionFile;
@@ -23,7 +22,7 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
         AnnotationClassLoader::class,
     ];
 
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         if (!$container->getParameter('rikudou_api.auto_discover_resources')) {
             return;
@@ -43,10 +42,8 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
 
         foreach ($directories as $directory) {
             $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($directory)
+                new RecursiveDirectoryIterator($directory),
             );
-
-            $annotationReader = new AnnotationReader();
 
             /** @var SplFileInfo $file */
             foreach ($iterator as $file) {
@@ -81,7 +78,7 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
 
                 if (
                     $class->implementsInterface(ApiResourceInterface::class)
-                    || $annotationReader->getClassAnnotation($class, ApiResource::class)
+                    || count($class->getAttributes(ApiResource::class))
                 ) {
                     $definition = new Definition();
                     $definition->setClass(DefaultEntityApiController::class);

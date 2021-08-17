@@ -3,6 +3,7 @@
 namespace Rikudou\JsonApiBundle\Listener;
 
 use function is_array;
+use JetBrains\PhpStorm\ArrayShape;
 use Rikudou\JsonApiBundle\Exception\InvalidJsonApiArrayException;
 use Rikudou\JsonApiBundle\Exception\JsonApiErrorException;
 use Rikudou\JsonApiBundle\Response\JsonApiResponse;
@@ -15,31 +16,21 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 final class JsonApiErrorExceptionListener implements EventSubscriberInterface
 {
-    /**
-     * @var bool
-     */
-    private $enabled;
-
-    public function __construct(bool $enabled)
+    public function __construct(private bool $enabled)
     {
-        $this->enabled = $enabled;
     }
 
-    public static function getSubscribedEvents()
+    #[ArrayShape([KernelEvents::EXCEPTION => 'string'])]
+    public static function getSubscribedEvents(): array
     {
         return [
             KernelEvents::EXCEPTION => 'handleJsonApiException',
         ];
     }
 
-    public function handleJsonApiException(ExceptionEvent $event)
+    public function handleJsonApiException(ExceptionEvent $event): void
     {
-        if (method_exists($event, 'getThrowable')) {
-            $method = 'getThrowable';
-        } else {
-            $method = 'getException';
-        }
-        $exception = $event->{$method}();
+        $exception = $event->getThrowable();
         if ($exception instanceof JsonApiErrorException) {
             if (!$this->enabled) {
                 if ($previous = $exception->getPrevious()) {

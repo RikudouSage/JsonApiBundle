@@ -2,6 +2,7 @@
 
 namespace Rikudou\JsonApiBundle\Listener;
 
+use JetBrains\PhpStorm\ArrayShape;
 use Rikudou\JsonApiBundle\Response\JsonApiResponse;
 use Rikudou\JsonApiBundle\Structure\Collection\JsonApiCollection;
 use Rikudou\JsonApiBundle\Structure\JsonApiObject;
@@ -11,7 +12,8 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 final class JsonApiStructureResponseListener implements EventSubscriberInterface
 {
-    public static function getSubscribedEvents()
+    #[ArrayShape([KernelEvents::VIEW => 'string'])]
+    public static function getSubscribedEvents(): array
     {
         return [
             KernelEvents::VIEW => 'handleResponse',

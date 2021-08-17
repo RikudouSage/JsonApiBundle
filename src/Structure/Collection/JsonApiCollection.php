@@ -10,27 +10,16 @@ use Rikudou\JsonApiBundle\Structure\JsonApiObject;
 
 final class JsonApiCollection implements JsonSerializable
 {
-    /**
-     * @var JsonApiObject[]
-     */
-    private $data = [];
+    private JsonApiMetaCollection $meta;
+
+    private JsonApiLinksCollection $links;
+
+    private JsonApiIncludesCollection $includes;
 
     /**
-     * @var JsonApiMetaCollection
+     * @param JsonApiObject[] $data
      */
-    private $meta;
-
-    /**
-     * @var JsonApiLinksCollection
-     */
-    private $links;
-
-    /**
-     * @var JsonApiIncludesCollection
-     */
-    private $includes;
-
-    public function __construct(array $data = [])
+    public function __construct(private array $data = [])
     {
         $this->parse($data);
     }
@@ -48,71 +37,56 @@ final class JsonApiCollection implements JsonSerializable
         return $this->data;
     }
 
-    /**
-     * @return JsonApiMetaCollection
-     */
     public function getMeta(): JsonApiMetaCollection
     {
         return $this->meta;
     }
 
-    /**
-     * @return JsonApiLinksCollection
-     */
     public function getLinks(): JsonApiLinksCollection
     {
         return $this->links;
     }
 
-    /**
-     * @return JsonApiIncludesCollection
-     */
     public function getIncludes(): JsonApiIncludesCollection
     {
         return $this->includes;
     }
 
-    public function addObject(JsonApiObject $object)
+    public function addObject(JsonApiObject $object): self
     {
         $this->data[] = $object;
 
         return $this;
     }
 
-    public function addInclude(JsonApiObject $include)
+    public function addInclude(JsonApiObject $include): self
     {
         $this->includes[] = $include;
 
         return $this;
     }
 
-    public function addLink(string $name, ?string $link)
+    public function addLink(string $name, ?string $link): self
     {
         $this->links[] = new JsonApiLink($name, $link);
 
         return $this;
     }
 
-    /**
-     * @param string                           $name
-     * @param int|string|float|bool|array|null $value
-     *
-     * @return JsonApiCollection
-     */
-    public function addMeta(string $name, $value)
+    public function addMeta(string $name, float|array|bool|int|string|null $value): self
     {
         $this->meta[] = new JsonApiMeta($name, $value);
 
         return $this;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         $result = array_merge(
             $this->meta->jsonSerialize() ?: [],
             $this->links->jsonSerialize() ?: [],
             ['data' => []],
-            $this->includes->jsonSerialize() ?: []
+            $this->includes->jsonSerialize() ?: [],
         );
 
         foreach ($this->data as $apiObject) {
@@ -122,7 +96,7 @@ final class JsonApiCollection implements JsonSerializable
         return $result;
     }
 
-    private function parse(array $json)
+    private function parse(array $json): void
     {
         $this->meta = new JsonApiMetaCollection();
         $this->links = new JsonApiLinksCollection();

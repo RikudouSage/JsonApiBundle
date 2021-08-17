@@ -7,72 +7,39 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 final class RouterPreroutingEvent extends Event
 {
-    /**
-     * @var string
-     */
-    private $resourceName;
-
-    /**
-     * @var int|string|null
-     */
-    private $id;
-
-    /**
-     * @var ApiControllerInterface
-     */
-    private $controller;
-
-    /**
-     * RouterPreroutingEvent constructor.
-     *
-     * @param string                 $resourceName
-     * @param int|string|null        $id
-     * @param ApiControllerInterface $controller
-     */
-    public function __construct(string $resourceName, $id, ApiControllerInterface $controller)
-    {
-        $this->resourceName = $resourceName;
-        $this->id = $id;
-        $this->controller = $controller;
+    public function __construct(
+        private string $resourceName,
+        private int|string|null $id,
+        private ApiControllerInterface $controller,
+    ) {
     }
 
-    /**
-     * @return ApiControllerInterface
-     */
     public function getController(): ApiControllerInterface
     {
         return $this->controller;
     }
 
-    /**
-     * @return string
-     */
     public function getResourceName(): string
     {
         return $this->resourceName;
     }
 
-    /**
-     * @param string $resourceName
-     */
-    public function setResourceName(string $resourceName): void
+    public function setResourceName(string $resourceName): self
     {
         $this->resourceName = $resourceName;
+
+        return $this;
     }
 
-    /**
-     * @return int|string|null
-     */
-    public function getId()
+    public function getId(): int|string|null
     {
         return $this->id;
     }
 
-    /**
-     * @param int|string|null $id
-     */
-    public function setId($id): void
+    public function setId(int|string|null $id): self
     {
         $this->id = $id;
+
+        return $this;
     }
 }

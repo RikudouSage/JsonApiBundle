@@ -2,15 +2,18 @@
 
 namespace Rikudou\JsonApiBundle\Structure\Collection;
 
+use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\Pure;
 use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\JsonApiObject;
 
+/**
+ * @extends() AbstractCollection<JsonApiObject>
+ */
 final class JsonApiIncludesCollection extends AbstractCollection implements JsonSerializable
 {
-    /**
-     * @inheritDoc
-     */
-    public function jsonSerialize()
+    #[ArrayShape(['included' => 'array'])]
+    public function jsonSerialize(): array
     {
         return [
             'included' => array_map(function (JsonApiObject $item) {
@@ -19,9 +22,9 @@ final class JsonApiIncludesCollection extends AbstractCollection implements Json
         ];
     }
 
+    #[Pure]
     public function contains(JsonApiObject $include): bool
     {
-        /** @var JsonApiObject $datum */
         foreach ($this->data as $datum) {
             if ($datum->getType() === $include->getType() && $datum->getId() === $include->getId()) {
                 return true;
@@ -31,10 +34,7 @@ final class JsonApiIncludesCollection extends AbstractCollection implements Json
         return false;
     }
 
-    /**
-     * @inheritDoc
-     */
-    protected function getAllowedTypes(): ?array
+    protected function getAllowedTypes(): array
     {
         return [
             JsonApiObject::class,

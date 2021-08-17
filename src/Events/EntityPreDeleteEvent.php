@@ -6,11 +6,8 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 final class EntityPreDeleteEvent extends Event
 {
-    private object $entity;
-
-    public function __construct(object $entity)
+    public function __construct(private object $entity)
     {
-        $this->entity = $entity;
     }
 
     public function getEntity(): object

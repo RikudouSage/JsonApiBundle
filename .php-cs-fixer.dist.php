@@ -20,7 +20,7 @@ if ($ignoredTags === null) {
 
 $ignoredTags[] = 'Annotation';
 
-return PhpCsFixer\Config::create()
+return (new PhpCsFixer\Config())
     ->setRules([
         '@PSR2' => true,
         'array_syntax' => ['syntax' => 'short'],
@@ -101,7 +101,10 @@ return PhpCsFixer\Config::create()
         'single_quote' => true,
         'standardize_not_equals' => true,
         'ternary_operator_spaces' => true,
-        'trailing_comma_in_multiline_array' => true,
+        'trailing_comma_in_multiline' => [
+            'elements' => ['arrays', 'arguments', 'parameters'],
+
+        ],
         'unary_operator_spaces' => true,
         'visibility_required' => [
             'elements' => ['property', 'method', 'const'],

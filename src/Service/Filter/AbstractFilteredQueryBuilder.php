@@ -3,7 +3,6 @@
 namespace Rikudou\JsonApiBundle\Service\Filter;
 
 use function array_keys;
-use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use function explode;
@@ -12,38 +11,23 @@ use InvalidArgumentException;
 use function is_array;
 use ReflectionException;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiPropertyParser;
-use function strpos;
 use function substr;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInterface
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
+
+    private ApiPropertyParser $propertyParser;
 
     /**
-     * @var ApiPropertyParser
-     */
-    private $propertyParser;
-
-    /**
-     * @param string       $class
-     * @param ParameterBag $queryParams
-     * @param bool         $useFilter
-     * @param bool         $useSort
-     *
-     * @throws AnnotationException
      * @throws ReflectionException
-     *
-     * @return QueryBuilder
      */
     public function get(
         string $class,
         ParameterBag $queryParams,
         bool $useFilter = true,
-        bool $useSort = true
+        bool $useSort = true,
     ): QueryBuilder {
         $builder = $this->entityManager->createQueryBuilder();
         $builder
@@ -72,7 +56,7 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
 
                     for ($j = 0; $j < count($values); $j++) {
                         $operator = '=';
-                        if (strpos($values[$j], '!') === 0) {
+                        if (str_starts_with($values[$j], '!')) {
                             $operator = '!=';
                             $values[$j] = substr($values[$j], 1);
                         }
@@ -94,7 +78,7 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                 $sortFields = explode(',', $sort);
                 foreach ($sortFields as $sortField) {
                     $mode = 'ASC';
-                    if (substr($sortField, 0, 1) === '-') {
+                    if (str_starts_with($sortField, '-')) {
                         $mode = 'DESC';
                         $sortField = substr($sortField, 1);
                     }
@@ -112,8 +96,6 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
     ////////////// CONTAINER //////////////
 
     /**
-     * @param EntityManagerInterface $entityManager
-     *
      * @internal
      */
     public function setEntityManager(EntityManagerInterface $entityManager): void
@@ -122,8 +104,6 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
     }
 
     /**
-     * @param ApiPropertyParser $propertyParser
-     *
      * @internal
      */
     public function setPropertyParser(ApiPropertyParser $propertyParser): void

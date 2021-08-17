@@ -5,8 +5,6 @@ namespace Rikudou\JsonApiBundle\Service\ObjectParser;
 use function assert;
 use function call_user_func;
 use function count;
-use Doctrine\Common\Annotations\AnnotationException;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
 use function gettype;
@@ -18,10 +16,11 @@ use LogicException;
 use function method_exists;
 use ReflectionClass;
 use ReflectionException;
-use Rikudou\JsonApiBundle\Annotation\ApiResource;
+use Rikudou\JsonApiBundle\Attribute\ApiResource;
 use Rikudou\JsonApiBundle\Exception\AccessViolationException;
 use Rikudou\JsonApiBundle\Exception\InvalidApiPropertyConfig;
 use Rikudou\JsonApiBundle\Exception\InvalidJsonApiArrayException;
+use Rikudou\JsonApiBundle\Exception\ResourceNotFoundException;
 use Rikudou\JsonApiBundle\NameResolution\ApiNameResolutionInterface;
 use Rikudou\JsonApiBundle\Service\ApiNormalizerLocator;
 use Rikudou\JsonApiBundle\Service\ApiResourceLocator;
@@ -33,75 +32,23 @@ use UnexpectedValueException;
 
 final class ApiObjectParser
 {
-    /**
-     * @var ApiPropertyParser
-     */
-    private $propertyParser;
-
-    /**
-     * @var ApiObjectValidator
-     */
-    private $objectValidator;
-
-    /**
-     * @var ApiParserCache
-     */
-    private $parserCache;
-
-    /**
-     * @var ApiNameResolutionInterface
-     */
-    private $nameResolution;
-
-    /**
-     * @var ApiNormalizerLocator
-     */
-    private $normalizerLocator;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-
-    /**
-     * @var ApiResourceLocator
-     */
-    private $resourceLocator;
-
-    /**
-     * @var Inflector
-     */
-    private $inflector;
+    private ApiResourceLocator $resourceLocator;
 
     public function __construct(
-        ApiPropertyParser $propertyParser,
-        ApiObjectValidator $objectValidator,
-        ApiParserCache $parserCache,
-        ApiNameResolutionInterface $nameResolution,
-        ApiNormalizerLocator $normalizerLocator,
-        EntityManagerInterface $entityManager,
-        Inflector $inflector
+        private ApiPropertyParser $propertyParser,
+        private ApiObjectValidator $objectValidator,
+        private ApiParserCache $parserCache,
+        private ApiNameResolutionInterface $nameResolution,
+        private ApiNormalizerLocator $normalizerLocator,
+        private EntityManagerInterface $entityManager,
+        private Inflector $inflector,
     ) {
-        $this->propertyParser = $propertyParser;
-        $this->objectValidator = $objectValidator;
-        $this->parserCache = $parserCache;
-        $this->nameResolution = $nameResolution;
-        $this->normalizerLocator = $normalizerLocator;
-        $this->entityManager = $entityManager;
-        $this->inflector = $inflector;
     }
 
     /**
-     * @param object $object
-     * @param bool   $metadataOnly
-     *
      * @throws ReflectionException
-     * @throws AnnotationException
-     *
-     * @return array
-     *
      */
-    public function getJsonApiArray($object, bool $metadataOnly = false)
+    public function getJsonApiArray(object $object, bool $metadataOnly = false): array
     {
         $this->objectValidator->throwOnInvalidObject($object);
 
@@ -164,7 +111,11 @@ final class ApiObjectParser
         return $result;
     }
 
-    public function parseJsonApiArray(array $data)
+    /**
+     * @throws ReflectionException
+     * @throws ResourceNotFoundException
+     */
+    public function parseJsonApiArray(array $data): object
     {
         $this->objectValidator->throwOnInvalidArray($data);
         $jsonApiObject = $this->getJsonObject($data);
@@ -179,7 +130,7 @@ final class ApiObjectParser
             try {
                 $repository = $this->entityManager->getRepository($className);
                 $object = $repository->find($jsonApiObject->getId());
-            } catch (MappingException $e) {
+            } catch (MappingException) {
                 $object = new $className;
             }
         }
@@ -190,31 +141,22 @@ final class ApiObjectParser
         return $object;
     }
 
-    /**
-     * @param object $object
-     *
-     * @throws ReflectionException
-     * @throws AnnotationException
-     *
-     * @return string
-     *
-     */
-    public function getResourceName($object): string
+    public function getResourceName(object $object): string
     {
         return $this->getResourceNames($object)->name;
     }
 
-    public function getPluralResourceName($object): string
+    public function getPluralResourceName(object $object): string
     {
         return $this->getResourceNames($object)->plural;
     }
 
-    public function setApiResourceLocator(ApiResourceLocator $resourceLocator)
+    public function setApiResourceLocator(ApiResourceLocator $resourceLocator): void
     {
         $this->resourceLocator = $resourceLocator;
     }
 
-    private function getResourceNames($object): ApiResource
+    private function getResourceNames(object $object): ApiResource
     {
         $this->objectValidator->throwOnInvalidObject($object);
 
@@ -224,24 +166,23 @@ final class ApiObjectParser
         }
 
         $reflection = new ReflectionClass($object);
-        $annotationReader = new AnnotationReader();
-        $annotation = $annotationReader->getClassAnnotation($reflection, ApiResource::class);
-        if ($annotation === null) {
-            $annotation = new ApiResource();
+        $attribute = $reflection->getAttributes(ApiResource::class)[0] ?? null;
+        if ($attribute === null) {
+            $attribute = new ApiResource();
         }
-        assert($annotation instanceof ApiResource);
+        assert($attribute instanceof ApiResource);
 
-        if (!$annotation->name) {
-            $annotation->name = $this->nameResolution->getResourceName($reflection->getName());
+        if (!$attribute->name) {
+            $attribute->name = $this->nameResolution->getResourceName($reflection->getName());
         }
-        if (!$annotation->plural) {
-            $annotation->plural = $this->inflector->pluralize($annotation->name);
+        if (!$attribute->plural) {
+            $attribute->plural = $this->inflector->pluralize($attribute->name);
         }
 
-        $cacheItem->set($annotation);
+        $cacheItem->set($attribute);
         $this->parserCache->save($cacheItem);
 
-        return $annotation;
+        return $attribute;
     }
 
     private function getJsonObject(array $jsonData): JsonApiObject
@@ -253,7 +194,7 @@ final class ApiObjectParser
         return new JsonApiObject($jsonData);
     }
 
-    private function isRelation($value)
+    private function isRelation(mixed $value): bool
     {
         if (is_iterable($value)) {
             if (is_countable($value) && !count($value)) {
@@ -273,13 +214,9 @@ final class ApiObjectParser
     }
 
     /**
-     * @param object        $object
-     * @param JsonApiObject $jsonApiObject
-     *
-     * @throws AnnotationException
      * @throws ReflectionException
      */
-    private function parseArrayAttributes($object, JsonApiObject $jsonApiObject): void
+    private function parseArrayAttributes(object $object, JsonApiObject $jsonApiObject): void
     {
         $availableProperties = $this->propertyParser->getApiProperties($object);
 
@@ -289,7 +226,7 @@ final class ApiObjectParser
             }
             if (!isset($availableProperties[$attribute->getName()])) {
                 throw new InvalidJsonApiArrayException(
-                    new UnexpectedValueException("The attribute '{$attribute->getName()}' is not valid")
+                    new UnexpectedValueException("The attribute '{$attribute->getName()}' is not valid"),
                 );
             }
             $config = $availableProperties[$attribute->getName()];
@@ -308,7 +245,7 @@ final class ApiObjectParser
                             break;
                         }
                         throw new InvalidJsonApiArrayException(
-                            new UnexpectedValueException("The property '{$attribute->getName()}' is read-only")
+                            new UnexpectedValueException("The property '{$attribute->getName()}' is read-only"),
                         );
                     }
                     if ($config->getSetter()) {
@@ -322,13 +259,13 @@ final class ApiObjectParser
                         } catch (TypeError $error) {
                             $type = gettype($attribute->getValue());
                             throw new InvalidJsonApiArrayException(
-                                new UnexpectedValueException("The property '{$attribute->getName()}' does not accept values of type '{$type}'")
+                                new UnexpectedValueException("The property '{$attribute->getName()}' does not accept values of type '{$type}'"),
                             );
                         }
                     } else {
                         if (!is_iterable($attribute->getValue())) {
                             throw new InvalidJsonApiArrayException(
-                                new UnexpectedValueException("The property '{$attribute->getName()}' accepts only arrays")
+                                new UnexpectedValueException("The property '{$attribute->getName()}' accepts only arrays"),
                             );
                         }
                         $adder = [$object, $config->getAdder()];
@@ -343,7 +280,7 @@ final class ApiObjectParser
                             } catch (TypeError $error) {
                                 $type = gettype($attribute->getValue());
                                 throw new InvalidJsonApiArrayException(
-                                    new UnexpectedValueException("The property '{$attribute->getName()}' does not accept values of type '{$type}'")
+                                    new UnexpectedValueException("The property '{$attribute->getName()}' does not accept values of type '{$type}'"),
                                 );
                             }
                         }
@@ -356,21 +293,20 @@ final class ApiObjectParser
     }
 
     /**
-     * @param object        $object
-     * @param JsonApiObject $jsonApiObject
-     * @param array         $rawData
-     *
-     * @throws AnnotationException
      * @throws ReflectionException
+     * @throws ResourceNotFoundException
      */
-    private function parseRelationships($object, JsonApiObject $jsonApiObject, array $rawData)
-    {
+    private function parseRelationships(
+        object $object,
+        JsonApiObject $jsonApiObject,
+        array $rawData,
+    ): void {
         $availableProperties = $this->propertyParser->getApiProperties($object);
 
         foreach ($jsonApiObject->getRelationships() as $relationship) {
             if (!isset($availableProperties[$relationship->getName()])) {
                 throw new InvalidJsonApiArrayException(
-                    new UnexpectedValueException("The relationship '{$relationship->getName()}' is not valid")
+                    new UnexpectedValueException("The relationship '{$relationship->getName()}' is not valid"),
                 );
             }
 //            if (!$relationship->hasData()) {

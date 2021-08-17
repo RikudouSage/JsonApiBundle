@@ -5,6 +5,7 @@ namespace Rikudou\JsonApiBundle\Service;
 use ArgumentCountError;
 use function count;
 use ReflectionClass;
+use ReflectionException;
 use Rikudou\JsonApiBundle\Exception\ResourceNotFoundException;
 use Rikudou\JsonApiBundle\Interfaces\ApiControllerInterface;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectParser;
@@ -14,30 +15,15 @@ final class ApiResourceLocator
     /**
      * @var ApiControllerInterface[]
      */
-    private $controllers = [];
+    private array $controllers = [];
 
-    private $map = [];
+    private array $map = [];
 
-    /**
-     * @var ApiObjectParser
-     */
-    private $objectParser;
-
-    /**
-     * @var Inflector
-     */
-    private $inflector;
-
-    public function __construct(ApiObjectParser $objectParser, Inflector $inflector)
+    public function __construct(private ApiObjectParser $objectParser)
     {
-        $this->objectParser = $objectParser;
-        $this->inflector = $inflector;
     }
 
     /**
-     * @param ApiControllerInterface $controller
-     * @param string                 $serviceName
-     *
      * @internal
      */
     public function addController(ApiControllerInterface $controller, string $serviceName): void
@@ -47,11 +33,8 @@ final class ApiResourceLocator
     }
 
     /**
-     * @param string $resourceName
-     *
+     * @throws ReflectionException
      * @throws ResourceNotFoundException
-     *
-     * @return ApiControllerInterface
      */
     public function findControllerForResource(string $resourceName): ApiControllerInterface
     {
@@ -82,6 +65,10 @@ final class ApiResourceLocator
         return $this->map[$resourceName]['controller'];
     }
 
+    /**
+     * @throws ResourceNotFoundException
+     * @throws ReflectionException
+     */
     public function getEntityFromResourceType(string $resourceName): string
     {
         $controller = $this->findControllerForResource($resourceName);
@@ -89,15 +76,17 @@ final class ApiResourceLocator
         return $controller->getClass();
     }
 
-    public function getResourceNames(bool $plural = true)
+    /**
+     * @throws ReflectionException
+     *
+     * @return string[]
+     */
+    public function getResourceNames(bool $plural = true): array
     {
         $this->populateMap();
 
         $result = [];
-        $copy = array_filter($this->map, function ($item) use ($plural) {
-            return $item['plural'] === $plural;
-        });
-        assert(is_array($copy));
+        $copy = array_filter($this->map, fn (array $item): bool => $item['plural'] === $plural);
         foreach ($copy as $key => $value) {
             $result[] = $key;
         }
@@ -105,6 +94,9 @@ final class ApiResourceLocator
         return $result;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     private function populateMap()
     {
         if (!count($this->map)) {
@@ -116,7 +108,7 @@ final class ApiResourceLocator
                         $this->objectParser->getResourceName(new $className),
                         $this->objectParser->getPluralResourceName(new $className),
                     ];
-                } catch (ArgumentCountError $error) {
+                } catch (ArgumentCountError) {
                     $reflection = new ReflectionClass($className);
                     $names = [
                         $this->objectParser->getResourceName($reflection->newInstanceWithoutConstructor()),

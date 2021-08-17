@@ -2,36 +2,25 @@
 
 namespace Rikudou\JsonApiBundle\Structure;
 
+use JetBrains\PhpStorm\Pure;
 use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\Collection\JsonApiLinksCollection;
 use Rikudou\JsonApiBundle\Structure\Collection\JsonApiMetaCollection;
 
 final class JsonApiRelationship implements JsonSerializable
 {
-    /**
-     * @var string
-     */
-    private $name;
+    private string $name;
 
-    /**
-     * @var JsonApiLinksCollection
-     */
-    private $links;
+    private JsonApiLinksCollection $links;
 
-    /**
-     * @var JsonApiMetaCollection
-     */
-    private $meta;
+    private JsonApiMetaCollection $meta;
 
     /**
      * @var JsonApiRelationshipData|JsonApiRelationshipData[]|null
      */
-    private $data;
+    private JsonApiRelationshipData|array|null $data;
 
-    /**
-     * @var bool
-     */
-    private $hasData = false;
+    private bool $hasData = false;
 
     public function __construct(string $name, array $json = [])
     {
@@ -39,7 +28,8 @@ final class JsonApiRelationship implements JsonSerializable
         $this->parse($json);
     }
 
-    public function jsonSerialize()
+    #[Pure]
+    public function jsonSerialize(): array
     {
         if ($this->data instanceof JsonApiRelationshipData) {
             $data = $this->data->jsonSerialize();
@@ -62,28 +52,22 @@ final class JsonApiRelationship implements JsonSerializable
     /**
      * @return JsonApiRelationshipData|JsonApiRelationshipData[]|null
      */
-    public function getData()
+    public function getData(): array|JsonApiRelationshipData|null
     {
         return $this->data;
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return bool
-     */
     public function hasData(): bool
     {
         return $this->hasData;
     }
 
-    private function parse(array $json)
+    private function parse(array $json): void
     {
         $this->links = new JsonApiLinksCollection();
         $this->meta = new JsonApiMetaCollection();

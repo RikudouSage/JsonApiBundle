@@ -6,12 +6,8 @@ interface ApiObjectNormalizerInterface
 {
     /**
      * Returns the value in a normalized format that can be handled by api
-     *
-     * @param object $object
-     *
-     * @return int|string|bool|float|array
      */
-    public function getNormalizedValue($object);
+    public function getNormalizedValue(object $object): float|int|bool|array|string;
 
     /**
      * Returns the classes/interfaces that can be handled by the normalizer

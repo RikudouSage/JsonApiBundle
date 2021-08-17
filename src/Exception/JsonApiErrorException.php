@@ -4,6 +4,7 @@ namespace Rikudou\JsonApiBundle\Exception;
 
 use function is_array;
 use function is_string;
+use JetBrains\PhpStorm\Pure;
 use Rikudou\JsonApiBundle\Structure\JsonApiError;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,13 +12,14 @@ use Throwable;
 
 final class JsonApiErrorException extends RuntimeException
 {
-    /**
-     * @var string|array|JsonApiError
-     */
-    private $data;
+    private string|array|JsonApiError $data;
 
-    public function __construct($message = null, int $code = Response::HTTP_BAD_REQUEST, Throwable $previous = null)
-    {
+    #[Pure]
+    public function __construct(
+        array|string|JsonApiError|null $message = null,
+        int $code = Response::HTTP_BAD_REQUEST,
+        Throwable $previous = null,
+    ) {
         if (!is_array($message) && !is_string($message)) {
             $message = '';
         }
@@ -28,10 +30,7 @@ final class JsonApiErrorException extends RuntimeException
         parent::__construct($message, $code, $previous);
     }
 
-    /**
-     * @return array|string|JsonApiError
-     */
-    public function getData()
+    public function getData(): JsonApiError|array|string
     {
         return $this->data;
     }

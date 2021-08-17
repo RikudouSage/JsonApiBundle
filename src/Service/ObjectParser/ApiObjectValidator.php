@@ -5,7 +5,7 @@ namespace Rikudou\JsonApiBundle\Service\ObjectParser;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Proxy\Proxy;
 use function get_class;
-use function is_object;
+use JetBrains\PhpStorm\ArrayShape;
 use function method_exists;
 use Psr\Container\ContainerInterface;
 use Rikudou\JsonApiBundle\Exception\InvalidApiObjectException;
@@ -14,24 +14,13 @@ use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
 final class ApiObjectValidator implements ServiceSubscriberInterface
 {
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
-
-    public function __construct(ContainerInterface $container)
+    public function __construct(private ContainerInterface $container)
     {
-        $this->container = $container;
     }
 
-    /**
-     * @param object $object
-     *
-     * @return bool
-     */
-    public function isObjectValid($object): bool
+    public function isObjectValid(object $object): bool
     {
-        return is_object($object) && method_exists($object, 'getId');
+        return method_exists($object, 'getId');
     }
 
     public function isArrayValid(array $data): bool
@@ -46,10 +35,7 @@ final class ApiObjectValidator implements ServiceSubscriberInterface
         return true;
     }
 
-    /**
-     * @param object $object
-     */
-    public function throwOnInvalidObject($object): void
+    public function throwOnInvalidObject(object $object): void
     {
         if (!$this->isObjectValid($object)) {
             throw new InvalidApiObjectException();
@@ -63,12 +49,7 @@ final class ApiObjectValidator implements ServiceSubscriberInterface
         }
     }
 
-    /**
-     * @param object $object
-     *
-     * @return string
-     */
-    public function getRealClass($object): string
+    public function getRealClass(object $object): string
     {
         $class = get_class($object);
         if (!$object instanceof Proxy) {
@@ -78,7 +59,8 @@ final class ApiObjectValidator implements ServiceSubscriberInterface
         return $this->getEntityManager()->getClassMetadata($class)->getName();
     }
 
-    public static function getSubscribedServices()
+    #[ArrayShape(['entity_manager' => 'string'])]
+    public static function getSubscribedServices(): array
     {
         return [
             'entity_manager' => EntityManagerInterface::class,

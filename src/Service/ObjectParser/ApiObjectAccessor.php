@@ -5,6 +5,7 @@ namespace Rikudou\JsonApiBundle\Service\ObjectParser;
 use function call_user_func;
 use InvalidArgumentException;
 use function is_callable;
+use JetBrains\PhpStorm\ExpectedValues;
 use Rikudou\JsonApiBundle\Exception\InvalidApiPropertyConfig;
 
 final class ApiObjectAccessor
@@ -13,120 +14,51 @@ final class ApiObjectAccessor
 
     public const TYPE_METHOD = 2 << 2;
 
-    /**
-     * @var int
-     */
-    private $type;
-
-    /**
-     * @var string
-     */
-    private $getter;
-
-    /**
-     * @var string|null
-     */
-    private $setter;
-
-    /**
-     * @var string|null
-     */
-    private $adder;
-
-    /**
-     * @var string|null
-     */
-    private $remover;
-
-    /**
-     * @var bool|null
-     */
-    private $isRelation;
-
-    /**
-     * @var bool
-     */
-    private $readonly;
-
-    /**
-     * @var bool
-     */
-    private $silentFail;
-
     public function __construct(
-        int $type,
-        string $getter,
-        ?string $setter,
-        ?string $adder,
-        ?string $remover,
-        ?bool $isRelation,
-        bool $readonly,
-        bool $silentFail
+        #[ExpectedValues(valuesFromClass: self::class)]
+        private int $type,
+        private string $getter,
+        private ?string $setter,
+        private ?string $adder,
+        private ?string $remover,
+        private ?bool $isRelation,
+        private bool $readonly,
+        private bool $silentFail,
     ) {
-        $this->type = $type;
-        $this->getter = $getter;
-        $this->setter = $setter;
-        $this->adder = $adder;
-        $this->remover = $remover;
-        $this->isRelation = $isRelation;
-        $this->readonly = $readonly;
-        $this->silentFail = $silentFail;
     }
 
-    /**
-     * @return int
-     */
+    #[ExpectedValues(valuesFromClass: self::class)]
     public function getType(): int
     {
         return $this->type;
     }
 
-    /**
-     * @return string
-     */
     public function getGetter(): string
     {
         return $this->getter;
     }
 
-    /**
-     * @return string|null
-     */
     public function getSetter(): ?string
     {
         return $this->setter;
     }
 
-    /**
-     * @return string|null
-     */
     public function getAdder(): ?string
     {
         return $this->adder;
     }
 
-    /**
-     * @return string|null
-     */
     public function getRemover(): ?string
     {
         return $this->remover;
     }
 
-    /**
-     * @return bool|null
-     */
     public function isRelation(): ?bool
     {
         return $this->isRelation;
     }
 
-    /**
-     * @param object $object
-     *
-     * @return mixed
-     */
-    public function getValue($object)
+    public function getValue(object $object): mixed
     {
         switch ($this->getType()) {
             case self::TYPE_METHOD:
@@ -143,17 +75,11 @@ final class ApiObjectAccessor
         }
     }
 
-    /**
-     * @return bool
-     */
     public function isReadonly(): bool
     {
         return $this->readonly;
     }
 
-    /**
-     * @return bool
-     */
     public function isSilentFail(): bool
     {
         return $this->silentFail;
