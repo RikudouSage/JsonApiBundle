@@ -278,7 +278,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         return $response;
     }
 
-    public function addItem(): JsonApiResponse
+    public function addItem(): JsonApiObject|JsonApiResponse
     {
         try {
             $post = $this->getPostData();
@@ -360,7 +360,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         }
     }
 
-    public function deleteItem(int|string $id): JsonApiResponse|JsonApiObject|JsonApiCollection
+    public function deleteItem(int|string $id): JsonApiResponse|Response|JsonApiObject|JsonApiCollection
     {
         try {
             $entity = $this
@@ -409,7 +409,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         }
     }
 
-    public function updateItem(int|string $id): JsonApiObject
+    public function updateItem(int|string $id): JsonApiObject|JsonApiResponse
     {
         if (is_string($id) && is_numeric($id) && strval(intval($id)) === $id) {
             $id = (int) $id;
