@@ -14,6 +14,7 @@ final class CreateNameResolutionService implements CompilerPassInterface
     public function process(ContainerBuilder $container): void
     {
         $serviceId = $container->getParameter('rikudou_api.name_resolution_service');
+        assert(is_string($serviceId));
         $service = $container->getDefinition($serviceId);
         if (!is_a($service->getClass() ?? '', ApiNameResolutionInterface::class, true)) {
             throw new LogicException(

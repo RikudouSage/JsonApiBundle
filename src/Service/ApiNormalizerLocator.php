@@ -17,7 +17,7 @@ final class ApiNormalizerLocator
      */
     private array $normalizers = [];
 
-    public function addNormalizer(ApiObjectNormalizerInterface $normalizer)
+    public function addNormalizer(ApiObjectNormalizerInterface $normalizer): void
     {
         foreach ($normalizer->handles() as $class) {
             $this->normalizers[$class] = $normalizer;

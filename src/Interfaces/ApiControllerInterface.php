@@ -11,6 +11,8 @@ interface ApiControllerInterface
 {
     /**
      * Returns the name of the class that this controller handles
+     *
+     * @return class-string
      */
     public function getClass(): string;
 
@@ -32,7 +34,7 @@ interface ApiControllerInterface
     /**
      * Deletes the item with given id
      */
-    public function deleteItem(int|string $id): JsonApiResponse|Response|JsonApiObject;
+    public function deleteItem(int|string $id): JsonApiResponse|Response|JsonApiObject|JsonApiCollection;
 
     /**
      * Updates the item with given id

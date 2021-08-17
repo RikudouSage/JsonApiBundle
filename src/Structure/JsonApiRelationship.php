@@ -22,12 +22,18 @@ final class JsonApiRelationship implements JsonSerializable
 
     private bool $hasData = false;
 
+    /**
+     * @param array<mixed> $json
+     */
     public function __construct(string $name, array $json = [])
     {
         $this->name = $name;
         $this->parse($json);
     }
 
+    /**
+     * @phpstan-return array<string, array<string, array<mixed>|null>>
+     */
     #[Pure]
     public function jsonSerialize(): array
     {
@@ -67,6 +73,9 @@ final class JsonApiRelationship implements JsonSerializable
         return $this->hasData;
     }
 
+    /**
+     * @param array<mixed> $json
+     */
     private function parse(array $json): void
     {
         $this->links = new JsonApiLinksCollection();

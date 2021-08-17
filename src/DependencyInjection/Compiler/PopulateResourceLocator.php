@@ -18,6 +18,7 @@ final class PopulateResourceLocator implements CompilerPassInterface
         } else {
             $allowedClasses = [];
         }
+        assert(is_array($allowedClasses));
 
         foreach ($services as $service => $tags) {
             $definition = $container->getDefinition($service);

@@ -152,6 +152,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
 
         // todo refactor
         if ($includes = $request->query->get('include')) {
+            assert(is_string($includes));
             $includes = explode(',', $includes);
             $objects = $response->getData();
             foreach ($objects as $object) {
@@ -168,7 +169,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                                 if ($relationshipDatum === null) {
                                     continue;
                                 }
-                                $includeResponse = json_decode($this->forward('rikudou_api.controller.api_router::router', [
+                                $includeResponse = json_decode((string) $this->forward('rikudou_api.controller.api_router::router', [
                                     'resourceName' => $relationshipDatum->getType(),
                                     'id' => $relationshipDatum->getId(),
                                 ])->getContent(), true)['data'];
@@ -226,8 +227,10 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         $response = new JsonApiObject($this->objectParser->getJsonApiArray($entity));
 
         $request = $this->requestStack->getCurrentRequest();
+        assert($request !== null);
         // todo refactor
         if ($includes = $request->query->get('include')) {
+            assert(is_string($includes));
             $includes = explode(',', $includes);
             $relationships = $response->getRelationships();
             foreach ($includes as $include) {
@@ -242,7 +245,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                             if ($relationshipDatum === null) {
                                 continue;
                             }
-                            $includeResponse = json_decode($this->forward('rikudou_api.controller.api_router::router', [
+                            $includeResponse = json_decode((string) $this->forward('rikudou_api.controller.api_router::router', [
                                 'resourceName' => $relationshipDatum->getType(),
                                 'id' => $relationshipDatum->getId(),
                             ])->getContent(), true)['data'];
@@ -357,7 +360,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         }
     }
 
-    public function deleteItem(int|string $id): JsonApiResponse|JsonApiObject
+    public function deleteItem(int|string $id): JsonApiResponse|JsonApiObject|JsonApiCollection
     {
         try {
             $entity = $this
@@ -484,6 +487,8 @@ abstract class EntityApiController extends AbstractController implements ApiCont
 
             $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_RESPONSE);
 
+            assert($event->getData() instanceof JsonApiObject);
+
             return $event->getData();
         } catch (InvalidArgumentException $e) {
             throw new JsonApiErrorException(
@@ -588,6 +593,9 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         );
     }
 
+    /**
+     * @param array<string,string> $parameters
+     */
     protected function route(string $route, array $parameters = []): string
     {
         if (!isset($parameters['resourceName'])) {
@@ -597,6 +605,9 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         return $this->urlGenerator->generate($route, $parameters);
     }
 
+    /**
+     * @return ParameterBag<mixed>
+     */
     protected function getPostData(): ParameterBag
     {
         $request = $this->requestStack->getCurrentRequest();
@@ -608,7 +619,6 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         if (fnmatch('application/*json*', $contentType)) {
             /** @var string $body */
             $body = $request->getContent();
-            /** @var array $data */
             $data = @json_decode($body, true);
             if (json_last_error()) {
                 throw new InvalidArgumentException(json_last_error_msg());

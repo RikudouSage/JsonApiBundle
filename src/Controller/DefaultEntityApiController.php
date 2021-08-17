@@ -6,7 +6,7 @@ final class DefaultEntityApiController extends EntityApiController
 {
     private string $className;
 
-    public function setClassName(string $className)
+    public function setClassName(string $className): void
     {
         $this->className = $className;
     }

@@ -20,7 +20,7 @@ final class JsonApiStructureResponseListener implements EventSubscriberInterface
         ];
     }
 
-    public function handleResponse(ViewEvent $event)
+    public function handleResponse(ViewEvent $event): void
     {
         $result = $event->getControllerResult();
         if ($result instanceof JsonApiObject || $result instanceof JsonApiCollection) {

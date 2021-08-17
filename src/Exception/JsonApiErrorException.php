@@ -12,8 +12,14 @@ use Throwable;
 
 final class JsonApiErrorException extends RuntimeException
 {
+    /**
+     * @var string|string[]|JsonApiError[]|JsonApiError
+     */
     private string|array|JsonApiError $data;
 
+    /**
+     * @param string[]|string|JsonApiError|null $message
+     */
     #[Pure]
     public function __construct(
         array|string|JsonApiError|null $message = null,
@@ -30,6 +36,9 @@ final class JsonApiErrorException extends RuntimeException
         parent::__construct($message, $code, $previous);
     }
 
+    /**
+     * @phpstan-return JsonApiError|string[]|JsonApiError[]|string
+     */
     public function getData(): JsonApiError|array|string
     {
         return $this->data;

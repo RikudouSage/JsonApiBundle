@@ -46,6 +46,8 @@ final class ApiObjectParser
     }
 
     /**
+     * @phpstan-return array<string, mixed>
+     *
      * @throws ReflectionException
      */
     public function getJsonApiArray(object $object, bool $metadataOnly = false): array
@@ -112,6 +114,8 @@ final class ApiObjectParser
     }
 
     /**
+     * @param array<mixed> $data
+     *
      * @throws ReflectionException
      * @throws ResourceNotFoundException
      */
@@ -141,12 +145,12 @@ final class ApiObjectParser
         return $object;
     }
 
-    public function getResourceName(object $object): string
+    public function getResourceName(object $object): ?string
     {
         return $this->getResourceNames($object)->name;
     }
 
-    public function getPluralResourceName(object $object): string
+    public function getPluralResourceName(object $object): ?string
     {
         return $this->getResourceNames($object)->plural;
     }
@@ -166,7 +170,8 @@ final class ApiObjectParser
         }
 
         $reflection = new ReflectionClass($object);
-        $attribute = $reflection->getAttributes(ApiResource::class)[0] ?? null;
+        $attributes = $reflection->getAttributes(ApiResource::class);
+        $attribute = isset($attributes[0]) ? $attributes[0]->newInstance() : null;
         if ($attribute === null) {
             $attribute = new ApiResource();
         }
@@ -185,6 +190,9 @@ final class ApiObjectParser
         return $attribute;
     }
 
+    /**
+     * @param array<mixed> $jsonData
+     */
     private function getJsonObject(array $jsonData): JsonApiObject
     {
         if (isset($jsonData['data'])) {
@@ -293,6 +301,8 @@ final class ApiObjectParser
     }
 
     /**
+     * @param array<string, array<string, array>> $rawData
+     *
      * @throws ReflectionException
      * @throws ResourceNotFoundException
      */

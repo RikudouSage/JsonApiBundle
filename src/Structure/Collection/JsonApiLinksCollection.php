@@ -10,10 +10,13 @@ use Rikudou\JsonApiBundle\Structure\EmptyObject;
 use Rikudou\JsonApiBundle\Structure\JsonApiLink;
 
 /**
- * @extends() AbstractCollection<JsonApiLink>
+ * @extends AbstractCollection<JsonApiLink>
  */
 final class JsonApiLinksCollection extends AbstractCollection implements JsonSerializable
 {
+    /**
+     * @phpstan-return array<string,array<mixed>|EmptyObject>
+     */
     #[Pure]
     #[ArrayShape(['links' => "array|\Rikudou\JsonApiBundle\Structure\EmptyObject"])]
     public function jsonSerialize(): array
@@ -32,6 +35,9 @@ final class JsonApiLinksCollection extends AbstractCollection implements JsonSer
         return $result;
     }
 
+    /**
+     * @return string[]
+     */
     protected function getAllowedTypes(): array
     {
         return [

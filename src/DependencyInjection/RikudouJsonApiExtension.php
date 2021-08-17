@@ -10,18 +10,19 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 final class RikudouJsonApiExtension extends Extension
 {
+    /**
+     * @param array<mixed> $config
+     */
     public function getConfiguration(array $config, ContainerBuilder $container): Configuration
     {
         $isDebug = $container->getParameter('kernel.debug');
+        assert(is_bool($isDebug));
 
         return new Configuration($isDebug);
     }
 
     /**
-     * Loads a specific configuration.
-     *
-     * @param array            $configs
-     * @param ContainerBuilder $container
+     * @param array<mixed> $configs
      *
      * @throws Exception
      */
@@ -32,6 +33,7 @@ final class RikudouJsonApiExtension extends Extension
         $loader->load('aliases.yaml');
 
         $isDebug = $container->getParameter('kernel.debug');
+        assert(is_bool($isDebug));
         $configs = $this->processConfiguration(new Configuration($isDebug), $configs);
 
         $container->setAlias('cache.api_annotations', $configs['cache_adapter']);

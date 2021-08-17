@@ -11,7 +11,7 @@ final class CacheClearHook implements CacheClearerInterface
     {
     }
 
-    public function clear(string $cacheDir)
+    public function clear(string $cacheDir): void
     {
         if (!$this->enabled) {
             return;

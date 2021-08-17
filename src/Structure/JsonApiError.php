@@ -18,6 +18,9 @@ final class JsonApiError implements JsonSerializable
         $this->statusCode = (string) $statusCode;
     }
 
+    /**
+     * @return array<string,string>
+     */
     #[ArrayShape(['title' => 'string', 'detail' => 'string', 'status' => 'string'])]
     public function jsonSerialize(): array
     {

@@ -73,6 +73,9 @@ final class JsonApiCollection implements JsonSerializable
         return $this;
     }
 
+    /**
+     * @param float|array<mixed>|bool|int|string|null $value
+     */
     public function addMeta(string $name, float|array|bool|int|string|null $value): self
     {
         $this->meta[] = new JsonApiMeta($name, $value);
@@ -80,6 +83,9 @@ final class JsonApiCollection implements JsonSerializable
         return $this;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         $result = array_merge(
@@ -96,6 +102,9 @@ final class JsonApiCollection implements JsonSerializable
         return $result;
     }
 
+    /**
+     * @param array<mixed> $json
+     */
     private function parse(array $json): void
     {
         $this->meta = new JsonApiMetaCollection();

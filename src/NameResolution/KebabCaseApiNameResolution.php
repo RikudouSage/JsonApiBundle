@@ -19,6 +19,8 @@ final class KebabCaseApiNameResolution extends AbstractApiNameResolution
     }
 
     /**
+     * @param class-string $className
+     *
      * @throws ReflectionException
      */
     public function getResourceName(string $className): string

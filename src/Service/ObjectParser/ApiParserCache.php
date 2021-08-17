@@ -32,7 +32,7 @@ final class ApiParserCache
         }
     }
 
-    public function getResourceCacheItem($object): CacheItemInterface
+    public function getResourceCacheItem(object $object): CacheItemInterface
     {
         $this->objectValidator->throwOnInvalidObject($object);
 
@@ -53,7 +53,7 @@ final class ApiParserCache
         $this->cacheAdapter->save($cacheItem);
     }
 
-    private function getCacheName($object, ?string $postfix = null, bool $includeId = true): string
+    private function getCacheName(object $object, ?string $postfix = null, bool $includeId = true): string
     {
         assert(method_exists($object, 'getId'));
         $name = sprintf(

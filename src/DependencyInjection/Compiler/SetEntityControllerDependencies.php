@@ -20,7 +20,11 @@ final class SetEntityControllerDependencies implements CompilerPassInterface
         $controllers = $container->findTaggedServiceIds('rikudou_api.api_controller');
         foreach ($controllers as $controller => $tags) {
             $definition = $container->getDefinition($controller);
-            $reflection = new ReflectionClass($definition->getClass());
+            $class = $definition->getClass();
+            if ($class === null || !class_exists($class)) {
+                continue;
+            }
+            $reflection = new ReflectionClass($class);
             if (
                 $definition->isAbstract()
                 || $reflection->isAbstract()

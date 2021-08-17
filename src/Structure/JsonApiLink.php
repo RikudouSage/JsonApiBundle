@@ -20,6 +20,9 @@ final class JsonApiLink implements JsonSerializable
         return $this->name;
     }
 
+    /**
+     * @phpstan-return array<string,string|null>
+     */
     public function jsonSerialize(): array
     {
         return [

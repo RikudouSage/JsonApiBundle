@@ -23,6 +23,9 @@ final class ApiObjectValidator implements ServiceSubscriberInterface
         return method_exists($object, 'getId');
     }
 
+    /**
+     * @param array<mixed> $data
+     */
     public function isArrayValid(array $data): bool
     {
         if (!isset($data['type']) && !isset($data['data'])) {
@@ -42,6 +45,9 @@ final class ApiObjectValidator implements ServiceSubscriberInterface
         }
     }
 
+    /**
+     * @param array<mixed> $data
+     */
     public function throwOnInvalidArray(array $data): void
     {
         if (!$this->isArrayValid($data)) {
@@ -49,6 +55,9 @@ final class ApiObjectValidator implements ServiceSubscriberInterface
         }
     }
 
+    /**
+     * @return class-string
+     */
     public function getRealClass(object $object): string
     {
         $class = get_class($object);

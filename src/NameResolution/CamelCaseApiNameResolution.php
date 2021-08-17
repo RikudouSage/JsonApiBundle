@@ -13,6 +13,8 @@ use function substr;
 final class CamelCaseApiNameResolution extends AbstractApiNameResolution
 {
     /**
+     * @param class-string $className
+     *
      * @throws ReflectionException
      */
     public function getResourceName(string $className): string

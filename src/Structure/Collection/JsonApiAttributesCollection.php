@@ -10,10 +10,13 @@ use Rikudou\JsonApiBundle\Structure\EmptyObject;
 use Rikudou\JsonApiBundle\Structure\JsonApiAttribute;
 
 /**
- * @extends() AbstractCollection<JsonApiAttribute>
+ * @extends AbstractCollection<JsonApiAttribute>
  */
 final class JsonApiAttributesCollection extends AbstractCollection implements JsonSerializable
 {
+    /**
+     * @phpstan-return array<string, array<mixed>|EmptyObject>
+     */
     #[Pure]
     #[ArrayShape(['attributes' => "array|\Rikudou\JsonApiBundle\Structure\EmptyObject"])]
     public function jsonSerialize(): array

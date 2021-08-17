@@ -6,6 +6,8 @@ interface ApiObjectNormalizerInterface
 {
     /**
      * Returns the value in a normalized format that can be handled by api
+     *
+     * @phpstan-return float|int|bool|array<mixed>|string
      */
     public function getNormalizedValue(object $object): float|int|bool|array|string;
 

@@ -17,6 +17,9 @@ final class ApiResourceLocator
      */
     private array $controllers = [];
 
+    /**
+     * @var array<string, array{'controller': ApiControllerInterface, 'plural': bool}>
+     */
     private array $map = [];
 
     public function __construct(private ApiObjectParser $objectParser)
@@ -68,6 +71,8 @@ final class ApiResourceLocator
     /**
      * @throws ResourceNotFoundException
      * @throws ReflectionException
+     *
+     * @return class-string
      */
     public function getEntityFromResourceType(string $resourceName): string
     {
@@ -97,7 +102,7 @@ final class ApiResourceLocator
     /**
      * @throws ReflectionException
      */
-    private function populateMap()
+    private function populateMap(): void
     {
         if (!count($this->map)) {
             foreach ($this->controllers as $controller) {
@@ -115,6 +120,7 @@ final class ApiResourceLocator
                         $this->objectParser->getPluralResourceName($reflection->newInstanceWithoutConstructor()),
                     ];
                 }
+                $names = array_filter($names);
 
                 $i = 0;
                 foreach ($names as $name) {

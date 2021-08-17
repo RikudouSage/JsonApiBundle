@@ -8,10 +8,13 @@ use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\JsonApiObject;
 
 /**
- * @extends() AbstractCollection<JsonApiObject>
+ * @extends AbstractCollection<JsonApiObject>
  */
 final class JsonApiIncludesCollection extends AbstractCollection implements JsonSerializable
 {
+    /**
+     * @phpstan-return array<string,array<mixed>>
+     */
     #[ArrayShape(['included' => 'array'])]
     public function jsonSerialize(): array
     {
@@ -34,6 +37,9 @@ final class JsonApiIncludesCollection extends AbstractCollection implements Json
         return false;
     }
 
+    /**
+     * @return string[]
+     */
     protected function getAllowedTypes(): array
     {
         return [

@@ -21,6 +21,9 @@ final class JsonApiRelationshipData implements JsonSerializable
         return $this->id;
     }
 
+    /**
+     * @phpstan-return array<string, int|null|string>
+     */
     #[ArrayShape(['id' => 'int|null|string', 'type' => 'string'])]
     public function jsonSerialize(): array
     {

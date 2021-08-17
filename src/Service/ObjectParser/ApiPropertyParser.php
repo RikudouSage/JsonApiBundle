@@ -70,6 +70,11 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
         return $this->container->get('rikudou_api.object_parser.parser');
     }
 
+    /**
+     * @param ReflectionClass<object> $class
+     *
+     * @return array{'enabled': ApiProperty[], 'disabled': string[]}
+     */
     #[Pure]
     #[ArrayShape(['enabled' => 'array|mixed', 'disabled' => 'array|mixed'])]
     private function getResourcePropertyConfig(ReflectionClass $class): array
@@ -83,7 +88,7 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
             return $result;
         }
 
-        $attribute = $attributes[0];
+        $attribute = $attributes[0]->newInstance();
         if ($attribute instanceof ApiResource) {
             $result['enabled'] = $attribute->enabledProperties;
             $result['disabled'] = $attribute->disabledProperties;
@@ -114,7 +119,7 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
                 $attribute = $classProperties[$property->getName()];
             } else {
                 $attributes = $property->getAttributes(ApiProperty::class);
-                $attribute = $attributes[0] ?? null;
+                $attribute = isset($attributes[0]) ? $attributes[0]->newInstance() : null;
             }
 
             if ($attribute === null) {
@@ -246,7 +251,7 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
         $result = [];
         foreach ($methods as $method) {
             $attributes = $method->getAttributes(ApiProperty::class);
-            $attribute = $attributes[0] ?? null;
+            $attribute = isset($attributes[0]) ? $attributes[0]->newInstance() : null;
             if ($attribute === null) {
                 if ($method->getName() === 'getId') {
                     $attribute = new ApiProperty();

@@ -19,6 +19,9 @@ if ($ignoredTags === null) {
 }
 
 $ignoredTags[] = 'Annotation';
+$ignoredTags[] = 'extends';
+$ignoredTags[] = 'template';
+$ignoredTags[] = 'implements';
 
 return (new PhpCsFixer\Config())
     ->setRules([

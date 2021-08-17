@@ -33,11 +33,14 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
         } else {
             $allowedClasses = [];
         }
+        assert(is_array($allowedClasses));
 
-        /** @var array $directories */
+        /** @var string[] $directories */
         $directories = $container->getParameter('rikudou_api.auto_discover_paths');
         if (!is_countable($directories) || !count($directories)) {
-            $directories = [$container->getParameter('kernel.project_dir')];
+            $projectDir = $container->getParameter('kernel.project_dir');
+            assert(is_string($projectDir));
+            $directories = [$projectDir];
         }
 
         foreach ($directories as $directory) {

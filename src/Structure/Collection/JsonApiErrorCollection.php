@@ -8,10 +8,13 @@ use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\JsonApiError;
 
 /**
- * @extends() AbstractCollection<JsonApiError>
+ * @extends AbstractCollection<JsonApiError>
  */
 final class JsonApiErrorCollection extends AbstractCollection implements JsonSerializable
 {
+    /**
+     * @phpstan-return array<string,array<mixed>>
+     */
     #[Pure]
     #[ArrayShape(['errors' => 'array'])]
     public function jsonSerialize(): array
@@ -27,6 +30,9 @@ final class JsonApiErrorCollection extends AbstractCollection implements JsonSer
         return $result;
     }
 
+    /**
+     * @return string[]
+     */
     protected function getAllowedTypes(): array
     {
         return [

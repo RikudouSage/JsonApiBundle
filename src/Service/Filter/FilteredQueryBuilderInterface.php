@@ -9,6 +9,9 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 
 interface FilteredQueryBuilderInterface
 {
+    /**
+     * @phpstan-param ParameterBag<string> $queryParams
+     */
     public function get(string $class, ParameterBag $queryParams, bool $useFilter = true, bool $useSort = true): QueryBuilder;
 
     /**

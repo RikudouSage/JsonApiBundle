@@ -26,6 +26,9 @@ final class JsonApiObject implements JsonSerializable
 
     private JsonApiIncludesCollection $includes;
 
+    /**
+     * @param array<mixed> $json
+     */
     public function __construct(array $json = [])
     {
         $this->parse($json);
@@ -85,6 +88,9 @@ final class JsonApiObject implements JsonSerializable
         return $this->includes;
     }
 
+    /**
+     * @param float|array<mixed>|bool|int|string|null $value
+     */
     public function addAttribute(string $name, float|array|bool|int|string|null $value): self
     {
         $this->attributes[] = new JsonApiAttribute($name, $value);
@@ -99,6 +105,9 @@ final class JsonApiObject implements JsonSerializable
         return $this;
     }
 
+    /**
+     * @param float|array<mixed>|bool|int|string|null $value
+     */
     public function addMeta(string $name, float|array|bool|int|string|null $value): self
     {
         $this->meta[] = new JsonApiMeta($name, $value);
@@ -106,6 +115,9 @@ final class JsonApiObject implements JsonSerializable
         return $this;
     }
 
+    /**
+     * @param array<mixed> $data
+     */
     public function addRelationship(string $name, array $data): self
     {
         $this->relationships[] = new JsonApiRelationship($name, [
@@ -122,8 +134,12 @@ final class JsonApiObject implements JsonSerializable
         return $this;
     }
 
+    /**
+     * @return array<string, array<mixed>>
+     */
     public function jsonSerialize(): array
     {
+        /** @var array<string, array> $json */
         $json = array_merge(
             [
                 'id' => $this->id,
@@ -154,6 +170,9 @@ final class JsonApiObject implements JsonSerializable
         return $result;
     }
 
+    /**
+     * @param array<mixed> $json
+     */
     private function parse(array $json): void
     {
         $this->attributes = new JsonApiAttributesCollection();

@@ -6,6 +6,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class JsonApiResponse extends JsonResponse
 {
+    /**
+     * @param array<string,string> $headers
+     */
     public function __construct(
         mixed $data = null,
         int $status = 200,

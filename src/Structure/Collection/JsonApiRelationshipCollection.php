@@ -4,15 +4,20 @@ namespace Rikudou\JsonApiBundle\Structure\Collection;
 
 use function array_merge;
 use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\Pure;
 use JsonSerializable;
 use Rikudou\JsonApiBundle\Structure\EmptyObject;
 use Rikudou\JsonApiBundle\Structure\JsonApiRelationship;
 
 /**
- * @extends() AbstractCollection<JsonApiRelationship>
+ * @extends AbstractCollection<JsonApiRelationship>
  */
 final class JsonApiRelationshipCollection extends AbstractCollection implements JsonSerializable
 {
+    /**
+     * @phpstan-return array<string, array<mixed>|EmptyObject>
+     */
+    #[Pure]
     #[ArrayShape(['relationships' => "array|\Rikudou\JsonApiBundle\Structure\EmptyObject"])]
     public function jsonSerialize(): array
     {
@@ -30,6 +35,9 @@ final class JsonApiRelationshipCollection extends AbstractCollection implements 
         return $result;
     }
 
+    /**
+     * @return string[]
+     */
     protected function getAllowedTypes(): array
     {
         return [

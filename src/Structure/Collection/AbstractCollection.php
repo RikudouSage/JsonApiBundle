@@ -16,10 +16,15 @@ use Rikudou\JsonApiBundle\Exception\LockedCollectionException;
 use function sprintf;
 
 /**
- * @template() T
+ * @template T
+ * @implements ArrayAccess<int|string, T>
+ * @implements Iterator<int|string, T>
  */
 abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
 {
+    /**
+     * @var array<string|int>
+     */
     protected array $keys = [];
 
     protected int $current = 0;
@@ -60,7 +65,7 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
         ++$this->current;
     }
 
-    public function key(): int
+    public function key(): int|string
     {
         return $this->keys[$this->current] ?? -1;
     }
@@ -127,7 +132,7 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
      */
     abstract protected function getAllowedTypes(): ?array;
 
-    private function refresh()
+    private function refresh(): void
     {
         $this->count = count($this->data);
         $this->keys = array_keys($this->data);
@@ -144,7 +149,7 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
         $this->locked = false;
     }
 
-    private function validate(mixed $value = null)
+    private function validate(mixed $value = null): void
     {
         if ($this->getAllowedTypes() === null) {
             return;

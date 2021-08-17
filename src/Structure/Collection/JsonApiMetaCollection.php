@@ -10,10 +10,13 @@ use Rikudou\JsonApiBundle\Structure\EmptyObject;
 use Rikudou\JsonApiBundle\Structure\JsonApiMeta;
 
 /**
- * @extends() AbstractCollection<JsonApiMeta>
+ * @extends AbstractCollection<JsonApiMeta>
  */
 final class JsonApiMetaCollection extends AbstractCollection implements JsonSerializable
 {
+    /**
+     * @phpstan-return array<string,array<mixed>|EmptyObject>
+     */
     #[Pure]
     #[ArrayShape(['meta' => "array|\Rikudou\JsonApiBundle\Structure\EmptyObject"])]
     public function jsonSerialize(): array
@@ -32,6 +35,9 @@ final class JsonApiMetaCollection extends AbstractCollection implements JsonSeri
         return $result;
     }
 
+    /**
+     * @return string[]
+     */
     protected function getAllowedTypes(): array
     {
         return [
