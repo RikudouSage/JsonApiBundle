@@ -2,7 +2,7 @@
     "name": "rikudou/json-api-bundle",
     "description": "Bundle that converts your entities to JSON api",
     "type": "symfony-bundle",
-    "license": "WTFPL",
+    "license": "MIT",
     "authors": [
         {
             "name": "Dominik Chrastecky",
