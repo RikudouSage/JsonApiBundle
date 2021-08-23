@@ -18,9 +18,9 @@ final class ApiObjectValidator implements ServiceSubscriberInterface
     {
     }
 
-    public function isObjectValid(object $object): bool
+    public function isObjectValid(mixed $object): bool
     {
-        return method_exists($object, 'getId');
+        return is_object($object) && method_exists($object, 'getId');
     }
 
     /**
@@ -38,7 +38,7 @@ final class ApiObjectValidator implements ServiceSubscriberInterface
         return true;
     }
 
-    public function throwOnInvalidObject(object $object): void
+    public function throwOnInvalidObject(mixed $object): void
     {
         if (!$this->isObjectValid($object)) {
             throw new InvalidApiObjectException();
