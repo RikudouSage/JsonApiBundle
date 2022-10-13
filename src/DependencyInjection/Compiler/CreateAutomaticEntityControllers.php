@@ -40,7 +40,7 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
         if (!is_countable($directories) || !count($directories)) {
             $projectDir = $container->getParameter('kernel.project_dir');
             assert(is_string($projectDir));
-            $directories = [$projectDir];
+            $directories = ["{$projectDir}/src"];
         }
 
         foreach ($directories as $directory) {
