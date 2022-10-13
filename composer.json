@@ -11,14 +11,14 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "symfony/framework-bundle": "^4.3 | ^5.0",
-        "symfony/yaml": "^5.0",
+        "symfony/framework-bundle": "^4.3 | ^5.0 | ^6.0",
+        "symfony/yaml": "^5.0 | ^6.0",
         "php": "^8.0",
         "ext-json": "*",
-        "symfony/cache": "^5.0",
+        "symfony/cache": "^5.0 | ^6.0",
         "rikudou/reflection-file": "^2.0.0",
         "rikudou/array-merge-recursive": "^1.0",
-        "symfony/string": "^5.0",
+        "symfony/string": "^5.0 | ^6.0",
         "doctrine/orm": "^2.8"
     },
     "autoload": {
