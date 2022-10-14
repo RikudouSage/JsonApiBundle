@@ -36,6 +36,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Uid\Uuid;
 use UnexpectedValueException;
 
 abstract class EntityApiController extends AbstractController implements ApiControllerInterface
@@ -206,17 +207,20 @@ abstract class EntityApiController extends AbstractController implements ApiCont
     /**
      * @throws ReflectionException
      */
-    public function getItem(int|string $id): JsonApiObject
+    public function getItem(int|string|Uuid $id): JsonApiObject
     {
         try {
             $entity = $this
                 ->getFilteredQueryBuilder(false, false)
                 ->setMaxResults(1)
                 ->andWhere('entity.id = :itemId')
-                ->setParameter('itemId', $id)
+                ->setParameter('itemId', $id instanceof Uuid ? $id->toBinary() : $id)
                 ->getQuery()
                 ->getSingleResult();
         } catch (NoResultException | NonUniqueResultException $e) {
+            if (!$id instanceof Uuid && is_string($id) && Uuid::isValid($id)) {
+                return $this->getItem(Uuid::fromString($id));
+            }
             throw new JsonApiErrorException(
                 'The resource does not exist',
                 Response::HTTP_NOT_FOUND,
@@ -360,17 +364,20 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         }
     }
 
-    public function deleteItem(int|string $id): JsonApiResponse|Response|JsonApiObject|JsonApiCollection
+    public function deleteItem(int|string|Uuid $id): JsonApiResponse|Response|JsonApiObject|JsonApiCollection
     {
         try {
             $entity = $this
                 ->getFilteredQueryBuilder(false, false)
                 ->setMaxResults(1)
                 ->andWhere('entity.id = :itemId')
-                ->setParameter('itemId', $id)
+                ->setParameter('itemId', $id instanceof Uuid ? $id->toBinary() : $id)
                 ->getQuery()
                 ->getSingleResult();
         } catch (NoResultException | NonUniqueResultException $e) {
+            if (!$id instanceof Uuid && is_string($id) && Uuid::isValid($id)) {
+                return $this->deleteItem(Uuid::fromString($id));
+            }
             throw new JsonApiErrorException(
                 'The resource does not exist',
                 Response::HTTP_NOT_FOUND,
@@ -409,7 +416,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         }
     }
 
-    public function updateItem(int|string $id): JsonApiObject|JsonApiResponse
+    public function updateItem(int|string|Uuid $id): JsonApiObject|JsonApiResponse
     {
         if (is_string($id) && is_numeric($id) && strval(intval($id)) === $id) {
             $id = (int) $id;
@@ -422,10 +429,13 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                     ->getFilteredQueryBuilder(false, false)
                     ->setMaxResults(1)
                     ->andWhere('entity.id = :entityId')
-                    ->setParameter('entityId', $id)
+                    ->setParameter('entityId', $id instanceof Uuid ? $id->toBinary() : $id)
                     ->getQuery()
                     ->getSingleResult();
             } catch (NoResultException | NonUniqueResultException $e) {
+                if (!$id instanceof Uuid && is_string($id) && Uuid::isValid($id)) {
+                    return $this->updateItem(Uuid::fromString($id));
+                }
                 throw new JsonApiErrorException(
                     'The resource does not exist',
                     Response::HTTP_NOT_FOUND,
