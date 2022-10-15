@@ -70,7 +70,10 @@ final class ApiObjectParser
             if ($property === 'id') {
                 $result[$property] = $value;
             } elseif (!$metadataOnly) {
-                if ($normalizer = $this->normalizerLocator->getNormalizerForClass($value)) {
+                if (
+                    (is_object($value) || is_string($value))
+                    && $normalizer = $this->normalizerLocator->getNormalizerForClass($value)
+                ) {
                     $result['attributes'][$property] = $normalizer->getNormalizedValue($value);
                 } elseif (($accessor->isRelation() === true) || ($accessor->isRelation() === null && $this->isRelation($value))) {
                     if (is_iterable($value)) {
@@ -91,7 +94,10 @@ final class ApiObjectParser
                         $value = [];
 
                         foreach ($tmp as $key => $tmpValue) {
-                            if ($normalizer = $this->normalizerLocator->getNormalizerForClass($tmpValue)) {
+                            if (
+                                (is_object($tmpValue) || is_string($tmpValue))
+                                && $normalizer = $this->normalizerLocator->getNormalizerForClass($tmpValue)
+                            ) {
                                 $value[$key] = $normalizer->getNormalizedValue($tmpValue);
                             } else {
                                 $value[$key] = $tmpValue;
@@ -217,7 +223,8 @@ final class ApiObjectParser
             return true;
         } else {
             return $this->objectValidator->isObjectValid($value)
-                && $this->normalizerLocator->getNormalizerForClass($value) === null;
+                && ((!is_object($value) && !is_string($value))
+                    || $this->normalizerLocator->getNormalizerForClass($value) === null);
         }
     }
 
