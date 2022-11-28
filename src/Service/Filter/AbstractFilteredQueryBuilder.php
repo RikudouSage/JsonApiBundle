@@ -53,7 +53,7 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                     $values = explode(',', $values);
                     if ($this->isUuid($key, $class)) {
                         $values = array_map(
-                            fn (string $value) => Uuid::fromString($value),
+                            fn (string $value) => Uuid::fromString($value)->toBinary(),
                             $values,
                         );
                     }
