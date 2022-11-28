@@ -2,15 +2,18 @@
 
 namespace Rikudou\JsonApiBundle\Structure;
 
+use BackedEnum;
 use JsonSerializable;
 
 final class JsonApiAttribute implements JsonSerializable
 {
     /**
-     * @param float|array<mixed>|bool|int|string|null $value
+     * @param float|array<mixed>|bool|int|string|null|BackedEnum $value
      */
-    public function __construct(private string $name, private float|array|bool|int|string|null $value)
-    {
+    public function __construct(
+        private readonly string $name,
+        private float|array|bool|int|string|null|BackedEnum $value,
+    ) {
     }
 
     public function getName(): string
@@ -23,13 +26,17 @@ final class JsonApiAttribute implements JsonSerializable
      */
     public function getValue(): float|array|bool|int|string|null
     {
+        if ($this->value instanceof BackedEnum) {
+            return $this->value->value;
+        }
+
         return $this->value;
     }
 
     /**
      * @param float|int|bool|array<mixed>|string|null $value
      */
-    public function setValue(float|int|bool|array|string|null $value): self
+    public function setValue(float|int|bool|array|string|null|BackedEnum $value): self
     {
         $this->value = $value;
 
@@ -42,7 +49,7 @@ final class JsonApiAttribute implements JsonSerializable
     public function jsonSerialize(): array
     {
         return [
-            $this->name => $this->value,
+            $this->name => $this->getValue(),
         ];
     }
 }
