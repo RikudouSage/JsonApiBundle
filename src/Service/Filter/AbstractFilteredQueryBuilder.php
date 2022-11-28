@@ -8,9 +8,14 @@ use Doctrine\ORM\QueryBuilder;
 use function explode;
 use function in_array;
 use ReflectionException;
+use ReflectionMethod;
+use ReflectionNamedType;
+use ReflectionProperty;
+use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiPropertyParser;
 use function substr;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\Uid\Uuid;
 
 abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInterface
 {
@@ -46,6 +51,12 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                     }
 
                     $values = explode(',', $values);
+                    if ($this->isUuid($key, $class)) {
+                        $values = array_map(
+                            fn (string $value) => Uuid::fromString($value),
+                            $values,
+                        );
+                    }
                     $query = '';
 
                     for ($j = 0; $j < count($values); $j++) {
@@ -103,5 +114,40 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
     public function setPropertyParser(ApiPropertyParser $propertyParser): void
     {
         $this->propertyParser = $propertyParser;
+    }
+
+    /**
+     * @param class-string<object> $class
+     *
+     * @throws ReflectionException
+     */
+    private function isUuid(string $key, string $class): bool
+    {
+        $properties = $this->propertyParser->getApiProperties(new $class);
+        if (!isset($properties[$key])) {
+            return false;
+        }
+
+        $property = $properties[$key];
+        if ($property->getType() === ApiObjectAccessor::TYPE_PROPERTY) {
+            $reflection = new ReflectionProperty($class, $property->getGetter());
+            $type = $reflection->getType();
+        } else {
+            $reflection = new ReflectionMethod($class, $property->getGetter());
+            $type = $reflection->getReturnType();
+        }
+
+        if ($type === null) {
+            return false;
+        }
+
+        $types = $type instanceof ReflectionNamedType ? [$type] : $type->getTypes();
+        foreach ($types as $type) {
+            if (is_a($type->getName(), Uuid::class, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
