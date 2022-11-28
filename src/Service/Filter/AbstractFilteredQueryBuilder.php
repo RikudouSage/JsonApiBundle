@@ -7,8 +7,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use function explode;
 use function in_array;
-use InvalidArgumentException;
-use function is_array;
 use ReflectionException;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiPropertyParser;
 use function substr;
@@ -34,13 +32,9 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
             ->select('entity')
             ->from($class, 'entity');
 
-        if (($queryParams->get('filter') || $queryParams->get('sort')) && ($useFilter || $useSort)) {
-            $filter = $queryParams->get('filter', []);
+        if (($queryParams->has('filter') || $queryParams->has('sort')) && ($useFilter || $useSort)) {
+            $filter = $queryParams->all('filter');
             $sort = $queryParams->get('sort', '');
-
-            if (!is_array($filter)) {
-                throw new InvalidArgumentException('Invalid filter format');
-            }
 
             $allowedProperties = array_keys($this->propertyParser->getApiProperties(new $class));
 
