@@ -6,6 +6,7 @@ use ArgumentCountError;
 use function count;
 use ReflectionClass;
 use ReflectionException;
+use Rikudou\JsonApiBundle\Exception\DuplicateResourceException;
 use Rikudou\JsonApiBundle\Exception\ResourceNotFoundException;
 use Rikudou\JsonApiBundle\Interfaces\ApiControllerInterface;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectParser;
@@ -22,8 +23,10 @@ final class ApiResourceLocator
      */
     private array $map = [];
 
-    public function __construct(private ApiObjectParser $objectParser)
-    {
+    public function __construct(
+        private ApiObjectParser $objectParser,
+        private readonly bool $allowResourceOverwrite,
+    ) {
     }
 
     /**
@@ -124,6 +127,9 @@ final class ApiResourceLocator
 
                 $i = 0;
                 foreach ($names as $name) {
+                    if (isset($this->map[$name]) && !$this->allowResourceOverwrite) {
+                        throw new DuplicateResourceException("There's already a controller for resource '{$name}'. Either allow overriding in configuration or solve the issue.");
+                    }
                     $this->map[$name] = [
                         'controller' => $controller,
                         'plural' => $i % 2 === 1,

@@ -75,6 +75,10 @@ final class Configuration implements ConfigurationInterface
                     ->info('The cache adapter to use for caching properties etc.')
                     ->defaultValue('cache.app')
                 ->end()
+                ->booleanNode('allow_resource_overwrite')
+                    ->info('Whether to allow overwriting of resources. This could happen if more than one controller for a resource with the same name exists.')
+                    ->defaultFalse()
+                ->end()
             ->end();
 
         return $treeBuilder;

@@ -97,7 +97,7 @@ services:
     class: Rikudou\JsonApiBundle\Service\ApiResourceLocator
     arguments:
       - '@rikudou_api.object_parser.parser'
-      - '@rikudou_api.inflector'
+      - '%rikudou_api.allow_resource_overwrite%'
 
   rikudou_api.api_normalizer_locator:
     class: Rikudou\JsonApiBundle\Service\ApiNormalizerLocator

@@ -51,5 +51,6 @@ final class RikudouJsonApiExtension extends Extension
         $container->setParameter('rikudou_api.auto_discover_paths', $configs['auto_discover_paths']);
         $container->setParameter('rikudou_api.disable_autoconfiguration', $configs['disable_autoconfiguration']);
         $container->setParameter('rikudou_api.enabled_resources', $configs['enabled_resources']);
+        $container->setParameter('rikudou_api.allow_resource_overwrite', $configs['allow_resource_overwrite']);
     }
 }
