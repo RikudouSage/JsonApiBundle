@@ -12,6 +12,8 @@ use InvalidArgumentException;
 use function is_a;
 use Iterator;
 use LogicException;
+use ReflectionException;
+use ReflectionProperty;
 use Rikudou\JsonApiBundle\Exception\LockedCollectionException;
 use function sprintf;
 
@@ -82,6 +84,20 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
 
     public function offsetExists($offset): bool
     {
+        if ($keyName = $this->getKeyProperty()) {
+            foreach ($this->data as $item) {
+                if (!is_object($item) && !is_array($item)) {
+                    continue;
+                }
+                $accessor = $this->getAccessor($item, $keyName);
+                if ($accessor() === $offset) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         return isset($this->data[$offset]);
     }
 
@@ -90,6 +106,20 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
      */
     public function offsetGet($offset): mixed
     {
+        if ($keyName = $this->getKeyProperty()) {
+            foreach ($this->data as $item) {
+                if (!is_object($item) && !is_array($item)) {
+                    continue;
+                }
+                $accessor = $this->getAccessor($item, $keyName);
+                if ($accessor() === $offset) {
+                    return $item;
+                }
+            }
+
+            throw new LogicException("No item for offset '{$offset}' exists");
+        }
+
         return $this->data[$offset];
     }
 
@@ -115,7 +145,21 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
         if ($this->locked) {
             throw new LockedCollectionException();
         }
-        unset($this->data[$offset]);
+        if ($keyName = $this->getKeyProperty()) {
+            foreach ($this->data as $key => $item) {
+                if (!is_object($item) && !is_array($item)) {
+                    continue;
+                }
+                $accessor = $this->getAccessor($item, $keyName);
+                if ($accessor() === $offset) {
+                    unset($this->data[$key]);
+
+                    return;
+                }
+            }
+        } else {
+            unset($this->data[$offset]);
+        }
         $this->refresh();
     }
 
@@ -195,6 +239,36 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
                 throw new InvalidArgumentException(
                     sprintf('The collection accepts only instances of %s', implode(', ', $allowedTypes)),
                 );
+            }
+        }
+    }
+
+    /**
+     * @param T $item
+     *
+     * @return (callable(): (int|string))
+     */
+    private function getAccessor(mixed $item, string $name): callable
+    {
+        assert(is_array($item) || is_object($item));
+
+        if (is_array($item)) {
+            return fn () => $item[$name] ?? throw new LogicException("No accessor for property '{$name}'");
+        }
+
+        $getters = ['is', 'get'];
+        foreach ($getters as $getter) {
+            $methodName = $getter . ucfirst($name);
+            if (method_exists($item, $methodName)) {
+                return $item->{$methodName}(...);
+            }
+
+            try {
+                $reflection = new ReflectionProperty($item, $name);
+
+                return fn () => $reflection->getValue($item);
+            } catch (ReflectionException $e) {
+                throw new LogicException("No property '{$name}' exists in object of type '" . get_class($item) . "'");
             }
         }
     }
