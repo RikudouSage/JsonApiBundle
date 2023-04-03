@@ -262,14 +262,14 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
             if (method_exists($item, $methodName)) {
                 return $item->{$methodName}(...);
             }
+        }
 
-            try {
-                $reflection = new ReflectionProperty($item, $name);
+        try {
+            $reflection = new ReflectionProperty($item, $name);
 
-                return fn () => $reflection->getValue($item);
-            } catch (ReflectionException $e) {
-                throw new LogicException("No property '{$name}' exists in object of type '" . get_class($item) . "'");
-            }
+            return fn () => $reflection->getValue($item);
+        } catch (ReflectionException $e) {
+            throw new LogicException("No property '{$name}' exists in object of type '" . get_class($item) . "'");
         }
     }
 }
