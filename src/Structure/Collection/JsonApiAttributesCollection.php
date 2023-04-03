@@ -44,4 +44,16 @@ final class JsonApiAttributesCollection extends AbstractCollection implements Js
             JsonApiAttribute::class,
         ];
     }
+
+    protected function getKeys(): iterable
+    {
+        foreach ($this->data as $item) {
+            yield $item->getName();
+        }
+    }
+
+    protected function getKeyProperty(): ?string
+    {
+        return 'name';
+    }
 }
