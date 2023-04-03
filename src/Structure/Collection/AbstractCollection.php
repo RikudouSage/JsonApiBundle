@@ -132,10 +132,23 @@ abstract class AbstractCollection implements ArrayAccess, Iterator, Countable
      */
     abstract protected function getAllowedTypes(): ?array;
 
+    protected function getKeyProperty(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * @return array<string>
+     */
+    protected function getKeys(): iterable
+    {
+        return array_keys($this->data);
+    }
+
     private function refresh(): void
     {
         $this->count = count($this->data);
-        $this->keys = array_keys($this->data);
+        $this->keys = [...$this->getKeys()];
         $this->rewind();
     }
 

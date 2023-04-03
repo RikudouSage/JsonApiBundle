@@ -44,4 +44,16 @@ final class JsonApiMetaCollection extends AbstractCollection implements JsonSeri
             JsonApiMeta::class,
         ];
     }
+
+    protected function getKeyProperty(): ?string
+    {
+        return 'name';
+    }
+
+    protected function getKeys(): iterable
+    {
+        foreach ($this->data as $item) {
+            yield $item->getName();
+        }
+    }
 }
