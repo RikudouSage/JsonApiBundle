@@ -3,7 +3,7 @@
 namespace Rikudou\JsonApiBundle\Service\ObjectParser;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Proxy\Proxy;
+use Doctrine\Persistence\Proxy;
 use function get_class;
 use JetBrains\PhpStorm\ArrayShape;
 use function method_exists;
