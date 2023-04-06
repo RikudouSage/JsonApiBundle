@@ -458,7 +458,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
             if (!isset($data['id']) || !isset($data['type'])) {
                 throw new UnexpectedValueException("The JSON data must contain 'id' and 'type'");
             }
-            if ($data['id'] !== $id) {
+            if ($data['id'] !== ($id instanceof Uuid ? (string) $id : $id)) {
                 throw new UnexpectedValueException("The 'id' value does not match the id from URL");
             }
             if ($data['type'] !== $this->resourceName) {
