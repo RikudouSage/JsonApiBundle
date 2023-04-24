@@ -90,6 +90,7 @@ final class ApiObjectParser
                     }
                 } else {
                     if (is_iterable($value)) {
+                        $original = $value;
                         $tmp = $value;
                         $value = [];
 
@@ -102,6 +103,9 @@ final class ApiObjectParser
                             } else {
                                 $value[$key] = $tmpValue;
                             }
+                        }
+                        if (!count($value) && is_object($original)) {
+                            $value = $original;
                         }
                     }
                     $result['attributes'][$property] = $value;
