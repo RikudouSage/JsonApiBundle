@@ -47,8 +47,14 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
         $reflection = new ReflectionClass($this->objectValidator->getRealClass($object));
 
         $resourceConfig = $this->getResourcePropertyConfig($reflection);
-        $properties = $this->parsedProperties($reflection->getProperties(), $resourceConfig['enabled'], $resourceConfig['disabled']);
-        $methods = $this->parsedMethods($reflection->getMethods(ReflectionMethod::IS_PUBLIC));
+        $properties = $this->parsedProperties(
+            $this->getAllProperties($reflection),
+            $resourceConfig['enabled'],
+            $resourceConfig['disabled'],
+        );
+        $methods = $this->parsedMethods(
+            $this->getAllPublicMethods($reflection),
+        );
 
         $result = array_merge($properties, $methods);
         $cache->set($result);
@@ -281,5 +287,33 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
         }
 
         return $result;
+    }
+
+    /**
+     * @return array<ReflectionProperty>
+     */
+    private function getAllProperties(ReflectionClass $class): array
+    {
+        $properties = [];
+        do {
+            $properties = array_merge($properties, $class->getProperties());
+            $class = $class->getParentClass();
+        } while ($class);
+
+        return $properties;
+    }
+
+    /**
+     * @return array<ReflectionMethod>
+     */
+    private function getAllPublicMethods(ReflectionClass $class): array
+    {
+        $methods = [];
+        do {
+            $methods = array_merge($methods, $class->getMethods(ReflectionMethod::IS_PUBLIC));
+            $class = $class->getParentClass();
+        } while ($class);
+
+        return $methods;
     }
 }

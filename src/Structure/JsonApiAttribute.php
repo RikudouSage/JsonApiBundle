@@ -12,7 +12,7 @@ final class JsonApiAttribute implements JsonSerializable
      * @param float|array<mixed>|bool|int|string|null|BackedEnum $value
      */
     public function __construct(
-        private readonly string                                         $name,
+        private readonly string $name,
         private float|array|ArrayObject|bool|int|string|null|BackedEnum $value,
     ) {
     }
