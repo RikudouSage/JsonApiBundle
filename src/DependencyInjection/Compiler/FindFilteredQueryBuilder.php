@@ -32,6 +32,16 @@ final class FindFilteredQueryBuilder implements CompilerPassInterface
         }
 
         $definition = $container->getDefinition((string) $resultingBuilder);
+        $class = $definition->getClass();
+        assert(is_string($class));
+
+        if (method_exists($class, 'setObjectValidator')) {
+            $definition->addMethodCall(
+                'setObjectValidator',
+                [new Reference('rikudou_api.object_parser.validator')],
+            );
+        }
+
         $definition->addMethodCall(
             'setEntityManager',
             [new Reference('doctrine.orm.entity_manager')],

@@ -7,11 +7,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use function explode;
 use function in_array;
+use LogicException;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionProperty;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor;
+use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectValidator;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiPropertyParser;
 use function substr;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -22,6 +24,8 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
     private EntityManagerInterface $entityManager;
 
     private ApiPropertyParser $propertyParser;
+
+    private ApiObjectValidator $objectValidator;
 
     /**
      * @throws ReflectionException
@@ -57,11 +61,17 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                             $values,
                         );
                     }
+                    if ($this->isRelation($key, $class)) {
+                        $values = array_map(
+                            fn (string $value) => $this->findEntityById($key, $class, $value),
+                            $values,
+                        );
+                    }
                     $query = '';
 
                     for ($j = 0; $j < count($values); $j++) {
                         $operator = '=';
-                        if (str_starts_with($values[$j], '!')) {
+                        if (is_string($values[$j]) && str_starts_with($values[$j], '!')) {
                             $operator = '!=';
                             $values[$j] = substr($values[$j], 1);
                         }
@@ -72,8 +82,14 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                     $builder
                         ->andWhere($query);
                     for ($j = 0; $j < count($values); $j++) {
-                        $builder
-                            ->setParameter("value{$i}{$j}", $values[$j]);
+                        $currentValue = $values[$j];
+                        if ($this->objectValidator->isObjectValid($currentValue)) {
+                            $currentValue = $currentValue->getId();
+                            if ($currentValue instanceof Uuid) {
+                                $currentValue = $currentValue->toBinary();
+                            }
+                        }
+                        $builder->setParameter("value{$i}{$j}", $currentValue);
                     }
                     $i++;
                 }
@@ -116,6 +132,11 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
         $this->propertyParser = $propertyParser;
     }
 
+    public function setObjectValidator(ApiObjectValidator $validator): void
+    {
+        $this->objectValidator = $validator;
+    }
+
     /**
      * @param class-string<object> $class
      *
@@ -149,5 +170,67 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
         }
 
         return false;
+    }
+
+    /**
+     * @param class-string<object> $class
+     *
+     * @throws ReflectionException
+     */
+    private function isRelation(string $key, string $class): bool
+    {
+        $properties = $this->propertyParser->getApiProperties(new $class);
+        if (!isset($properties[$key])) {
+            return false;
+        }
+
+        $property = $properties[$key];
+        $isRelation = $property->isRelation();
+        if (is_bool($isRelation)) {
+            return $isRelation;
+        }
+
+        if ($property->getType() === ApiObjectAccessor::TYPE_PROPERTY) {
+            $reflection = new ReflectionProperty($class, $property->getGetter());
+            $type = $reflection->getType();
+        } else {
+            $reflection = new ReflectionMethod($class, $property->getGetter());
+            $type = $reflection->getReturnType();
+        }
+
+        if (!$type instanceof ReflectionNamedType) {
+            return false;
+        }
+
+        return class_exists($type->getName());
+    }
+
+    private function findEntityById(string $key, string $class, string $id): ?object
+    {
+        $properties = $this->propertyParser->getApiProperties(new $class);
+        if (!isset($properties[$key])) {
+            throw new LogicException("Property '{$key}' does not exist.");
+        }
+
+        $property = $properties[$key];
+
+        if ($property->getType() === ApiObjectAccessor::TYPE_PROPERTY) {
+            $reflection = new ReflectionProperty($class, $property->getGetter());
+            $type = $reflection->getType();
+        } else {
+            $reflection = new ReflectionMethod($class, $property->getGetter());
+            $type = $reflection->getReturnType();
+        }
+
+        if (!$type instanceof ReflectionNamedType) {
+            throw new LogicException("Property '{$key}' has an invalid type.");
+        }
+        $targetClass = $type->getName();
+        if (!class_exists($targetClass)) {
+            throw new LogicException("Property '{$key}' type does not reference a valid class.");
+        }
+
+        return $this->entityManager->getRepository($targetClass)
+            ->find(Uuid::isValid($id) ? Uuid::fromString($id)->toBinary() : $id);
     }
 }

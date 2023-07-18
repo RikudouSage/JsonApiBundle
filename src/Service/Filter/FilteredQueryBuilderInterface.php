@@ -4,9 +4,13 @@ namespace Rikudou\JsonApiBundle\Service\Filter;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
+use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectValidator;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiPropertyParser;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
+/**
+ * @method void setObjectValidator(ApiObjectValidator $validator)
+ */
 interface FilteredQueryBuilderInterface
 {
     /**
