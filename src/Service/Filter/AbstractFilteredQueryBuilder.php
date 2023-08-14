@@ -3,6 +3,7 @@
 namespace Rikudou\JsonApiBundle\Service\Filter;
 
 use function array_keys;
+use BackedEnum;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use function explode;
@@ -64,6 +65,14 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                     if ($this->isRelation($key, $class)) {
                         $values = array_map(
                             fn (string $value) => $this->findEntityById($key, $class, $value),
+                            $values,
+                        );
+                    }
+                    if ($this->isBackedEnum($key, $class)) {
+                        $enumType = $this->getPropertyType($key, $class);
+                        assert(is_a($enumType, BackedEnum::class, true));
+                        $values = array_map(
+                            fn (string $value) => $enumType::from(is_numeric($value) ? (int) $value : $value),
                             $values,
                         );
                     }
@@ -144,32 +153,24 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
      */
     private function isUuid(string $key, string $class): bool
     {
-        $properties = $this->propertyParser->getApiProperties(new $class);
-        if (!isset($properties[$key])) {
+        try {
+            $type = $this->getPropertyType($key, $class);
+
+            return is_a($type, Uuid::class, true);
+        } catch (LogicException) {
             return false;
         }
+    }
 
-        $property = $properties[$key];
-        if ($property->getType() === ApiObjectAccessor::TYPE_PROPERTY) {
-            $reflection = new ReflectionProperty($class, $property->getGetter());
-            $type = $reflection->getType();
-        } else {
-            $reflection = new ReflectionMethod($class, $property->getGetter());
-            $type = $reflection->getReturnType();
-        }
+    private function isBackedEnum(string $key, string $class): bool
+    {
+        try {
+            $type = $this->getPropertyType($key, $class);
 
-        if ($type === null) {
+            return is_a($type, BackedEnum::class, true);
+        } catch (LogicException) {
             return false;
         }
-
-        $types = $type instanceof ReflectionNamedType ? [$type] : $type->getTypes();
-        foreach ($types as $type) {
-            if (is_a($type->getName(), Uuid::class, true)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -190,22 +191,30 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
             return $isRelation;
         }
 
-        if ($property->getType() === ApiObjectAccessor::TYPE_PROPERTY) {
-            $reflection = new ReflectionProperty($class, $property->getGetter());
-            $type = $reflection->getType();
-        } else {
-            $reflection = new ReflectionMethod($class, $property->getGetter());
-            $type = $reflection->getReturnType();
-        }
-
-        if (!$type instanceof ReflectionNamedType) {
+        try {
+            $type = $this->getPropertyType($key, $class);
+        } catch (LogicException) {
             return false;
         }
 
-        return class_exists($type->getName());
+        return $this->entityManager->getMetadataFactory()->isTransient($type);
     }
 
     private function findEntityById(string $key, string $class, string $id): ?object
+    {
+        $targetClass = $this->getPropertyType($key, $class);
+
+        return $this->entityManager->getRepository($targetClass)->find(
+            Uuid::isValid($id) ? Uuid::fromString($id)->toBinary() : $id,
+        );
+    }
+
+    /**
+     * @param class-string<object> $class
+     *
+     * @return class-string<object>
+     */
+    private function getPropertyType(string $key, string $class): string
     {
         $properties = $this->propertyParser->getApiProperties(new $class);
         if (!isset($properties[$key])) {
@@ -221,7 +230,6 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
             $reflection = new ReflectionMethod($class, $property->getGetter());
             $type = $reflection->getReturnType();
         }
-
         if (!$type instanceof ReflectionNamedType) {
             throw new LogicException("Property '{$key}' has an invalid type.");
         }
@@ -230,7 +238,6 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
             throw new LogicException("Property '{$key}' type does not reference a valid class.");
         }
 
-        return $this->entityManager->getRepository($targetClass)
-            ->find(Uuid::isValid($id) ? Uuid::fromString($id)->toBinary() : $id);
+        return $targetClass;
     }
 }
