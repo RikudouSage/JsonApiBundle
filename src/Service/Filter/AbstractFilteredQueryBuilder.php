@@ -82,7 +82,11 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                             $operator = '!=';
                             $values[$j] = substr($values[$j], 1);
                         }
-                        $query .= "entity.{$key} {$operator} :value{$i}{$j} OR ";
+                        if ($values[$j] === null) {
+                            $query .= "entity.{$key} IS NULL OR ";
+                        } else {
+                            $query .= "entity.{$key} {$operator} :value{$i}{$j} OR ";
+                        }
                     }
 
                     $query = substr($query, 0, -4);
