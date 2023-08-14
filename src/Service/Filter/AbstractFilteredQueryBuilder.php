@@ -94,6 +94,9 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                         ->andWhere($query);
                     for ($j = 0; $j < count($values); $j++) {
                         $currentValue = $values[$j];
+                        if ($currentValue === null) {
+                            continue;
+                        }
                         if ($this->objectValidator->isObjectValid($currentValue)) {
                             $currentValue = $currentValue->getId();
                             if ($currentValue instanceof Uuid) {
