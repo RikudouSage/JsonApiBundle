@@ -61,18 +61,16 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                             fn (string $value) => Uuid::fromString($value)->toBinary(),
                             $values,
                         );
-                    }
-                    if ($this->isRelation($key, $class)) {
-                        $values = array_map(
-                            fn (string $value) => $this->findEntityById($key, $class, $value),
-                            $values,
-                        );
-                    }
-                    if ($this->isBackedEnum($key, $class)) {
+                    } elseif ($this->isBackedEnum($key, $class)) {
                         $enumType = $this->getPropertyType($key, $class);
                         assert(is_a($enumType, BackedEnum::class, true));
                         $values = array_map(
                             fn (string $value) => $enumType::from(is_numeric($value) ? (int) $value : $value),
+                            $values,
+                        );
+                    } elseif ($this->isRelation($key, $class)) {
+                        $values = array_map(
+                            fn (string $value) => $this->findEntityById($key, $class, $value),
                             $values,
                         );
                     }
