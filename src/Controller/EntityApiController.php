@@ -124,7 +124,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         );
         $response->addLink(
             'next',
-            $currentPage + 1 < $lastPage
+            $currentPage < $lastPage
                 ? $this->route(
                     'rikudou_json_api.router',
                     array_merge_recursive($queryParams->all(), ['page' => $currentPage + 1]),
