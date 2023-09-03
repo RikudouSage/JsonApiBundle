@@ -202,7 +202,7 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
             return false;
         }
 
-        return $this->entityManager->getMetadataFactory()->isTransient($type);
+        return !$this->entityManager->getMetadataFactory()->isTransient($type);
     }
 
     private function findEntityById(string $key, string $class, string $id): ?object
