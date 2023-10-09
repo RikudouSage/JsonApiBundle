@@ -304,7 +304,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
 
             $event = new EntityPreParseEvent([
                 'data' => $data,
-            ]);
+            ], $this->getClass());
             $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_PARSE);
             $data = $event->getData();
 
@@ -451,7 +451,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
 
             $event = new EntityPreParseEvent([
                 'data' => $data,
-            ]);
+            ], $this->getClass());
             $this->eventDispatcher->dispatch($event, ApiEntityEvents::PRE_PARSE);
             $data = $event->getData()['data'];
 

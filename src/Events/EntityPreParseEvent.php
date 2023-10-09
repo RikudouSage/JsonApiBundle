@@ -8,9 +8,12 @@ final class EntityPreParseEvent extends Event
 {
     /**
      * @param array<mixed> $data
+     * @param class-string $class,
      */
-    public function __construct(private array $data)
-    {
+    public function __construct(
+        private array $data,
+        private string $class,
+    ) {
     }
 
     /**
@@ -29,5 +32,13 @@ final class EntityPreParseEvent extends Event
         $this->data = $data;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getClass(): string
+    {
+        return $this->class;
     }
 }
