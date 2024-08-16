@@ -115,4 +115,6 @@ services:
     arguments:
       $projectDir: '%kernel.project_dir%'
     tags:
-      - { name: console.command, command: 'json-api:install-routes' }
+      - name: console.command
+        command: json-api:install-routes
+        description: Install a default routes file for use with the bundle.
