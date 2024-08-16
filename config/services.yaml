@@ -109,3 +109,10 @@ services:
       - '%rikudou_api.datetime_format%'
     tags:
       - rikudou_api.api_normalizer
+
+  rikudou_api.command.install_routes:
+    class: Rikudou\JsonApiBundle\Command\InstallRoutesCommand
+    arguments:
+      $projectDir: '%kernel.project_dir%'
+    tags:
+      - { name: console.command, command: 'json-api:install-routes' }
