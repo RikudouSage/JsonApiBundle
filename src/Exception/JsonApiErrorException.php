@@ -24,7 +24,7 @@ final class JsonApiErrorException extends RuntimeException
     public function __construct(
         array|string|JsonApiError|null $message = null,
         int $code = Response::HTTP_BAD_REQUEST,
-        Throwable $previous = null,
+        ?Throwable $previous = null,
     ) {
         if (!is_array($message) && !is_string($message)) {
             $message = '';
