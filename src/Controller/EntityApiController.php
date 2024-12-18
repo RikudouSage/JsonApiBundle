@@ -2,11 +2,11 @@
 
 namespace Rikudou\JsonApiBundle\Controller;
 
+use Doctrine\ORM\Exception\ORMException;
 use function assert;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Exception;
