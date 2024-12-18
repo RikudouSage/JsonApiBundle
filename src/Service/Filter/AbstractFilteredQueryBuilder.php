@@ -55,12 +55,14 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                         continue;
                     }
 
+                    $valuesAreUuids = false;
                     $values = explode(',', $values);
                     if ($this->isUuid($key, $class)) {
                         $values = array_map(
                             fn (string $value) => Uuid::fromString($value)->toBinary(),
                             $values,
                         );
+                        $valuesAreUuids = true;
                     } elseif ($this->isBackedEnum($key, $class)) {
                         $enumType = $this->getPropertyType($key, $class);
                         assert(is_a($enumType, BackedEnum::class, true));
@@ -78,7 +80,7 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
 
                     for ($j = 0; $j < count($values); $j++) {
                         $operator = '=';
-                        if (is_string($values[$j]) && str_starts_with($values[$j], '!')) {
+                        if (!$valuesAreUuids && is_string($values[$j]) && str_starts_with($values[$j], '!')) {
                             $operator = '!=';
                             $values[$j] = substr($values[$j], 1);
                         }
