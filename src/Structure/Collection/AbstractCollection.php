@@ -19,6 +19,7 @@ use function sprintf;
 
 /**
  * @template T
+ *
  * @implements ArrayAccess<int|string, T>
  * @implements Iterator<int|string, T>
  */

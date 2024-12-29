@@ -2,9 +2,9 @@
 
 namespace Rikudou\JsonApiBundle\Controller;
 
-use Doctrine\ORM\Exception\ORMException;
 use function assert;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;

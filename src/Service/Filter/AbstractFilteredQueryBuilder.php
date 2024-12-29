@@ -13,10 +13,13 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionProperty;
+use Rikudou\JsonApiBundle\ApiEntityEvents;
+use Rikudou\JsonApiBundle\Events\EntityApiOnFilterSearchEvent;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectValidator;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiPropertyParser;
 use function substr;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\Uid\Uuid;
 
@@ -27,6 +30,8 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
     private ApiPropertyParser $propertyParser;
 
     private ApiObjectValidator $objectValidator;
+
+    private EventDispatcherInterface $eventDispatcher;
 
     /**
      * @throws ReflectionException
@@ -51,12 +56,19 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
             if ($useFilter) {
                 $i = 0;
                 foreach ($filter as $key => $values) {
+                    $values = explode(',', $values);
+
+                    $event = new EntityApiOnFilterSearchEvent($builder, $key, $values);
+                    $this->eventDispatcher->dispatch($event, ApiEntityEvents::ON_FILTER_SEARCH);
+                    if ($event->handled) {
+                        continue;
+                    }
+
                     if (!in_array($key, $allowedProperties, true)) {
                         continue;
                     }
 
                     $valuesAreUuids = false;
-                    $values = explode(',', $values);
                     if ($this->isUuid($key, $class)) {
                         $values = array_map(
                             fn (string $value) => Uuid::fromString($value)->toBinary(),
@@ -148,9 +160,20 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
         $this->propertyParser = $propertyParser;
     }
 
+    /**
+     * @internal
+     */
     public function setObjectValidator(ApiObjectValidator $validator): void
     {
         $this->objectValidator = $validator;
+    }
+
+    /**
+     * @internal
+     */
+    public function setEventDispatcher(EventDispatcherInterface $eventDispatcher): void
+    {
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**

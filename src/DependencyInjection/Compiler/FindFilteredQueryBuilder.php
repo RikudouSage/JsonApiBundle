@@ -41,6 +41,12 @@ final class FindFilteredQueryBuilder implements CompilerPassInterface
                 [new Reference('rikudou_api.object_parser.validator')],
             );
         }
+        if (method_exists($class, 'setEventDispatcher')) {
+            $definition->addMethodCall(
+                'setEventDispatcher',
+                [new Reference('event_dispatcher')],
+            );
+        }
 
         $definition->addMethodCall(
             'setEntityManager',

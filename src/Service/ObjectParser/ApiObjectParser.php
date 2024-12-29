@@ -330,9 +330,9 @@ final class ApiObjectParser
                     new UnexpectedValueException("The relationship '{$relationship->getName()}' is not valid"),
                 );
             }
-//            if (!$relationship->hasData()) {
-//                continue;
-//            }
+            //            if (!$relationship->hasData()) {
+            //                continue;
+            //            }
 
             $data = $relationship->getData();
             $raw = $rawData['data']['relationships'][$relationship->getName()];

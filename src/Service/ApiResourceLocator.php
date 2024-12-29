@@ -48,24 +48,24 @@ final class ApiResourceLocator
 
         if (!isset($this->map[$resourceName])) {
             throw new ResourceNotFoundException($resourceName);
-//            $found = false;
-//
-//            $plural = [$this->inflector->pluralize($resourceName)];
-//            $singular = [$this->inflector->singularize($resourceName)];
-//
-//            $result = array_merge($plural, $singular);
-//
-//            foreach ($result as $word) {
-//                if (isset($this->map[$word])) {
-//                    $resourceName = $word;
-//                    $found = true;
-//                    break;
-//                }
-//            }
-//
-//            if (!$found) {
-//                throw new ResourceNotFoundException($resourceName);
-//            }
+            //            $found = false;
+            //
+            //            $plural = [$this->inflector->pluralize($resourceName)];
+            //            $singular = [$this->inflector->singularize($resourceName)];
+            //
+            //            $result = array_merge($plural, $singular);
+            //
+            //            foreach ($result as $word) {
+            //                if (isset($this->map[$word])) {
+            //                    $resourceName = $word;
+            //                    $found = true;
+            //                    break;
+            //                }
+            //            }
+            //
+            //            if (!$found) {
+            //                throw new ResourceNotFoundException($resourceName);
+            //            }
         }
 
         return $this->map[$resourceName]['controller'];

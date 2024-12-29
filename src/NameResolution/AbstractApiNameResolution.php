@@ -37,14 +37,14 @@ abstract class AbstractApiNameResolution implements ApiNameResolutionInterface
     {
         return 'add' .
             $this->inflector->singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)))
-            ;
+        ;
     }
 
     public function getRemover(string $propertyName): string
     {
         return 'remove' .
             $this->inflector->singularize(ucfirst($this->snakeCaseToCamelCase($propertyName)))
-            ;
+        ;
     }
 
     public function getIsser(string $propertyName): string

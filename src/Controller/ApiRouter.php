@@ -66,14 +66,14 @@ final class ApiRouter extends AbstractController
             case Request::METHOD_POST:
                 $method = self::ADD_ITEM_METHOD;
                 break;
-            /** @noinspection PhpMissingBreakStatementInspection */
+                /** @noinspection PhpMissingBreakStatementInspection */
             case Request::METHOD_PATCH:
                 if ($id !== null) {
                     $method = self::UPDATE_ITEM_METHOD;
                     break;
                 }
-            /** @noinspection PhpMissingBreakStatementInspection */
-            // no break
+                /** @noinspection PhpMissingBreakStatementInspection */
+                // no break
             case Request::METHOD_DELETE:
                 if ($id !== null) {
                     $method = self::DELETE_ITEM_METHOD;

@@ -34,4 +34,11 @@ final class ApiEntityEvents
      * @Event("Rikudou\JsonApiBundle\Events\EntityApiResponseCreatedEvent")
      */
     public const PRE_RESPONSE = 'rikudou_api.entity.pre_response';
+
+    /**
+     * Triggered for each filter property, allowing to customize the QueryBuilder
+     *
+     * @Event("Rikudou\JsonApiBundle\Events\EntityApiOnFilterSearchEvent")
+     */
+    public const ON_FILTER_SEARCH = 'rikudou_api.entity.on_filter_search';
 }
