@@ -58,7 +58,7 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                 foreach ($filter as $key => $values) {
                     $values = explode(',', $values);
 
-                    $event = new EntityApiOnFilterSearchEvent($builder, $key, $values);
+                    $event = new EntityApiOnFilterSearchEvent($builder, $class, $key, $values);
                     $this->eventDispatcher->dispatch($event, ApiEntityEvents::ON_FILTER_SEARCH);
                     if ($event->handled) {
                         continue;
