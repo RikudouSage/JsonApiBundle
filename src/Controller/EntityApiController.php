@@ -213,19 +213,20 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         try {
             $queryBuilder = $this->getFilteredQueryBuilder(false, false);
 
-            if ($id instanceof Uuid) {
+            $idToUse = $id;
+            if ($idToUse instanceof Uuid) {
                 $platform = $queryBuilder->getEntityManager()->getConnection()->getDatabasePlatform();
                 if ($platform instanceof MySqlPlatform) {
-                    $id = $id->toBinary();
+                    $idToUse = $idToUse->toBinary();
                 } else {
-                    $id = (string) $id;
+                    $idToUse = (string) $idToUse;
                 }
             }
 
             $entity = $queryBuilder
                 ->setMaxResults(1)
                 ->andWhere('entity.id = :itemId')
-                ->setParameter('itemId', $id)
+                ->setParameter('itemId', $idToUse)
                 ->getQuery()
                 ->getSingleResult();
         } catch (NoResultException | NonUniqueResultException $e) {
