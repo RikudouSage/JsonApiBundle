@@ -2,6 +2,7 @@
 
 namespace Rikudou\JsonApiBundle\Controller;
 
+use Doctrine\DBAL\Platforms\MySQLPlatform;
 use function assert;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -210,11 +211,21 @@ abstract class EntityApiController extends AbstractController implements ApiCont
     public function getItem(int|string|Uuid $id): JsonApiObject
     {
         try {
-            $entity = $this
-                ->getFilteredQueryBuilder(false, false)
+            $queryBuilder = $this->getFilteredQueryBuilder(false, false);
+
+            if ($id instanceof Uuid) {
+                $platform = $queryBuilder->getEntityManager()->getConnection()->getDatabasePlatform();
+                if ($platform instanceof MySqlPlatform) {
+                    $id = $id->toBinary();
+                } else {
+                    $id = (string) $id;
+                }
+            }
+
+            $entity = $queryBuilder
                 ->setMaxResults(1)
                 ->andWhere('entity.id = :itemId')
-                ->setParameter('itemId', $id instanceof Uuid ? $id->toBinary() : $id)
+                ->setParameter('itemId', $id)
                 ->getQuery()
                 ->getSingleResult();
         } catch (NoResultException | NonUniqueResultException $e) {
