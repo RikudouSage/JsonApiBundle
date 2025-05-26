@@ -2,6 +2,7 @@
 
 namespace Rikudou\JsonApiBundle\Service\Filter;
 
+use Doctrine\DBAL\Platforms\MySQLPlatform;
 use function array_keys;
 use BackedEnum;
 use Doctrine\ORM\EntityManagerInterface;
@@ -52,6 +53,7 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
             $sort = $queryParams->get('sort', '');
 
             $allowedProperties = array_keys($this->propertyParser->getApiProperties(new $class));
+            $databasePlatform = $builder->getEntityManager()->getConnection()->getDatabasePlatform();
 
             if ($useFilter) {
                 $i = 0;
@@ -71,9 +73,16 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                     $valuesAreUuids = false;
                     if ($this->isUuid($key, $class)) {
                         $values = array_map(
-                            fn (string $value) => Uuid::fromString($value)->toBinary(),
+                            fn (string $value) => Uuid::fromString($value),
                             $values,
                         );
+                        if ($databasePlatform instanceof MySQLPlatform) {
+                            $values = array_map(
+                                fn (Uuid $value) => $value->toBinary(),
+                                $values,
+                            );
+                        }
+
                         $valuesAreUuids = true;
                     } elseif ($this->isBackedEnum($key, $class)) {
                         $enumType = $this->getPropertyType($key, $class);
@@ -113,7 +122,7 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                         }
                         if ($this->objectValidator->isObjectValid($currentValue)) {
                             $currentValue = $currentValue->getId();
-                            if ($currentValue instanceof Uuid) {
+                            if ($currentValue instanceof Uuid && $databasePlatform instanceof MySQLPlatform) {
                                 $currentValue = $currentValue->toBinary();
                             }
                         }
