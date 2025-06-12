@@ -155,6 +155,10 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         // todo refactor
         if ($includes = $request->query->get('include')) {
             assert(is_string($includes));
+
+            /** @var array<string, array<mixed>> $cache */
+            $cache = [];
+
             $includes = explode(',', $includes);
             $objects = $response->getData();
             foreach ($objects as $object) {
@@ -171,10 +175,16 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                                 if ($relationshipDatum === null) {
                                     continue;
                                 }
-                                $includeResponse = json_decode((string) $this->forward('rikudou_api.controller.api_router::router', [
-                                    'resourceName' => $relationshipDatum->getType(),
-                                    'id' => $relationshipDatum->getId(),
-                                ])->getContent(), true)['data'];
+
+                                if (isset($cache[$relationshipDatum->getType().$relationshipDatum->getId()])) {
+                                    $includeResponse =  $cache[$relationshipDatum->getType().$relationshipDatum->getId()];
+                                } else {
+                                    $includeResponse = json_decode((string) $this->forward('rikudou_api.controller.api_router::router', [
+                                        'resourceName' => $relationshipDatum->getType(),
+                                        'id' => $relationshipDatum->getId(),
+                                    ])->getContent(), true)['data'];
+                                    $cache[$relationshipDatum->getType().$relationshipDatum->getId()] = $includeResponse;
+                                }
 
                                 $includeObject = new JsonApiObject($includeResponse);
                                 if ($response->getIncludes()->contains($includeObject)) {
@@ -247,6 +257,10 @@ abstract class EntityApiController extends AbstractController implements ApiCont
         // todo refactor
         if ($includes = $request->query->get('include')) {
             assert(is_string($includes));
+
+            /** @var array<string, array<mixed>> $cache */
+            $cache = [];
+
             $includes = explode(',', $includes);
             $relationships = $response->getRelationships();
             foreach ($includes as $include) {
@@ -261,10 +275,16 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                             if ($relationshipDatum === null) {
                                 continue;
                             }
-                            $includeResponse = json_decode((string) $this->forward('rikudou_api.controller.api_router::router', [
-                                'resourceName' => $relationshipDatum->getType(),
-                                'id' => $relationshipDatum->getId(),
-                            ])->getContent(), true)['data'];
+
+                            if (isset($cache[$relationshipDatum->getType().$relationshipDatum->getId()])) {
+                                $includeResponse =  $cache[$relationshipDatum->getType().$relationshipDatum->getId()];
+                            } else {
+                                $includeResponse = json_decode((string) $this->forward('rikudou_api.controller.api_router::router', [
+                                    'resourceName' => $relationshipDatum->getType(),
+                                    'id' => $relationshipDatum->getId(),
+                                ])->getContent(), true)['data'];
+                                $cache[$relationshipDatum->getType().$relationshipDatum->getId()] = $includeResponse;
+                            }
 
                             $includeObject = new JsonApiObject($includeResponse);
                             if ($response->getIncludes()->contains($includeObject)) {
