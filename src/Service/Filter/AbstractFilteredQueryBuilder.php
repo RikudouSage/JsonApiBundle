@@ -3,6 +3,8 @@
 namespace Rikudou\JsonApiBundle\Service\Filter;
 
 use Doctrine\DBAL\Platforms\MySQLPlatform;
+use Doctrine\ORM\Mapping\ManyToOneAssociationMapping;
+use Doctrine\ORM\Mapping\OneToOneAssociationMapping;
 use function array_keys;
 use BackedEnum;
 use Doctrine\ORM\EntityManagerInterface;
@@ -47,6 +49,18 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
         $builder
             ->select('entity')
             ->from($class, 'entity');
+
+        $metadata = $this->entityManager->getClassMetadata($class);
+        $associations = $metadata->getAssociationMappings();
+
+        foreach ($associations as $fieldName => $mapping) {
+            if ($mapping instanceof ManyToOneAssociationMapping || $mapping instanceof OneToOneAssociationMapping) {
+                $alias = 'joined_' . $fieldName;
+                $builder = $builder
+                    ->leftJoin("entity.{$fieldName}", $alias)
+                    ->addSelect($alias);
+            }
+        }
 
         if (($queryParams->has('filter') || $queryParams->has('sort')) && ($useFilter || $useSort)) {
             $filter = $queryParams->all('filter');
