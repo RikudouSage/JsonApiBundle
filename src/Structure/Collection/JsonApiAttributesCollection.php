@@ -56,4 +56,15 @@ final class JsonApiAttributesCollection extends AbstractCollection implements Js
     {
         return 'name';
     }
+
+    public function findAttributeByName(string $name): ?JsonApiAttribute
+    {
+        foreach ($this->data as $item) {
+            if ($item->getName() === $name) {
+                return $item;
+            }
+        }
+
+        return null;
+    }
 }
