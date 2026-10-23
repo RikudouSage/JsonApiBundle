@@ -388,6 +388,10 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 $e,
             );
         } catch (Exception $e) {
+            if ($e instanceof JsonApiErrorException) {
+                throw $e;
+            }
+
             throw new JsonApiErrorException(
                 'The server encountered an internal error',
                 Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -545,6 +549,10 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 $e,
             );
         } catch (Exception $e) {
+            if ($e instanceof JsonApiErrorException) {
+                throw $e;
+            }
+
             throw new JsonApiErrorException(
                 'The server encountered an internal error',
                 Response::HTTP_INTERNAL_SERVER_ERROR,
