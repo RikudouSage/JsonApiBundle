@@ -2,12 +2,11 @@
 
 namespace Rikudou\JsonApiBundle\Service\Filter;
 
-use Doctrine\DBAL\Platforms\MySQLPlatform;
-use Doctrine\ORM\Mapping\ManyToOneAssociationMapping;
-use Doctrine\ORM\Mapping\OneToOneAssociationMapping;
 use function array_keys;
 use BackedEnum;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ManyToOneAssociationMapping;
+use Doctrine\ORM\Mapping\OneToOneAssociationMapping;
 use Doctrine\ORM\QueryBuilder;
 use function explode;
 use function in_array;
@@ -18,6 +17,7 @@ use ReflectionNamedType;
 use ReflectionProperty;
 use Rikudou\JsonApiBundle\ApiEntityEvents;
 use Rikudou\JsonApiBundle\Events\EntityApiOnFilterSearchEvent;
+use Rikudou\JsonApiBundle\Service\IdConverter;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectAccessor;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectValidator;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiPropertyParser;
@@ -35,6 +35,8 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
     private ApiObjectValidator $objectValidator;
 
     private EventDispatcherInterface $eventDispatcher;
+
+    private IdConverter $idConverter;
 
     /**
      * @throws ReflectionException
@@ -87,15 +89,9 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                     $valuesAreUuids = false;
                     if ($this->isUuid($key, $class)) {
                         $values = array_map(
-                            fn (string $value) => Uuid::fromString($value),
+                            fn (string $value) => $this->idConverter->convert(Uuid::fromString($value)),
                             $values,
                         );
-                        if ($databasePlatform instanceof MySQLPlatform) {
-                            $values = array_map(
-                                fn (Uuid $value) => $value->toBinary(),
-                                $values,
-                            );
-                        }
 
                         $valuesAreUuids = true;
                     } elseif ($this->isBackedEnum($key, $class)) {
@@ -135,10 +131,7 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
                             continue;
                         }
                         if ($this->objectValidator->isObjectValid($currentValue)) {
-                            $currentValue = $currentValue->getId();
-                            if ($currentValue instanceof Uuid && $databasePlatform instanceof MySQLPlatform) {
-                                $currentValue = $currentValue->toBinary();
-                            }
+                            $currentValue = $this->idConverter->convert($currentValue->getId());
                         }
                         $builder->setParameter("value{$i}{$j}", $currentValue);
                     }
@@ -197,6 +190,11 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
     public function setEventDispatcher(EventDispatcherInterface $eventDispatcher): void
     {
         $this->eventDispatcher = $eventDispatcher;
+    }
+
+    public function setIdConverter(IdConverter $idConverter): void
+    {
+        $this->idConverter = $idConverter;
     }
 
     /**
@@ -258,7 +256,7 @@ abstract class AbstractFilteredQueryBuilder implements FilteredQueryBuilderInter
         $targetClass = $this->getPropertyType($key, $class);
 
         return $this->entityManager->getRepository($targetClass)->find(
-            Uuid::isValid($id) ? Uuid::fromString($id)->toBinary() : $id,
+            Uuid::isValid($id) ? $this->idConverter->convert(Uuid::fromString($id)) : $id,
         );
     }
 

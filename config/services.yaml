@@ -118,3 +118,8 @@ services:
       - name: console.command
         command: json-api:install-routes
         description: Install a default routes file for use with the bundle.
+
+  rikudou_api.id_converter:
+    class: Rikudou\JsonApiBundle\Service\IdConverter
+    arguments:
+      $convertUuidToBinary: '%rikudou_api.convert_uuid_to_binary%'

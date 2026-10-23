@@ -10,7 +10,7 @@ final class EntityApiOnFilterSearchEvent extends Event
     public bool $handled = false;
 
     /**
-     * @param class-string $className
+     * @param class-string  $className
      * @param array<string> $filterValues
      */
     public function __construct(

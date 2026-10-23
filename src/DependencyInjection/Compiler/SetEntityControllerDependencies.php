@@ -65,6 +65,10 @@ final class SetEntityControllerDependencies implements CompilerPassInterface
                 'setUrlGenerator',
                 [new Reference('router')],
             );
+            $definition->addMethodCall(
+                'setIdConverter',
+                [new Reference('rikudou_api.id_converter')],
+            );
         }
     }
 }

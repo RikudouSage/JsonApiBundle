@@ -4,6 +4,7 @@ namespace Rikudou\JsonApiBundle\Service\Filter;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
+use Rikudou\JsonApiBundle\Service\IdConverter;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectValidator;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiPropertyParser;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -12,6 +13,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 /**
  * @method void setObjectValidator(ApiObjectValidator $validator)
  * @method void setEventDispatcher(EventDispatcherInterface $eventDispatcher)
+ * @method void setIdConverter(IdConverter $idConverter)
  */
 interface FilteredQueryBuilderInterface
 {

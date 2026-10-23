@@ -2,7 +2,6 @@
 
 namespace Rikudou\JsonApiBundle\Controller;
 
-use Doctrine\DBAL\Platforms\MySQLPlatform;
 use function assert;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -27,6 +26,7 @@ use Rikudou\JsonApiBundle\Interfaces\ApiControllerInterface;
 use Rikudou\JsonApiBundle\Interfaces\ApiResourceInterface;
 use Rikudou\JsonApiBundle\Response\JsonApiResponse;
 use Rikudou\JsonApiBundle\Service\Filter\FilteredQueryBuilderInterface;
+use Rikudou\JsonApiBundle\Service\IdConverter;
 use Rikudou\JsonApiBundle\Service\ObjectParser\ApiObjectParser;
 use Rikudou\JsonApiBundle\Structure\Collection\JsonApiCollection;
 use Rikudou\JsonApiBundle\Structure\JsonApiObject;
@@ -61,6 +61,8 @@ abstract class EntityApiController extends AbstractController implements ApiCont
     private EntityManagerInterface $entityManager;
 
     private UrlGeneratorInterface $urlGenerator;
+
+    private IdConverter $idConverter;
 
     public function setResourceName(string $resourceName): void
     {
@@ -176,14 +178,14 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                                     continue;
                                 }
 
-                                if (isset($cache[$relationshipDatum->getType().$relationshipDatum->getId()])) {
-                                    $includeResponse =  $cache[$relationshipDatum->getType().$relationshipDatum->getId()];
+                                if (isset($cache[$relationshipDatum->getType() . $relationshipDatum->getId()])) {
+                                    $includeResponse =  $cache[$relationshipDatum->getType() . $relationshipDatum->getId()];
                                 } else {
                                     $includeResponse = json_decode((string) $this->forward('rikudou_api.controller.api_router::router', [
                                         'resourceName' => $relationshipDatum->getType(),
                                         'id' => $relationshipDatum->getId(),
                                     ])->getContent(), true)['data'];
-                                    $cache[$relationshipDatum->getType().$relationshipDatum->getId()] = $includeResponse;
+                                    $cache[$relationshipDatum->getType() . $relationshipDatum->getId()] = $includeResponse;
                                 }
 
                                 $includeObject = new JsonApiObject($includeResponse);
@@ -222,16 +224,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
     {
         try {
             $queryBuilder = $this->getFilteredQueryBuilder(false, false);
-
-            $idToUse = $id;
-            if ($idToUse instanceof Uuid) {
-                $platform = $queryBuilder->getEntityManager()->getConnection()->getDatabasePlatform();
-                if ($platform instanceof MySqlPlatform) {
-                    $idToUse = $idToUse->toBinary();
-                } else {
-                    $idToUse = (string) $idToUse;
-                }
-            }
+            $idToUse = $this->idConverter->convert($id);
 
             $entity = $queryBuilder
                 ->setMaxResults(1)
@@ -276,14 +269,14 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                                 continue;
                             }
 
-                            if (isset($cache[$relationshipDatum->getType().$relationshipDatum->getId()])) {
-                                $includeResponse =  $cache[$relationshipDatum->getType().$relationshipDatum->getId()];
+                            if (isset($cache[$relationshipDatum->getType() . $relationshipDatum->getId()])) {
+                                $includeResponse =  $cache[$relationshipDatum->getType() . $relationshipDatum->getId()];
                             } else {
                                 $includeResponse = json_decode((string) $this->forward('rikudou_api.controller.api_router::router', [
                                     'resourceName' => $relationshipDatum->getType(),
                                     'id' => $relationshipDatum->getId(),
                                 ])->getContent(), true)['data'];
-                                $cache[$relationshipDatum->getType().$relationshipDatum->getId()] = $includeResponse;
+                                $cache[$relationshipDatum->getType() . $relationshipDatum->getId()] = $includeResponse;
                             }
 
                             $includeObject = new JsonApiObject($includeResponse);
@@ -407,7 +400,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                 ->getFilteredQueryBuilder(false, false)
                 ->setMaxResults(1)
                 ->andWhere('entity.id = :itemId')
-                ->setParameter('itemId', $id instanceof Uuid ? $id->toBinary() : $id)
+                ->setParameter('itemId', $this->idConverter->convert($id))
                 ->getQuery()
                 ->getSingleResult();
         } catch (NoResultException | NonUniqueResultException $e) {
@@ -465,7 +458,7 @@ abstract class EntityApiController extends AbstractController implements ApiCont
                     ->getFilteredQueryBuilder(false, false)
                     ->setMaxResults(1)
                     ->andWhere('entity.id = :entityId')
-                    ->setParameter('entityId', $id instanceof Uuid ? $id->toBinary() : $id)
+                    ->setParameter('entityId', $this->idConverter->convert($id))
                     ->getQuery()
                     ->getSingleResult();
             } catch (NoResultException | NonUniqueResultException $e) {
@@ -626,6 +619,11 @@ abstract class EntityApiController extends AbstractController implements ApiCont
     public function setUrlGenerator(UrlGeneratorInterface $urlGenerator): void
     {
         $this->urlGenerator = $urlGenerator;
+    }
+
+    public function setIdConverter(IdConverter $idConverter): void
+    {
+        $this->idConverter = $idConverter;
     }
 
     //////////////// CONTAINER END ////////////////

@@ -79,6 +79,10 @@ final class Configuration implements ConfigurationInterface
                     ->info('Whether to allow overwriting of resources. This could happen if more than one controller for a resource with the same name exists.')
                     ->defaultFalse()
                 ->end()
+                ->booleanNode('convert_uuid_to_binary')
+                    ->info('Whether the bundle should convert UUID instances to the binary form. Some drivers might need it (e.g. MySQL)')
+                    ->defaultFalse()
+                ->end()
             ->end();
 
         return $treeBuilder;

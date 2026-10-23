@@ -46,9 +46,10 @@ final class ApiObjectParser
     }
 
     /**
-     * @phpstan-return array<string, mixed>
      *
      * @throws ReflectionException
+     *
+     * @phpstan-return array<string, mixed>
      */
     public function getJsonApiArray(object $object, bool $metadataOnly = false): array
     {

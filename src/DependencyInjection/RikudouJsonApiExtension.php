@@ -52,5 +52,6 @@ final class RikudouJsonApiExtension extends Extension
         $container->setParameter('rikudou_api.disable_autoconfiguration', $configs['disable_autoconfiguration']);
         $container->setParameter('rikudou_api.enabled_resources', $configs['enabled_resources']);
         $container->setParameter('rikudou_api.allow_resource_overwrite', $configs['allow_resource_overwrite']);
+        $container->setParameter('rikudou_api.convert_uuid_to_binary', $configs['convert_uuid_to_binary']);
     }
 }
