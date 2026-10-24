@@ -35,6 +35,17 @@ final class JsonApiAttributesCollection extends AbstractCollection implements Js
         return $result;
     }
 
+    public function findAttributeByName(string $name): ?JsonApiAttribute
+    {
+        foreach ($this->data as $item) {
+            if ($item->getName() === $name) {
+                return $item;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * @return string[]
      */
@@ -55,16 +66,5 @@ final class JsonApiAttributesCollection extends AbstractCollection implements Js
     protected function getKeyProperty(): ?string
     {
         return 'name';
-    }
-
-    public function findAttributeByName(string $name): ?JsonApiAttribute
-    {
-        foreach ($this->data as $item) {
-            if ($item->getName() === $name) {
-                return $item;
-            }
-        }
-
-        return null;
     }
 }

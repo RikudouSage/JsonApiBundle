@@ -13,6 +13,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use UnexpectedValueException;
 
 final class JsonApiErrorExceptionListener implements EventSubscriberInterface
 {
@@ -32,14 +33,16 @@ final class JsonApiErrorExceptionListener implements EventSubscriberInterface
     {
         $exception = $event->getThrowable();
         if ($exception instanceof JsonApiErrorException) {
+            if ($previous = $exception->getPrevious()) {
+                if (
+                    $previous instanceof InvalidJsonApiArrayException
+                    && $previous->getPrevious() !== null
+                ) {
+                    $previous = $previous->getPrevious();
+                }
+            }
             if (!$this->enabled) {
-                if ($previous = $exception->getPrevious()) {
-                    if (
-                        $previous instanceof InvalidJsonApiArrayException
-                        && $previous->getPrevious() !== null
-                    ) {
-                        $previous = $previous->getPrevious();
-                    }
+                if ($previous) {
                     throw $previous;
                 }
 
@@ -53,8 +56,17 @@ final class JsonApiErrorExceptionListener implements EventSubscriberInterface
 
             $result = new JsonApiErrorCollection();
 
+            $message = null;
+            if ($previous) {
+                if ($previous instanceof UnexpectedValueException) {
+                    $message = $previous->getMessage();
+                }
+            }
+
             $data = $exception->getData();
-            if (is_array($data)) {
+            if ($message) {
+                $result[] = new JsonApiError($message, '', $statusCode);
+            } elseif (is_array($data)) {
                 foreach ($data as $item) {
                     if ($item instanceof JsonApiError) {
                         $result[] = $item;
