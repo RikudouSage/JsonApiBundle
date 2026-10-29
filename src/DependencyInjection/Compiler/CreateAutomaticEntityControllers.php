@@ -44,6 +44,13 @@ final class CreateAutomaticEntityControllers implements CompilerPassInterface
         }
 
         foreach ($directories as $directory) {
+            if (!file_exists($directory)) {
+                continue;
+            }
+            if (!is_dir($directory)) {
+                error_log(sprintf('Warning: %s is not a directory', $directory));
+                continue;
+            }
             $iterator = new RecursiveIteratorIterator(
                 new RecursiveDirectoryIterator($directory),
             );
