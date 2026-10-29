@@ -37,6 +37,16 @@ final class JsonApiCollection implements JsonSerializable
         return $this->data;
     }
 
+    /**
+     * @param array<JsonApiObject> $data
+     */
+    public function setData(array $data): self
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
     public function getMeta(): JsonApiMetaCollection
     {
         return $this->meta;
