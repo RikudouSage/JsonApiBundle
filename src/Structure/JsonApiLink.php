@@ -15,6 +15,11 @@ final class JsonApiLink implements JsonSerializable
         return $this->link;
     }
 
+    public function setLink(?string $link): void
+    {
+        $this->link = $link;
+    }
+
     public function getName(): string
     {
         return $this->name;
