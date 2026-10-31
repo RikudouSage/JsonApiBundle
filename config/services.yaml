@@ -119,6 +119,13 @@ services:
         command: json-api:install-routes
         description: Install a default routes file for use with the bundle.
 
+  rikudou_api.command.list_resources:
+    class: Rikudou\JsonApiBundle\Command\ListResourcesCommand
+    arguments:
+      $resourceLocator: '@rikudou_api.api_resource_locator'
+    tags:
+      - name: console.command
+
   rikudou_api.id_converter:
     class: Rikudou\JsonApiBundle\Service\IdConverter
     arguments:
