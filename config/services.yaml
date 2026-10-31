@@ -126,6 +126,15 @@ services:
     tags:
       - name: console.command
 
+  rikudou_api.command.get_mapping:
+    class: Rikudou\JsonApiBundle\Command\GetMappingCommand
+    arguments:
+      $resourceLocator: '@rikudou_api.api_resource_locator'
+      $apiObjectParser: '@rikudou_api.object_parser.parser'
+      $propertyParser: '@rikudou_api.object_parser.property_parser'
+    tags:
+      - name: console.command
+
   rikudou_api.id_converter:
     class: Rikudou\JsonApiBundle\Service\IdConverter
     arguments:
