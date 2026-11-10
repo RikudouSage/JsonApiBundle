@@ -14,6 +14,7 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionProperty;
 use Rikudou\JsonApiBundle\Attribute\ApiProperty;
+use Rikudou\JsonApiBundle\Attribute\ApiPropertyMethodArg;
 use Rikudou\JsonApiBundle\Attribute\ApiResource;
 use Rikudou\JsonApiBundle\Exception\InvalidApiPropertyConfig;
 use Rikudou\JsonApiBundle\NameResolution\ApiNameResolutionInterface;
@@ -244,6 +245,10 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
             $isRelation,
             $attribute->readonly,
             $attribute->silentFail,
+            $this->getMethodArgumentTypes($class->getMethod($getter)),
+            $this->getWriterArgumentTypes($class, $setter),
+            $this->getWriterArgumentTypes($class, $adder),
+            $this->getWriterArgumentTypes($class, $remover),
         );
     }
 
@@ -283,10 +288,61 @@ final class ApiPropertyParser implements ServiceSubscriberInterface
                 $attribute->relation,
                 $attribute->readonly,
                 $attribute->silentFail,
+                $this->getMethodArgumentTypes($method),
+                $this->getWriterArgumentTypes($method->getDeclaringClass(), $attribute->setter),
+                $this->getWriterArgumentTypes($method->getDeclaringClass(), $attribute->adder),
+                $this->getWriterArgumentTypes($method->getDeclaringClass(), $attribute->remover),
             );
         }
 
         return $result;
+    }
+
+    /**
+     * @return string[]
+     */
+    private function getMethodArgumentTypes(ReflectionMethod $method, int $skippedArguments = 0): array
+    {
+        $parameterCount = $method->getNumberOfParameters() - $skippedArguments;
+        $attributes = $method->getAttributes(ApiPropertyMethodArg::class);
+        $attributeCount = count($attributes);
+        if ($parameterCount === 0) {
+            if ($attributeCount > 0) {
+                throw new InvalidApiPropertyConfig(InvalidApiPropertyConfig::TYPE_METHOD_ARGUMENTS, $method->getName());
+            }
+
+            return [];
+        }
+
+        if (
+            $attributeCount < max(0, $method->getNumberOfRequiredParameters() - $skippedArguments)
+            || $attributeCount > $parameterCount
+        ) {
+            throw new InvalidApiPropertyConfig(InvalidApiPropertyConfig::TYPE_METHOD_ARGUMENTS, $method->getName());
+        }
+
+        $result = [];
+        foreach ($attributes as $attribute) {
+            $config = $attribute->newInstance();
+            assert($config instanceof ApiPropertyMethodArg);
+            $result[] = $config->argumentType;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param ReflectionClass<object> $class
+     *
+     * @return string[]
+     */
+    private function getWriterArgumentTypes(ReflectionClass $class, ?string $method): array
+    {
+        if ($method === null || !$class->hasMethod($method)) {
+            return [];
+        }
+
+        return $this->getMethodArgumentTypes($class->getMethod($method), 1);
     }
 
     /**

@@ -17,6 +17,8 @@ final class InvalidApiPropertyConfig extends InvalidArgumentException
 
     public const TYPE_REMOVER = 'remover';
 
+    public const TYPE_METHOD_ARGUMENTS = 'method arguments';
+
     #[Pure]
     public function __construct(
         #[ExpectedValues(valuesFromClass: self::class)]

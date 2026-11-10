@@ -2,7 +2,6 @@
 
 namespace Rikudou\JsonApiBundle\Service\ObjectParser;
 
-use function call_user_func;
 use InvalidArgumentException;
 use function is_callable;
 use JetBrains\PhpStorm\ExpectedValues;
@@ -14,6 +13,12 @@ final class ApiObjectAccessor
 
     public const TYPE_METHOD = 2 << 2;
 
+    /**
+     * @param array<string> $methodArgumentTypes
+     * @param array<string> $setterArgumentTypes
+     * @param array<string> $adderArgumentTypes
+     * @param array<string> $removerArgumentTypes
+     */
     public function __construct(
         #[ExpectedValues(valuesFromClass: self::class)]
         private int $type,
@@ -24,6 +29,10 @@ final class ApiObjectAccessor
         private ?bool $isRelation,
         private bool $readonly,
         private bool $silentFail,
+        public readonly array $methodArgumentTypes = [],
+        public readonly array $setterArgumentTypes = [],
+        public readonly array $adderArgumentTypes = [],
+        public readonly array $removerArgumentTypes = [],
     ) {
     }
 
@@ -58,7 +67,10 @@ final class ApiObjectAccessor
         return $this->isRelation;
     }
 
-    public function getValue(object $object): mixed
+    /**
+     * @param mixed[] $methodArguments
+     */
+    public function getValue(object $object, array $methodArguments = []): mixed
     {
         switch ($this->getType()) {
             case self::TYPE_METHOD:
@@ -67,7 +79,7 @@ final class ApiObjectAccessor
                     throw new InvalidApiPropertyConfig(InvalidApiPropertyConfig::TYPE_GETTER);
                 }
 
-                return call_user_func($callable);
+                return $callable(...$methodArguments);
             case self::TYPE_PROPERTY:
                 return $object->{$this->getGetter()};
             default:

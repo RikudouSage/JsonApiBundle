@@ -3,7 +3,6 @@
 namespace Rikudou\JsonApiBundle\Service\ObjectParser;
 
 use function assert;
-use function call_user_func;
 use function count;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
@@ -25,6 +24,7 @@ use Rikudou\JsonApiBundle\NameResolution\ApiNameResolutionInterface;
 use Rikudou\JsonApiBundle\Service\ApiNormalizerLocator;
 use Rikudou\JsonApiBundle\Service\ApiResourceLocator;
 use Rikudou\JsonApiBundle\Service\Inflector;
+use Rikudou\JsonApiBundle\Service\MethodArg\MethodArgTypeProviderRegistry;
 use Rikudou\JsonApiBundle\Structure\JsonApiObject;
 use Rikudou\JsonApiBundle\Structure\JsonApiRelationshipData;
 use TypeError;
@@ -42,6 +42,7 @@ final class ApiObjectParser
         private ApiNormalizerLocator $normalizerLocator,
         private EntityManagerInterface $entityManager,
         private Inflector $inflector,
+        private MethodArgTypeProviderRegistry $methodArgTypeProviderRegistry,
     ) {
     }
 
@@ -67,7 +68,10 @@ final class ApiObjectParser
         $properties = $this->propertyParser->getApiProperties($object);
 
         foreach ($properties as $property => $accessor) {
-            $value = $accessor->getValue($object);
+            $value = $accessor->getValue(
+                $object,
+                $this->resolveMethodArguments($accessor->methodArgumentTypes),
+            );
             if ($property === 'id') {
                 $result[$property] = $value;
             } elseif (!$metadataOnly) {
@@ -213,6 +217,25 @@ final class ApiObjectParser
         return new JsonApiObject($jsonData);
     }
 
+    /**
+     * @param string[] $argumentTypes
+     *
+     * @return mixed[]
+     */
+    private function resolveMethodArguments(array $argumentTypes): array
+    {
+        $arguments = [];
+        foreach ($argumentTypes as $type) {
+            $provider = $this->methodArgTypeProviderRegistry->findByType($type);
+            if ($provider === null) {
+                throw new InvalidApiPropertyConfig(InvalidApiPropertyConfig::TYPE_METHOD_ARGUMENTS);
+            }
+            $arguments[] = $provider->resolve();
+        }
+
+        return $arguments;
+    }
+
     private function isRelation(mixed $value): bool
     {
         if (is_iterable($value)) {
@@ -275,7 +298,10 @@ final class ApiObjectParser
                         }
 
                         try {
-                            call_user_func($setter, $attribute->getValue());
+                            $setter(
+                                $attribute->getValue(),
+                                ...$this->resolveMethodArguments($config->setterArgumentTypes),
+                            );
                         } catch (TypeError $error) {
                             $type = gettype($attribute->getValue());
                             throw new InvalidJsonApiArrayException(
@@ -296,7 +322,7 @@ final class ApiObjectParser
 
                         foreach ($attribute->getValue() as $item) {
                             try {
-                                call_user_func($adder, $item);
+                                $adder($item, ...$this->resolveMethodArguments($config->adderArgumentTypes));
                             } catch (TypeError $error) {
                                 $type = gettype($attribute->getValue());
                                 throw new InvalidJsonApiArrayException(
@@ -353,7 +379,10 @@ final class ApiObjectParser
                         if (!is_callable($setter)) {
                             throw new InvalidApiPropertyConfig(InvalidApiPropertyConfig::TYPE_SETTER, $relationship->getName());
                         }
-                        call_user_func($setter, $raw['data'] === null ? null : $this->parseJsonApiArray($raw));
+                        $setter(
+                            $raw['data'] === null ? null : $this->parseJsonApiArray($raw),
+                            ...$this->resolveMethodArguments($config->setterArgumentTypes),
+                        );
                         break;
                     default:
                         throw new LogicException("Unknown type '{$config->getType()}'");
@@ -377,7 +406,10 @@ final class ApiObjectParser
                             }
 
                             foreach ($data as $index => $relationshipData) {
-                                call_user_func($adder, $this->parseJsonApiArray(['data' => $raw['data'][$index]]));
+                                $adder(
+                                    $this->parseJsonApiArray(['data' => $raw['data'][$index]]),
+                                    ...$this->resolveMethodArguments($config->adderArgumentTypes),
+                                );
                             }
                         } else {
                             $setter = [$object, $config->getSetter()];
@@ -390,7 +422,7 @@ final class ApiObjectParser
                                 $tempData[$index] = $this->parseJsonApiArray($raw['data'][$index]);
                             }
 
-                            call_user_func($setter, $tempData);
+                            $setter($tempData, ...$this->resolveMethodArguments($config->setterArgumentTypes));
                         }
                         break;
                     default:

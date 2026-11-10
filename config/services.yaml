@@ -64,6 +64,7 @@ services:
       - '@rikudou_api.api_normalizer_locator'
       - '@doctrine.orm.entity_manager'
       - '@rikudou_api.inflector'
+      - '@rikudou_api.method_arg_provider.registry'
     calls:
       - method: setApiResourceLocator
         arguments:
