@@ -45,7 +45,7 @@ final class GetMappingCommand
             'Remover',
             'Is relation?',
             'Readonly?',
-            'Silent fail?'
+            'Silent fail?',
         ]);
 
         $bool = fn (bool $value): string => $value ? 'Yes' : 'No';
