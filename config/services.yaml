@@ -139,3 +139,15 @@ services:
     class: Rikudou\JsonApiBundle\Service\IdConverter
     arguments:
       $convertUuidToBinary: '%rikudou_api.convert_uuid_to_binary%'
+
+  rikudou_api.method_arg_provider.registry:
+    class: Rikudou\JsonApiBundle\Service\MethodArg\MethodArgTypeProviderRegistry
+    arguments:
+      $providers: !tagged_iterator rikudou_api.method_arg_type_provider
+
+  rikudou_api.method_arg_provider.current_locale:
+    class: Rikudou\JsonApiBundle\Service\MethodArg\CurrentLocaleArgTypeProvider
+    arguments:
+      $requestStack: '@request_stack'
+    tags:
+      - rikudou_api.method_arg_type_provider

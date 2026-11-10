@@ -10,6 +10,7 @@ use Rikudou\JsonApiBundle\DependencyInjection\Compiler\PopulateResourceLocator;
 use Rikudou\JsonApiBundle\DependencyInjection\Compiler\SetEntityControllerDependencies;
 use Rikudou\JsonApiBundle\Interfaces\ApiControllerInterface;
 use Rikudou\JsonApiBundle\Service\Filter\FilteredQueryBuilderInterface;
+use Rikudou\JsonApiBundle\Service\MethodArg\MethodArgTypeProvider;
 use Rikudou\JsonApiBundle\Service\ObjectParser\Normalizer\ApiObjectNormalizerInterface;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -27,6 +28,8 @@ final class RikudouJsonApiBundle extends Bundle
             ->addTag('rikudou_api.api_normalizer');
         $container->registerForAutoconfiguration(FilteredQueryBuilderInterface::class)
             ->addTag('rikudou_api.filtered_query_builder');
+        $container->registerForAutoconfiguration(MethodArgTypeProvider::class)
+            ->addTag('rikudou_api.method_arg_type_provider');
 
         $container->addCompilerPass(new CreateNameResolutionService());
         $container->addCompilerPass(new PopulateNormalizerLocator());
